@@ -38,3 +38,10 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Environment Variables ###
+.env
+
+### Public and Private Keys ###
+public-key.pem
+private-key.pem
