@@ -1,0 +1,76 @@
+databaseChangeLog:
+  - changeSet:
+      id: projects-001-create-table
+      author: Christian A.
+      changes:
+        - createTable:
+            tableName: projects
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: project_status_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deleted_at
+                  type: timestamp
+
+  - changeSet:
+      id: projects-002-add-fk-project_status_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: projects
+            baseColumnNames: project_status_id
+            constraintName: fk_projects_project_status_id
+            referencedTableName: project_statuses
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: projects-003-add-fk-user_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: projects
+            baseColumnNames: user_id
+            constraintName: fk_projects_user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT

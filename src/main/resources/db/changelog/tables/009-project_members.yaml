@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: project_members-001-create-table
+      author: Christian A.
+      changes:
+        - createTable:
+            tableName: project_members
+            columns:
+              - column:
+                  name: project_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: member_role_id
+                  type: int
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: project_members-002-add-pk
+      author: Christian A.
+      changes:
+        - addPrimaryKey:
+            tableName: project_members
+            columnNames: project_id, user_id
+
+  - changeSet:
+      id: project_members-003-add-fk-project_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: project_members
+            baseColumnNames: project_id
+            constraintName: fk_project_members_project_id
+            referencedTableName: projects
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: project_members-004-add-fk-user_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: project_members
+            baseColumnNames: user_id
+            constraintName: fk_project_members_user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: project_members-005-add-fk-member_role_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: project_members
+            baseColumnNames: member_role_id
+            constraintName: fk_project_members_member_role_id
+            referencedTableName: member_roles
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT

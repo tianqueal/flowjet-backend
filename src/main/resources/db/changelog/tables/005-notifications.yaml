@@ -1,0 +1,79 @@
+databaseChangeLog:
+  - changeSet:
+      id: notifications-001-create-table
+      author: Christian A.
+      changes:
+        - createTable:
+            tableName: notifications
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notification_type_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password_hash
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: avatar_url
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deleted_at
+                  type: timestamp
+
+  - changeSet:
+      id: notifications-002-add-fk-user_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: notifications
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_notifications_user_id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: notifications-003-add-fk-notification_type_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: notifications
+            baseColumnNames: notification_type_id
+            referencedTableName: notification_types
+            referencedColumnNames: id
+            constraintName: fk_notifications_notification_type_id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT

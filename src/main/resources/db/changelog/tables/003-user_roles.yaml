@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: user_roles-001-create-table
+      author: Christian A.
+      changes:
+        - createTable:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: int
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: user_roles-002-add-pk
+      author: Christian A.
+      changes:
+        - addPrimaryKey:
+            tableName: user_roles
+            columnNames: user_id, role_id
+
+  - changeSet:
+      id: user_roles-003-add-fk-user_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: user_id
+            constraintName: fk_user_roles_user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: user_roles-004-add-fk-role_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: role_id
+            constraintName: fk_user_roles_role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT

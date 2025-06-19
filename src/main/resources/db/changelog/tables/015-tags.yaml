@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: tags-001-create-table
+      author: Christian A.
+      changes:
+        - createTable:
+            tableName: tags
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(50)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: color_bg_light
+                  type: varchar(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color_text_light
+                  type: varchar(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color_bg_dark
+                  type: varchar(7)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color_text_dark
+                  type: varchar(7)
+                  constraints:
+                    nullable: false

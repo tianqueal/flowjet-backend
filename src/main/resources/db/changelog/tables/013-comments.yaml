@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: comments-001-create-table
+      author: Christian A.
+      changes:
+        - createTable:
+            tableName: comments
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: content
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment_id
+                  type: bigint
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deleted_at
+                  type: timestamp
+
+  - changeSet:
+      id: comments-002-add-fk-user_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: comments
+            baseColumnNames: user_id
+            constraintName: fk_comments_user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: comments-003-add-fk-comment_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: comments
+            baseColumnNames: comment_id
+            constraintName: fk_comments_comment_id
+            referencedTableName: comments
+            referencedColumnNames: id
+            onDelete: CASCADE # RESTRICT would prevent deletion of parent comments
+            onUpdate: RESTRICT
