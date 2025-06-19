@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: roles-001-seed
+      author: Christian A.
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: code
+                  value: ROLE_ADMIN
+              - column:
+                  name: name
+                  value: Administrator
+
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: code
+                  value: ROLE_USER
+              - column:
+                  name: name
+                  value: User
