@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: project_members-001-idx-member_role_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_project_members_member_role_id
+            tableName: project_members
+            columns:
+              - column:
+                  name: member_role_id

@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: projects-001-idx-project_status_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_projects_project_status_id
+            tableName: projects
+            columns:
+              - column:
+                  name: project_status_id
+
+  - changeSet:
+      id: projects-002-idx-user_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_projects_user_id
+            tableName: projects
+            columns:
+              - column:
+                  name: user_id
