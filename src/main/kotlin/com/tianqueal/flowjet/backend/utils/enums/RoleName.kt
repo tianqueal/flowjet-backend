@@ -5,4 +5,5 @@ enum class RoleName(val displayName: String) {
   ROLE_USER("User");
 
   fun getCode(): String = name
+  fun shortName(): String = name.removePrefix("ROLE_")
 }
