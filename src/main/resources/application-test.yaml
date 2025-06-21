@@ -5,9 +5,19 @@ spring:
     password: sa
     driver-class-name: org.h2.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
     show-sql: true
   liquibase:
-    enabled: false
+    contexts: test
+  mail:
+    host: localhost
+    port: 3025
+    username: ""
+    password: ""
+    properties:
+      "[mail.smtp.auth]": false
+      "[mail.smtp.starttls.enable]": false
+      "[mail.smtp.starttls.required]": false
+debug: true
+logging:
+  level:
+    '[org.springframework.security]': DEBUG

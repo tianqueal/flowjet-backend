@@ -1,6 +1,11 @@
 spring:
   jpa:
     show-sql: true
+  liquibase:
+    contexts: dev
   freemarker:
     cache: false
 debug: true
+logging:
+  level:
+    '[org.springframework.security]': DEBUG

@@ -10,7 +10,7 @@ plugins {
 
 group = "com.tianqueal"
 
-version = "0.0.1-SNAPSHOT"
+version = System.getenv("APP_VERSION") ?: "0.0.1-SNAPSHOT"
 
 java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
