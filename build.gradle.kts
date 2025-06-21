@@ -6,7 +6,6 @@ plugins {
   id("org.hibernate.orm") version "6.6.15.Final"
   id("org.graalvm.buildtools.native") version "0.10.6"
   kotlin("plugin.jpa") version "1.9.25"
-  id("com.ncorti.ktfmt.gradle") version "0.22.0"
 }
 
 group = "com.tianqueal"
@@ -31,15 +30,24 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.liquibase:liquibase-core")
-  compileOnly("org.projectlombok:lombok")
+  implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+  implementation("org.mapstruct:mapstruct:1.6.3")
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   developmentOnly("org.springframework.boot:spring-boot-docker-compose")
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.postgresql:postgresql")
-  annotationProcessor("org.projectlombok:lombok")
+  runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+  runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
   testImplementation("org.springframework.security:spring-security-test")
+  testImplementation("com.icegreen:greenmail:2.1.3") {
+    exclude(group = "com.sun.mail", module = "jakarta.mail")
+  }
+  testImplementation("com.icegreen:greenmail-junit5:2.1.3") {
+    exclude(group = "com.sun.mail", module = "jakarta.mail")
+  }
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
