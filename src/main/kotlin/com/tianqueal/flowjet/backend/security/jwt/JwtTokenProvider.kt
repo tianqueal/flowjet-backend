@@ -16,6 +16,7 @@ import java.util.Date
 
 /**
  * Service responsible for generating and parsing JWT tokens.
+ *
  * @author Christian A.
  */
 @Component
