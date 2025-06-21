@@ -54,3 +54,7 @@ allOpen {
 }
 
 tasks.withType<Test> { useJUnitPlatform() }
+
+tasks.withType<ProcessResources> {
+  filteringCharset = "UTF-8"
+}
