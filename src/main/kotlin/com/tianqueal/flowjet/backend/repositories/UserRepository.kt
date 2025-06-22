@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface UserRepository : JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
+  fun findByEmail(email: String): UserEntity?
   fun findByUsername(username: String): UserEntity?
   fun findByUsernameOrEmail(username: String, email: String): UserEntity?
   fun existsByUsername(username: String): Boolean
