@@ -5,6 +5,7 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.auth.*
 import com.tianqueal.flowjet.backend.domain.dto.v1.error.ErrorResponse
 import com.tianqueal.flowjet.backend.security.jwt.JwtTokenProvider
 import com.tianqueal.flowjet.backend.services.EmailVerificationService
+import com.tianqueal.flowjet.backend.services.PasswordResetService
 import com.tianqueal.flowjet.backend.services.UserService
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.MessageKeys
@@ -33,9 +34,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 class AuthController(
   private val authenticationManager: AuthenticationManager,
   private val jwtTokenProvider: JwtTokenProvider,
+  private val messageSource: MessageSource,
   private val userService: UserService,
   private val emailVerificationService: EmailVerificationService,
-  private val messageSource: MessageSource,
+  private val passwordResetService: PasswordResetService,
 ) {
   @Operation(
     summary = "Authenticate user and return JWT",
@@ -135,8 +137,8 @@ class AuthController(
     val locale = LocaleContextHolder.getLocale()
     val message = messageSource.getMessage(MessageKeys.AUTH_REGISTER_SUCCESS, null, locale)
     emailVerificationService.sendEmailVerification(
-      createdUser,
-      ApiPaths.V1
+      user = createdUser,
+      apiVersionPath = ApiPaths.V1
     )
     val location = ServletUriComponentsBuilder
       .fromCurrentContextPath()
@@ -194,14 +196,93 @@ class AuthController(
   fun verifyEmail(
     @RequestParam token: String
   ): ResponseEntity<VerifyEmailResponse> {
-    emailVerificationService.verifyToken(token)
+    emailVerificationService.verifyTokenAndMarkAsVerified(token)
     val locale = LocaleContextHolder.getLocale()
     val message = messageSource.getMessage(MessageKeys.EMAIL_VERIFICATION_SUCCESS, null, locale)
-    return ResponseEntity.ok(
-      VerifyEmailResponse(
-        success = true,
-        message = message
-      )
+    return ResponseEntity.ok(VerifyEmailResponse(success = true, message = message))
+  }
+
+  @Operation(
+    summary = "Reset password",
+    description = "Sends a password reset email to the user."
+  )
+  @SwaggerRequestBody(
+    description = "Email address to send the reset link",
+    required = true,
+    content = [Content(
+      mediaType = MediaType.APPLICATION_JSON_VALUE,
+      schema = Schema(implementation = PasswordResetRequest::class)
+    )]
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Password reset email sent successfully",
+        content = [Content(
+          mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = Schema(implementation = PasswordResetResponse::class)
+        )]
+      ),
+    ]
+  )
+  @PublicOperationErrorResponses
+  @PostMapping("${ApiPaths.PASSWORD_RESET}/request")
+  fun requestPasswordReset(
+    @Valid @RequestBody passwordResetRequest: PasswordResetRequest
+  ): ResponseEntity<PasswordResetResponse> {
+    passwordResetService.sendPasswordResetEmail(
+      email = passwordResetRequest.email,
+      apiVersionPath = ApiPaths.V1
     )
+    val locale = LocaleContextHolder.getLocale()
+    val message = messageSource.getMessage(MessageKeys.PASSWORD_RESET_REQUEST_SUCCESS, null, locale)
+    return ResponseEntity.ok(PasswordResetResponse(message))
+  }
+
+  @Operation(
+    summary = "Confirm password reset",
+    description = "Confirms the password reset using a token and sets the new password."
+  )
+  @SwaggerRequestBody(
+    description = "Password reset confirmation request containing token and new password",
+    required = true,
+    content = [Content(
+      mediaType = MediaType.APPLICATION_JSON_VALUE,
+      schema = Schema(implementation = PasswordResetConfirmRequest::class)
+    )]
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Password reset successfully",
+        content = [Content(
+          mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = Schema(implementation = PasswordResetResponse::class)
+        )]
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Invalid or expired password reset token",
+        content = [Content(
+          mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = Schema(implementation = ErrorResponse::class)
+        )]
+      )
+    ]
+  )
+  @PublicOperationErrorResponses
+  @PostMapping("${ApiPaths.PASSWORD_RESET}/confirm")
+  fun confirmPasswordReset(
+    @Valid @RequestBody passwordResetConfirmRequest: PasswordResetConfirmRequest
+  ): ResponseEntity<PasswordResetResponse> {
+    passwordResetService.verifyTokenAndResetPassword(
+      token = passwordResetConfirmRequest.token,
+      newPassword = passwordResetConfirmRequest.newPassword
+    )
+    val locale = LocaleContextHolder.getLocale()
+    val message = messageSource.getMessage(MessageKeys.PASSWORD_RESET_CONFIRM_SUCCESS, null, locale)
+    return ResponseEntity.ok(PasswordResetResponse(message))
   }
 }
