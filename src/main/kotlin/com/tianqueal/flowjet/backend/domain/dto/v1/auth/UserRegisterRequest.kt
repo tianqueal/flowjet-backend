@@ -45,7 +45,11 @@ data class UserRegisterRequest(
     requiredMode = Schema.RequiredMode.REQUIRED
   )
   @field:NotBlank(message = ValidationMessageKeys.VALIDATION_USER_NAME_NOT_BLANK)
-  @field:Size(min = 3, max = 100, message = ValidationMessageKeys.VALIDATION_USER_NAME_SIZE)
+  @field:Size(
+    min = 3,
+    max = 100,
+    message = ValidationMessageKeys.VALIDATION_USER_NAME_SIZE
+  )
   @field:Pattern(
     regexp = ValidationPatterns.NAME,
     message = ValidationMessageKeys.VALIDATION_USER_NAME_PATTERN
@@ -60,7 +64,11 @@ data class UserRegisterRequest(
     requiredMode = Schema.RequiredMode.REQUIRED
   )
   @field:NotBlank(message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_NOT_BLANK)
-  @field:Size(min = 8, max = 64, message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_SIZE)
+  @field:Size(
+    min = 8,
+    max = 64,
+    message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_SIZE
+  )
   @field:Pattern(
     regexp = ValidationPatterns.PASSWORD,
     message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_PATTERN

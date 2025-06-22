@@ -25,7 +25,11 @@ data class UpdateUserByAdminRequest(
     requiredMode = RequiredMode.REQUIRED
   )
   @field:NotBlank(message = ValidationMessageKeys.VALIDATION_USER_USERNAME_NOT_BLANK)
-  @field:Size(min = 3, max = 50, message = ValidationMessageKeys.VALIDATION_USER_USERNAME_SIZE)
+  @field:Size(
+    min = 3,
+    max = 50,
+    message = ValidationMessageKeys.VALIDATION_USER_USERNAME_SIZE
+  )
   @field:Pattern(
     regexp = ValidationPatterns.USERNAME,
     message = ValidationMessageKeys.VALIDATION_USER_USERNAME_PATTERN
