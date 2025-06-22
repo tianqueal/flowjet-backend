@@ -6,10 +6,13 @@ import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
 import com.tianqueal.flowjet.backend.domain.dto.v1.auth.LoginRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.auth.LoginResponse
+import com.tianqueal.flowjet.backend.domain.dto.v1.auth.PasswordResetConfirmRequest
+import com.tianqueal.flowjet.backend.domain.dto.v1.auth.PasswordResetRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.CreateAdminUserRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.CreateUserRequest
 import com.tianqueal.flowjet.backend.repositories.UserRepository
 import com.tianqueal.flowjet.backend.services.EmailVerificationService
+import com.tianqueal.flowjet.backend.services.PasswordResetService
 import com.tianqueal.flowjet.backend.services.UserService
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.SecurityConstants
@@ -41,6 +44,7 @@ class AuthControllerIntegrationTests @Autowired constructor(
   private val userRepository: UserRepository,
   private val userService: UserService,
   private val emailVerificationService: EmailVerificationService,
+  private val passwordResetService: PasswordResetService,
 ) {
   @BeforeEach
   fun setUp() {
@@ -278,6 +282,88 @@ class AuthControllerIntegrationTests @Autowired constructor(
       .andExpect { status { isOk() } }
   }
 
+  @Test
+  fun `requestPasswordReset with registered email should send email and return OK`() {
+    // Arrange
+    userService.createUserByAdmin(TestDataUtils.createTestUserRequest())
+
+    // Act
+    mockMvc.post(PASSWORD_RESET_REQUEST_URI) {
+      contentType = MediaType.APPLICATION_JSON
+      content = objectMapper.writeValueAsString(PasswordResetRequest(TestDataUtils.DEFAULT_EMAIL))
+    }
+      .andExpect { status { isOk() } }
+
+    // Assert
+    val receivedMessages = greenMail.receivedMessages
+    assertEquals(1, receivedMessages.size)
+    val message = receivedMessages[0]
+    assertEquals(TestDataUtils.DEFAULT_EMAIL, message.allRecipients[0].toString())
+    val body = GreenMailUtil.getBody(message)
+    assertTrue(body.contains("password reset", ignoreCase = true))
+    assertTrue(body.contains("?token="))
+  }
+
+  @Test
+  fun `requestPasswordReset with unregistered email should return OK and not send email`() {
+    // Arrange
+    val request = PasswordResetRequest("notfound@example.com")
+
+    // Act
+    mockMvc.post(PASSWORD_RESET_REQUEST_URI) {
+      contentType = MediaType.APPLICATION_JSON
+      content = objectMapper.writeValueAsString(request)
+    }
+      .andExpect { status { isOk() } }
+
+    // Assert
+    assertEquals(0, greenMail.receivedMessages.size)
+  }
+
+  @Test
+  fun `confirmPasswordReset with valid token should reset password and allow login`() {
+    // Arrange
+    val user = userService.createUserByAdmin(TestDataUtils.createTestUserRequest())
+    val token = passwordResetService.generatePasswordResetToken(user.email)
+    val newPassword = "NewSecureP@ssw0rd123"
+
+    val confirmRequest = PasswordResetConfirmRequest(
+      token = token,
+      newPassword = newPassword
+    )
+
+    // Act
+    mockMvc.post(PASSWORD_RESET_CONFIRM_URI) {
+      contentType = MediaType.APPLICATION_JSON
+      content = objectMapper.writeValueAsString(confirmRequest)
+    }
+      .andExpect { status { isOk() } }
+
+    // Assert
+    val loginRequest = LoginRequest(user.email, newPassword)
+    mockMvc.post(LOGIN_URI) {
+      contentType = MediaType.APPLICATION_JSON
+      content = objectMapper.writeValueAsString(loginRequest)
+    }
+      .andExpect { status { isOk() } }
+  }
+
+  @Test
+  fun `confirmPasswordReset with invalid token should return BadRequest`() {
+    // Arrange
+    val confirmRequest = PasswordResetConfirmRequest(
+      token = "invalid-token-123",
+      newPassword = "AnyPassword123"
+    )
+
+    // Act & Assert
+    mockMvc.post(PASSWORD_RESET_CONFIRM_URI) {
+      contentType = MediaType.APPLICATION_JSON
+      content = objectMapper.writeValueAsString(confirmRequest)
+    }
+      .andExpect { status { isBadRequest() } }
+  }
+
   private fun loginAndGetToken(
     usernameOrEmail: String,
     password: String = TestDataUtils.DEFAULT_PASSWORD
@@ -313,6 +399,20 @@ class AuthControllerIntegrationTests @Autowired constructor(
     private val REGISTER_URI = UriComponentsBuilder
       .fromPath(BASE_URI)
       .path(ApiPaths.REGISTER)
+      .build()
+      .toUri()
+
+    private val PASSWORD_RESET_REQUEST_URI = UriComponentsBuilder
+      .fromPath(BASE_URI)
+      .path(ApiPaths.PASSWORD_RESET)
+      .pathSegment("request")
+      .build()
+      .toUri()
+
+    private val PASSWORD_RESET_CONFIRM_URI = UriComponentsBuilder
+      .fromPath(BASE_URI)
+      .path(ApiPaths.PASSWORD_RESET)
+      .pathSegment("confirm")
       .build()
       .toUri()
 
