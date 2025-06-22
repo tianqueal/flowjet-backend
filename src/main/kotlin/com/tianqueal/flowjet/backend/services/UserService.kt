@@ -13,6 +13,7 @@ interface UserService {
   fun findAll(username: String?, email: String?, name: String?, pageable: Pageable): Page<UserResponse>
   fun findById(id: Long): UserResponse
   fun findByUsername(username: String): UserResponse
+  fun findByEmail(email: String): UserResponse
   fun findByUsernameOrEmail(usernameOrEmail: String): UserResponse
 
   fun createAdminUser(createAdminUserRequest: CreateAdminUserRequest): UserResponse
@@ -24,4 +25,6 @@ interface UserService {
 
   fun markUserAsVerifiedByUsername(username: String)
   fun markUserAsNotVerifiedByUsername(username: String)
+
+  fun resetPasswordByEmail(email: String, newPassword: String)
 }

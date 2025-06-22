@@ -78,6 +78,14 @@ class UserServiceImpl(
       ?.let(userMapper::toDto)
       ?: throw UserNotFoundException(username)
 
+  @Transactional(readOnly = true)
+  override fun findByEmail(email: String): UserResponse {
+    return userRepository.findByEmail(email)
+      ?.let(userMapper::toDto)
+      ?: throw UserNotFoundException(email)
+  }
+
+  @Transactional(readOnly = true)
   override fun findByUsernameOrEmail(usernameOrEmail: String): UserResponse {
     return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
       ?.let(userMapper::toDto)
@@ -154,6 +162,7 @@ class UserServiceImpl(
       throw UserAlreadyVerifiedException("username", username)
     }
     userEntity.verifiedAt = Instant.now()
+    userRepository.save(userEntity)
   }
 
   override fun markUserAsNotVerifiedByUsername(username: String) {
@@ -163,8 +172,14 @@ class UserServiceImpl(
       throw UserAlreadyVerifiedException("username", username)
     }
     userEntity.verifiedAt = null
+    userRepository.save(userEntity)
   }
 
-  //  private fun mapRolesToAuthorities(roles: Set<RoleEntity>): Collection<GrantedAuthority> =
-  //    roles.map { SimpleGrantedAuthority(it.code.name) }
+  override fun resetPasswordByEmail(email: String, newPassword: String) {
+    val userEntity = userRepository.findByEmail(email)
+      ?: throw UserNotFoundException(email)
+
+    userEntity.passwordHash = passwordEncoder.encode(newPassword)
+    userRepository.save(userEntity)
+  }
 }
