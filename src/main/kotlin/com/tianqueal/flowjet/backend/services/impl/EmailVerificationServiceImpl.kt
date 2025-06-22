@@ -5,7 +5,6 @@ import com.tianqueal.flowjet.backend.security.jwt.JwtTokenProvider
 import com.tianqueal.flowjet.backend.services.EmailService
 import com.tianqueal.flowjet.backend.services.EmailVerificationService
 import com.tianqueal.flowjet.backend.services.UserService
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,23 +13,31 @@ class EmailVerificationServiceImpl(
   private val emailService: EmailService,
   private val userService: UserService,
 ) : EmailVerificationService {
+  /**
+   * Generates an email verification token for the given user.
+   * @param user The user for whom the token is generated.
+   * @return The generated email verification token.
+   */
   override fun generateEmailVerificationToken(user: UserResponse): String =
     jwtTokenProvider.generateEmailVerificationTokenDetails(user.username).token
 
-  override fun sendEmailVerification(user: UserResponse, apiVersionPath: String) {
-    val token = generateEmailVerificationToken(user)
-    val locale = LocaleContextHolder.getLocale()
+  /**
+   * Sends an email verification to the user.
+   * @param user The user to whom the verification email is sent.
+   * @param apiVersionPath The API version path to include in the email.
+   */
+  override fun sendEmailVerification(user: UserResponse, apiVersionPath: String) =
     emailService.sendEmailVerification(
-      user.email,
-      user.username,
-      token,
-      locale,
-      apiVersionPath
+      to = user.email,
+      name = user.username,
+      token = generateEmailVerificationToken(user),
+      apiVersionPath = apiVersionPath
     )
-  }
 
-  override fun verifyToken(token: String) {
-    val username = jwtTokenProvider.getUsernameFromToken(token)
-    userService.markUserAsVerifiedByUsername(username)
-  }
+  /**
+   * Verifies the provided token and marks the user as verified.
+   * @param token The email verification token.
+   */
+  override fun verifyTokenAndMarkAsVerified(token: String) =
+    userService.markUserAsVerifiedByUsername(jwtTokenProvider.getSubjectFromToken(token))
 }

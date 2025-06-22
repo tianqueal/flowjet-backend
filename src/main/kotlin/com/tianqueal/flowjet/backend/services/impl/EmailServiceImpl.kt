@@ -30,6 +30,65 @@ class EmailServiceImpl(
   @Value("\${info.app.frontend.base-url:http://localhost:3000}")
   private var frontendBaseUrl: String,
 ) : EmailService {
+  /**
+   * Sends an email verification message to the user.
+   * @param to The recipient's email address.
+   * @param name The name of the user.
+   * @param token The verification token.
+   * @param locale The locale for the email content.
+   * @param apiVersionPath The API version path to use in the verification URL.
+   */
+  override fun sendEmailVerification(to: String, name: String, token: String, locale: Locale, apiVersionPath: String) {
+    val verificationUrl = UriComponentsBuilder
+      .fromUriString(frontendBaseUrl)
+      .path("${apiVersionPath}${ApiPaths.AUTH}${ApiPaths.VERIFY_EMAIL}")
+      .queryParam("token", token)
+      .toUriString()
+
+    val model = mutableMapOf<String, Any>(
+      "appName" to appName,
+      "name" to name,
+      "verificationUrl" to verificationUrl
+    )
+    val subject = messageSource.getMessage(MessageKeys.EMAIL_VERIFICATION_SUBJECT, null, locale)
+
+    sendEmailFromTemplate(to, subject, TemplatePaths.EMAIL_VERIFICATION, model, locale)
+  }
+
+  /**
+   * Sends a password reset email to the user.
+   * @param to The recipient's email address.
+   * @param name The name of the user.
+   * @param token The password reset token.
+   * @param locale The locale for the email content.
+   * @param apiVersionPath The API version path to use in the password reset URL.
+   */
+  override fun sendPasswordResetEmail(to: String, name: String, token: String, locale: Locale, apiVersionPath: String) {
+    val passwordResetUrl = UriComponentsBuilder
+      .fromUriString(frontendBaseUrl)
+      .path("${apiVersionPath}${ApiPaths.AUTH}${ApiPaths.PASSWORD_RESET}")
+      .pathSegment("confirm")
+      .queryParam("token", token)
+      .toUriString()
+
+    val model = mutableMapOf<String, Any>(
+      "appName" to appName,
+      "name" to name,
+      "passwordResetUrl" to passwordResetUrl
+    )
+    val subject = messageSource.getMessage(MessageKeys.EMAIL_PASSWORD_RESET_SUBJECT, null, locale)
+
+    sendEmailFromTemplate(to, subject, TemplatePaths.EMAIL_PASSWORD_RESET, model, locale)
+  }
+
+  /**
+   * Sends an email using a FreeMarker template.
+   * @param to The recipient's email address.
+   * @param subject The subject of the email.
+   * @param templateName The name of the FreeMarker template to use.
+   * @param model The model data to populate the template.
+   * @param locale The locale for the email content.
+   */
   private fun sendEmailFromTemplate(
     to: String,
     subject: String,
@@ -54,22 +113,5 @@ class EmailServiceImpl(
     helper.setText(htmlBody, true)
 
     javaMailSender.send(message)
-  }
-
-  override fun sendEmailVerification(to: String, name: String, token: String, locale: Locale, apiVersionPath: String) {
-    val verificationUrl = UriComponentsBuilder
-      .fromUriString(frontendBaseUrl)
-      .path("${apiVersionPath}${ApiPaths.AUTH}${ApiPaths.VERIFY_EMAIL}")
-      .queryParam("token", token)
-      .toUriString()
-
-    val model = mutableMapOf<String, Any>(
-      "appName" to appName,
-      "name" to name,
-      "verificationUrl" to verificationUrl
-    )
-    val subject = messageSource.getMessage(MessageKeys.EMAIL_VERIFICATION_SUBJECT, null, locale)
-
-    sendEmailFromTemplate(to, subject, TemplatePaths.EMAIL_VERIFICATION, model, locale)
   }
 }
