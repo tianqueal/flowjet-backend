@@ -39,8 +39,6 @@ import kotlin.reflect.full.findAnnotation
 class GlobalExceptionHandler(
   private val messageSource: MessageSource
 ) {
-  private val log = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
-
   /**
    * Handles validation errors for request bodies (e.g., @Valid failures).
    * Returns a 400 Bad Request with details about which fields failed validation.
@@ -323,5 +321,9 @@ class GlobalExceptionHandler(
     )
 
     return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+  }
+
+  companion object {
+    private val log = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
   }
 }

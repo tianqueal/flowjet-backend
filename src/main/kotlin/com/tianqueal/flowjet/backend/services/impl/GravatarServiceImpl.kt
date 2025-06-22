@@ -8,13 +8,6 @@ import java.security.MessageDigest
 
 @Service
 class GravatarServiceImpl : GravatarService {
-
-  companion object {
-    private const val GRAVATAR_URL_PREFIX = "https://www.gravatar.com/avatar"
-    private const val DEFAULT_HASH = "00000000000000000000000000000000"
-    private const val DEFAULT_STYLE = "identicon"
-  }
-
   override fun getAvatarUrl(email: String?, size: Int): String {
     val cleanedEmail = email?.trim()?.lowercase()
     val hash = cleanedEmail
@@ -32,5 +25,11 @@ class GravatarServiceImpl : GravatarService {
   private fun md5Hex(input: String): String {
     val digest = MessageDigest.getInstance("MD5").digest(input.toByteArray(StandardCharsets.UTF_8))
     return digest.joinToString("") { "%02x".format(it) }
+  }
+
+  companion object {
+    private const val GRAVATAR_URL_PREFIX = "https://www.gravatar.com/avatar"
+    private const val DEFAULT_HASH = "00000000000000000000000000000000"
+    private const val DEFAULT_STYLE = "identicon"
   }
 }
