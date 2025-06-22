@@ -12,6 +12,7 @@ import com.tianqueal.flowjet.backend.utils.constants.SecurityConstants
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.Parameters
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
@@ -20,9 +21,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.data.web.PagedModel
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -44,72 +45,63 @@ class AdminUserController(
     summary = "Get all users",
     description = "Retrieves a paginated list of all users in the system. Requires Admin privileges."
   )
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "200",
-        description = "List of users retrieved successfully",
-        content = [Content(
-          mediaType = MediaType.APPLICATION_JSON_VALUE,
-          schema = Schema(implementation = UserResponse::class)
-        )]
-      ),
-    ]
+  @ApiResponse(
+    responseCode = "200",
+    description = "List of users retrieved successfully",
+    useReturnTypeSchema = true
   )
   @ProtectedOperationErrorResponses
-  @GetMapping
   @Parameters(
     value = [
       Parameter(
         description = "Filter by username (case-insensitive, partial match)",
-        required = false,
+        name = "username",
         example = "john_doe",
         schema = Schema(type = "string")
       ),
       Parameter(
         description = "Filter by email (case-insensitive, partial match)",
-        required = false,
+        name = "email",
         example = "user@example.com",
         schema = Schema(type = "string")
       ),
       Parameter(
-        description = "Filter by name (case-insensitive, partial match)",
-        required = false,
+        description = "Filter by user name (case-insensitive, partial match)",
+        name = "name",
         example = "John",
         schema = Schema(type = "string")
       ),
       Parameter(
+        description = "Zero-based page index (0..N)",
         name = "page",
-        description = "Page number to retrieve",
-        example = "0",
-        required = false,
         schema = Schema(type = "integer", defaultValue = "0")
       ),
       Parameter(
+        description = "The size of the page to be returned",
         name = "size",
-        description = "Number of items per page",
-        example = "20",
-        required = false,
-        schema = Schema(type = "integer", defaultValue = "20")
+        schema = Schema(type = "integer", defaultValue = "20"),
       ),
       Parameter(
+        description = "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
         name = "sort",
-        description = "Sorting criteria in the format: property,asc|desc",
-        example = "id,asc",
-        required = false,
-        schema = Schema(type = "string")
+        content = [Content(array = ArraySchema(schema = Schema(type = "string")))]
       ),
     ]
   )
+  @GetMapping
   fun getAllUsers(
     @RequestParam(required = false) username: String?,
     @RequestParam(required = false) email: String?,
     @RequestParam(required = false) name: String?,
+
     @PageableDefault(
       page = PaginationConstants.DEFAULT_PAGE_NUMBER,
       size = PaginationConstants.DEFAULT_PAGE_SIZE,
-    ) pageable: Pageable
-  ): ResponseEntity<Page<UserResponse>> = ResponseEntity.ok(userService.findAll(username, email, name, pageable))
+    )
+    @Parameter(hidden = true)
+    pageable: Pageable
+  ): ResponseEntity<PagedModel<UserResponse>> =
+    ResponseEntity.ok(PagedModel(userService.findAll(username, email, name, pageable)))
 
   @Operation(
     summary = "Get user by ID",
