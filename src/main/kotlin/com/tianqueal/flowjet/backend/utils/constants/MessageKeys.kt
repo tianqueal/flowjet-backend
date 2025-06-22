@@ -28,7 +28,10 @@ object MessageKeys {
   const val ERROR_USER_ALREADY_VERIFIED = "error.user.alreadyVerified"
 
   // Email
-  const val EMAIL_GREETING_SUBJECT = "email.greeting.subject"
   const val EMAIL_VERIFICATION_SUBJECT = "email.verification.subject"
   const val EMAIL_VERIFICATION_SUCCESS = "email.verification.success"
+  const val EMAIL_PASSWORD_RESET_SUBJECT = "email.passwordReset.subject"
+
+  const val PASSWORD_RESET_REQUEST_SUCCESS = "passwordReset.request.success"
+  const val PASSWORD_RESET_CONFIRM_SUCCESS = "passwordReset.confirm.success"
 }

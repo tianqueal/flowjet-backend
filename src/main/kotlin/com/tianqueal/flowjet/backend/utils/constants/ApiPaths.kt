@@ -48,7 +48,7 @@ object ApiPaths {
   const val LOGIN = "/login"
   const val REGISTER = "/register"
   const val VERIFY_EMAIL = "/verify-email"
-  const val RESET_PASSWORD = "/reset-password"
+  const val PASSWORD_RESET = "/password-reset"
   const val REFRESH_TOKEN = "/refresh-token"
 
   // Nested routes

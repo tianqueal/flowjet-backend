@@ -6,7 +6,9 @@ object PublicEndpoints {
   private val AUTH_PATHS = listOf(
     ApiPaths.LOGIN,
     ApiPaths.REGISTER,
-    ApiPaths.VERIFY_EMAIL
+    ApiPaths.VERIFY_EMAIL,
+    "${ApiPaths.PASSWORD_RESET}/request",
+    "${ApiPaths.PASSWORD_RESET}/confirm",
   )
 
   fun auth(version: String) = AUTH_PATHS.map { "$version${ApiPaths.AUTH}$it" }.toSet()
