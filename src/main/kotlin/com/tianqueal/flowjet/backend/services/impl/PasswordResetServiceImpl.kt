@@ -55,7 +55,7 @@ class PasswordResetServiceImpl(
    * @param newPassword The new password to set for the user.
    */
   override fun verifyTokenAndResetPassword(token: String, newPassword: String) =
-    userService.resetPasswordByEmail(jwtTokenProvider.getSubjectFromToken(token), newPassword)
+    userService.resetPassword(jwtTokenProvider.getSubjectFromToken(token), newPassword)
 
   companion object {
     private val log = LoggerFactory.getLogger(PasswordResetServiceImpl::class.java)
