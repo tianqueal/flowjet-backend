@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: member_roles-001-seed
+      author: Christian A.
+      changes:
+        - insert:
+            tableName: member_roles
+            columns:
+              - column:
+                  name: code
+                  value: PROJECT_OWNER
+              - column:
+                  name: name
+                  value: Project Owner
+
+        - insert:
+            tableName: member_roles
+            columns:
+              - column:
+                  name: code
+                  value: PROJECT_MEMBER
+              - column:
+                  name: name
+                  value: Project Member
+
+        - insert:
+            tableName: member_roles
+            columns:
+              - column:
+                  name: code
+                  value: PROJECT_VIEWER
+              - column:
+                  name: name
+                  value: Project Viewer
