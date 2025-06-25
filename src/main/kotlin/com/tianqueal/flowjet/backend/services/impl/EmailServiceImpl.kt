@@ -21,7 +21,7 @@ class EmailServiceImpl(
   private val freeMarkerConfig: Configuration,
   private val messageSource: MessageSource,
 
-  @Value(value = "\${info.app.name:myapp}")
+  @Value("\${info.app.name:myapp}")
   private var appName: String,
   @Value("\${info.app.mail.from:noreply@example.com}")
   private var from: String,
