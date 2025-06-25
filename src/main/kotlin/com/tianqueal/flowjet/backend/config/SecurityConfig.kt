@@ -39,96 +39,96 @@ import java.util.Base64
 @EnableWebSecurity
 @EnableMethodSecurity
 class SecurityConfig(
-  @Value("classpath:certs/private-key.pem")
-  private val privateKeyResource: Resource
+    @Value("classpath:certs/private-key.pem")
+    private val privateKeyResource: Resource,
 ) {
-  /**
-   * Configures the main security filter chain.
-   *
-   * - Disables CSRF protection.
-   * - Permits all requests to public endpoints (such as login, register, etc.).
-   * - Requires authentication for all other endpoints.
-   * - Enforces stateless session management.
-   * - Configures the application as an OAuth2 Resource Server using JWT.
-   * - Applies a custom JwtAuthenticationConverter for authority mapping.
-   */
-  @Bean
-  fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-    val publicV1 = PublicEndpoints.forVersion(ApiPaths.V1)
-    http
-      .csrf { it.disable() }
-      .authorizeHttpRequests { authz ->
-        authz
-          .requestMatchers(*publicV1.toTypedArray()).permitAll()
-          .anyRequest().authenticated()
-      }
-      .sessionManagement { sess ->
-        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      }
-      .oauth2ResourceServer { oauth2 ->
-        oauth2.jwt { jwt ->
-          jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
-        }
-      }
-    return http.build()
-  }
-
-  /**
-   * Exposes the AuthenticationManager as a bean, required for manual authentication flows.
-   */
-  @Bean
-  fun authenticationManager(
-    authenticationConfiguration: AuthenticationConfiguration
-  ): AuthenticationManager = authenticationConfiguration.authenticationManager
-
-  /**
-   * Provides a BCrypt password encoder for hashing user passwords.
-   */
-  @Bean
-  fun passwordEncode(): PasswordEncoder = BCryptPasswordEncoder()
-
-  /**
-   * Loads the RSA private key from the configured PEM file for JWT signing.
-   *
-   * @return PrivateKey used to sign JWT tokens.
-   * @throws RuntimeException if the key cannot be loaded or parsed.
-   */
-  @Bean
-  @Qualifier(BeanNames.JWT_SIGNING_PRIVATE_KEY)
-  fun jwtSigningPrivateKey(): PrivateKey {
-    try {
-      privateKeyResource.inputStream.use { inputStream ->
-        val keyBytes = FileCopyUtils.copyToByteArray(inputStream)
-        val privateKeyPEM = String(keyBytes, StandardCharsets.UTF_8)
-          .replace("-----BEGIN PRIVATE KEY-----", "")
-          .replace("-----END PRIVATE KEY-----", "")
-          .replace(System.lineSeparator(), "")
-          .replace("\n", "")
-          .replace("\r", "")
-
-        val decodedKey = Base64.getDecoder().decode(privateKeyPEM)
-        val keySpec = PKCS8EncodedKeySpec(decodedKey)
-        val keyFactory = KeyFactory.getInstance("RSA")
-        return keyFactory.generatePrivate(keySpec)
-      }
-    } catch (e: Exception) {
-      throw RuntimeException("Failed to load private key for JWT signing", e)
+    /**
+     * Configures the main security filter chain.
+     *
+     * - Disables CSRF protection.
+     * - Permits all requests to public endpoints (such as login, register, etc.).
+     * - Requires authentication for all other endpoints.
+     * - Enforces stateless session management.
+     * - Configures the application as an OAuth2 Resource Server using JWT.
+     * - Applies a custom JwtAuthenticationConverter for authority mapping.
+     */
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        val publicV1 = PublicEndpoints.forVersion(ApiPaths.V1)
+        http
+            .csrf { it.disable() }
+            .authorizeHttpRequests { authz ->
+                authz
+                    .requestMatchers(*publicV1.toTypedArray())
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }.sessionManagement { sess ->
+                sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }.oauth2ResourceServer { oauth2 ->
+                oauth2.jwt { jwt ->
+                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
+                }
+            }
+        return http.build()
     }
-  }
 
-  /**
-   * Configures a JwtAuthenticationConverter bean to map JWT claims (such as roles/authorities)
-   * to Spring Security GrantedAuthority objects.
-   *
-   * The claim name and prefix are configurable via SecurityConstants.
-   */
-  @Bean
-  fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
-    val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
-    grantedAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORITIES_CLAIM_NAME)
-    grantedAuthoritiesConverter.setAuthorityPrefix(SecurityConstants.AUTHORITIES_PREFIX)
-    val jwtAuthenticationConverter = JwtAuthenticationConverter()
-    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter)
-    return jwtAuthenticationConverter
-  }
+    /**
+     * Exposes the AuthenticationManager as a bean, required for manual authentication flows.
+     */
+    @Bean
+    fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager =
+        authenticationConfiguration.authenticationManager
+
+    /**
+     * Provides a BCrypt password encoder for hashing user passwords.
+     */
+    @Bean
+    fun passwordEncode(): PasswordEncoder = BCryptPasswordEncoder()
+
+    /**
+     * Loads the RSA private key from the configured PEM file for JWT signing.
+     *
+     * @return PrivateKey used to sign JWT tokens.
+     * @throws RuntimeException if the key cannot be loaded or parsed.
+     */
+    @Bean
+    @Qualifier(BeanNames.JWT_SIGNING_PRIVATE_KEY)
+    fun jwtSigningPrivateKey(): PrivateKey {
+        try {
+            privateKeyResource.inputStream.use { inputStream ->
+                val keyBytes = FileCopyUtils.copyToByteArray(inputStream)
+                val privateKeyPEM =
+                    String(keyBytes, StandardCharsets.UTF_8)
+                        .replace("-----BEGIN PRIVATE KEY-----", "")
+                        .replace("-----END PRIVATE KEY-----", "")
+                        .replace(System.lineSeparator(), "")
+                        .replace("\n", "")
+                        .replace("\r", "")
+
+                val decodedKey = Base64.getDecoder().decode(privateKeyPEM)
+                val keySpec = PKCS8EncodedKeySpec(decodedKey)
+                val keyFactory = KeyFactory.getInstance("RSA")
+                return keyFactory.generatePrivate(keySpec)
+            }
+        } catch (e: Exception) {
+            throw RuntimeException("Failed to load private key for JWT signing", e)
+        }
+    }
+
+    /**
+     * Configures a JwtAuthenticationConverter bean to map JWT claims (such as roles/authorities)
+     * to Spring Security GrantedAuthority objects.
+     *
+     * The claim name and prefix are configurable via SecurityConstants.
+     */
+    @Bean
+    fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
+        val grantedAuthoritiesConverter = JwtGrantedAuthoritiesConverter()
+        grantedAuthoritiesConverter.setAuthoritiesClaimName(SecurityConstants.AUTHORITIES_CLAIM_NAME)
+        grantedAuthoritiesConverter.setAuthorityPrefix(SecurityConstants.AUTHORITIES_PREFIX)
+        val jwtAuthenticationConverter = JwtAuthenticationConverter()
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter)
+        return jwtAuthenticationConverter
+    }
 }

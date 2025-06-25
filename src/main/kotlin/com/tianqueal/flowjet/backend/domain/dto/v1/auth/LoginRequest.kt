@@ -10,24 +10,22 @@ import jakarta.validation.constraints.NotNull
 @Schema(description = "DTO for login request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class LoginRequest(
-  @field:UsernameOrEmailConstraint
-  val usernameOrEmail: String,
-
-  @field:Schema(
-    description = "Password for login",
-    example = "SecureP@ssw0rd",
-    nullable = false,
-    requiredMode = RequiredMode.REQUIRED
-  )
-  @field:NotNull(message = ValidationMessageKeys.VALIDATION_AUTH_PASSWORD_NOT_NULL)
-  val password: String,
-
-  @field:Schema(
-    description = "Flag to remember the user for future logins",
-    example = "true",
-    nullable = true,
-    defaultValue = "false",
-    requiredMode = RequiredMode.NOT_REQUIRED
-  )
-  val rememberMe: Boolean = false,
+    @field:UsernameOrEmailConstraint
+    val usernameOrEmail: String,
+    @field:Schema(
+        description = "Password for login",
+        example = "SecureP@ssw0rd",
+        nullable = false,
+        requiredMode = RequiredMode.REQUIRED,
+    )
+    @field:NotNull(message = ValidationMessageKeys.VALIDATION_AUTH_PASSWORD_NOT_NULL)
+    val password: String,
+    @field:Schema(
+        description = "Flag to remember the user for future logins",
+        example = "true",
+        nullable = true,
+        defaultValue = "false",
+        requiredMode = RequiredMode.NOT_REQUIRED,
+    )
+    val rememberMe: Boolean = false,
 )

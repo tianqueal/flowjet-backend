@@ -5,16 +5,19 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
 interface ProjectMemberService {
-  fun findAll(
-    projectId: Long,
-    memberRoleId: Int?,
-    username: String?,
-    pageable: Pageable,
-  ): Page<ProjectMemberResponse>
+    fun findAll(
+        projectId: Long,
+        memberRoleId: Int?,
+        username: String?,
+        pageable: Pageable,
+    ): Page<ProjectMemberResponse>
 
-  fun isMember(projectId: Long, userId: Long): Boolean
+    fun isMember(
+        projectId: Long,
+        userId: Long,
+    ): Boolean
 
-  // fun addMemberToProject(projectId: Long, userId: Long, roleId: Long): ProjectMemberResponse
-  // fun removeMemberFromProject(projectId: Long, userId: Long)
-  // fun changeMemberRole(projectId: Long, userId: Long, newRoleId: Long): ProjectMemberResponse
+    // fun addMemberToProject(projectId: Long, userId: Long, roleId: Long): ProjectMemberResponse
+    // fun removeMemberFromProject(projectId: Long, userId: Long)
+    // fun changeMemberRole(projectId: Long, userId: Long, newRoleId: Long): ProjectMemberResponse
 }

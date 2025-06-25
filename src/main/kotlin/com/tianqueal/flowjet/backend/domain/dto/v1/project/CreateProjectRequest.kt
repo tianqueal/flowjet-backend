@@ -9,12 +9,10 @@ import jakarta.validation.constraints.NotNull
 @Schema(description = "Request DTO for creating a new project")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CreateProjectRequest(
-  @field:ProjectNameConstraint
-  var name: String,
-
-  @field:ProjectDescriptionConstraint
-  var description: String? = null,
-
-  @field:NotNull
-  var projectStatusId: Int,
+    @field:ProjectNameConstraint
+    var name: String,
+    @field:ProjectDescriptionConstraint
+    var description: String? = null,
+    @field:NotNull
+    var projectStatusId: Int,
 )

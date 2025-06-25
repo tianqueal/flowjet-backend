@@ -8,9 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Schema(description = "DTO for a user to update their profile")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UpdateUserProfileRequest(
-  @field:UserNameConstraint
-  val name: String,
-
-  @field:UserAvatarUrlConstraint
-  val avatarUrl: String? = null,
+    @field:UserNameConstraint
+    val name: String,
+    @field:UserAvatarUrlConstraint
+    val avatarUrl: String? = null,
 )

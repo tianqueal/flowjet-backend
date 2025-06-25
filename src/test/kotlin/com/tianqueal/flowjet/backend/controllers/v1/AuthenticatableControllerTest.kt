@@ -42,26 +42,29 @@ abstract class AuthenticatableControllerTest {
         username: String = TestDataUtils.DEFAULT_USERNAME,
         email: String = "$username@example.com",
         password: String = TestDataUtils.DEFAULT_PASSWORD,
-    ): UserResponse = userService.create(
-        TestDataUtils.createTestUserRequest(username = username, email = email, password = password)
-    )
+    ): UserResponse =
+        userService.create(
+            TestDataUtils.createTestUserRequest(username = username, email = email, password = password),
+        )
 
     protected fun loginAndGetToken(
         usernameOrEmail: String,
         password: String = TestDataUtils.DEFAULT_PASSWORD,
     ): String {
         val loginRequest = LoginRequest(usernameOrEmail, password)
-        val result = mockMvc.post(LOGIN_URI) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(loginRequest)
-        }
-            .andExpect { status { isOk() } }
-            .andReturn()
+        val result =
+            mockMvc
+                .post(LOGIN_URI) {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(loginRequest)
+                }.andExpect { status { isOk() } }
+                .andReturn()
 
-        val loginResponse = objectMapper.readValue(
-            result.response.contentAsByteArray,
-            LoginResponse::class.java
-        )
+        val loginResponse =
+            objectMapper.readValue(
+                result.response.contentAsByteArray,
+                LoginResponse::class.java,
+            )
         return "Bearer ${loginResponse.jwtResponse.token}"
     }
 
@@ -74,12 +77,11 @@ abstract class AuthenticatableControllerTest {
         return userResponse to loginAndGetToken(usernameOrEmail = username, password = password)
     }
 
-    protected fun createMultipleTestUsersAndGetTokens(count: Int): List<Pair<UserResponse, String>> {
-        return (1..count).map { index ->
+    protected fun createMultipleTestUsersAndGetTokens(count: Int): List<Pair<UserResponse, String>> =
+        (1..count).map { index ->
             val username = "test.user$index"
             createTestUserAndGetToken(username = username, email = "$username@example.com")
         }
-    }
 
     companion object {
         const val LOGIN_URI = "${ApiPaths.V1}${ApiPaths.AUTH}${ApiPaths.LOGIN}"

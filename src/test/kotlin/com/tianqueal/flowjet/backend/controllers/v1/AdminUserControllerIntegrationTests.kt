@@ -24,19 +24,21 @@ class AdminUserControllerIntegrationTests : AuthenticatableControllerTest() {
         val request = TestDataUtils.createTestUserRequest()
 
         // Act
-        val result = mockMvc.post(BASE_URI) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(request)
-            with(adminAuth())
-        }
-            .andExpect { status { isCreated() } }
-            .andReturn()
+        val result =
+            mockMvc
+                .post(BASE_URI) {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(request)
+                    with(adminAuth())
+                }.andExpect { status { isCreated() } }
+                .andReturn()
 
         // Assert
-        val userResponse = objectMapper.readValue(
-            result.response.contentAsByteArray,
-            UserResponse::class.java
-        )
+        val userResponse =
+            objectMapper.readValue(
+                result.response.contentAsByteArray,
+                UserResponse::class.java,
+            )
         assertEquals(request.username, userResponse.username)
         assertEquals(request.email, userResponse.email)
         assertNotNull(userResponse.id)
@@ -48,17 +50,19 @@ class AdminUserControllerIntegrationTests : AuthenticatableControllerTest() {
         val created = createTestUser()
 
         // Act
-        val result = mockMvc.get("$BASE_URI/${created.id}") {
-            with(adminAuth())
-        }
-            .andExpect { status { isOk() } }
-            .andReturn()
+        val result =
+            mockMvc
+                .get("$BASE_URI/${created.id}") {
+                    with(adminAuth())
+                }.andExpect { status { isOk() } }
+                .andReturn()
 
         // Assert
-        val userResponse = objectMapper.readValue(
-            result.response.contentAsByteArray,
-            UserResponse::class.java
-        )
+        val userResponse =
+            objectMapper.readValue(
+                result.response.contentAsByteArray,
+                UserResponse::class.java,
+            )
         assertEquals(created.id, userResponse.id)
         assertEquals(TestDataUtils.DEFAULT_USERNAME, userResponse.username)
     }
@@ -71,17 +75,19 @@ class AdminUserControllerIntegrationTests : AuthenticatableControllerTest() {
         createTestUser("test.user2")
 
         // Act
-        val uri = UriComponentsBuilder
-            .fromUriString(BASE_URI)
-            .queryParam("username", "user")
-            .build()
-            .toUri()
+        val uri =
+            UriComponentsBuilder
+                .fromUriString(BASE_URI)
+                .queryParam("username", "user")
+                .build()
+                .toUri()
 
-        val result = mockMvc.get(uri) {
-            with(adminAuth())
-        }
-            .andExpect { status { isOk() } }
-            .andReturn()
+        val result =
+            mockMvc
+                .get(uri) {
+                    with(adminAuth())
+                }.andExpect { status { isOk() } }
+                .andReturn()
 
         // Assert
         val page = objectMapper.readTree(result.response.contentAsByteArray)
@@ -93,32 +99,36 @@ class AdminUserControllerIntegrationTests : AuthenticatableControllerTest() {
     fun `update user should modify user data`() {
         // Arrange
         val created = createTestUser()
-        val updateRequest = UpdateUserRequest(
-            name = "Updated Name",
-            email = "updated.user@example.com",
-            username = "updated.user"
-        )
+        val updateRequest =
+            UpdateUserRequest(
+                name = "Updated Name",
+                email = "updated.user@example.com",
+                username = "updated.user",
+            )
 
         // Act
-        val uri = UriComponentsBuilder
-            .fromUriString(BASE_URI)
-            .pathSegment(created.id.toString())
-            .build()
-            .toUri()
+        val uri =
+            UriComponentsBuilder
+                .fromUriString(BASE_URI)
+                .pathSegment(created.id.toString())
+                .build()
+                .toUri()
 
-        val result = mockMvc.put(uri) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(updateRequest)
-            with(adminAuth())
-        }
-            .andExpect { status { isOk() } }
-            .andReturn()
+        val result =
+            mockMvc
+                .put(uri) {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(updateRequest)
+                    with(adminAuth())
+                }.andExpect { status { isOk() } }
+                .andReturn()
 
         // Assert
-        val userResponse = objectMapper.readValue(
-            result.response.contentAsByteArray,
-            UserResponse::class.java
-        )
+        val userResponse =
+            objectMapper.readValue(
+                result.response.contentAsByteArray,
+                UserResponse::class.java,
+            )
         assertEquals(updateRequest.name, userResponse.name)
         assertEquals(updateRequest.email, userResponse.email)
         assertEquals(updateRequest.username, userResponse.username)
@@ -128,20 +138,21 @@ class AdminUserControllerIntegrationTests : AuthenticatableControllerTest() {
     fun `create user with duplicate email should return Conflict`() {
         // Arrange
         createTestUser("dup.user")
-        val request = CreateUserRequest(
-            username = "other.user",
-            email = "dup.user@example.com",
-            name = "Other User",
-            password = TestDataUtils.DEFAULT_PASSWORD
-        )
+        val request =
+            CreateUserRequest(
+                username = "other.user",
+                email = "dup.user@example.com",
+                name = "Other User",
+                password = TestDataUtils.DEFAULT_PASSWORD,
+            )
 
         // Act & Assert
-        mockMvc.post(BASE_URI) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(request)
-            with(adminAuth())
-        }
-            .andExpect { status { isConflict() } }
+        mockMvc
+            .post(BASE_URI) {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsBytes(request)
+                with(adminAuth())
+            }.andExpect { status { isConflict() } }
     }
 
     @Test
@@ -150,18 +161,20 @@ class AdminUserControllerIntegrationTests : AuthenticatableControllerTest() {
         createTestUser("not.admin")
 
         // Act & Assert
-        mockMvc.get(BASE_URI) {
-            with(
-                SecurityMockMvcRequestPostProcessors
-                    .user("not.admin").roles(RoleEnum.ROLE_USER.shortName())
-            )
-        }
-            .andExpect { status { isForbidden() } }
+        mockMvc
+            .get(BASE_URI) {
+                with(
+                    SecurityMockMvcRequestPostProcessors
+                        .user("not.admin")
+                        .roles(RoleEnum.ROLE_USER.shortName()),
+                )
+            }.andExpect { status { isForbidden() } }
     }
 
-    private fun adminAuth() = SecurityMockMvcRequestPostProcessors
-        .user("admin")
-        .roles(RoleEnum.ROLE_ADMIN.shortName())
+    private fun adminAuth() =
+        SecurityMockMvcRequestPostProcessors
+            .user("admin")
+            .roles(RoleEnum.ROLE_ADMIN.shortName())
 
     companion object {
         private const val BASE_URI = "${ApiPaths.V1}${ApiPaths.ADMIN}${ApiPaths.USERS}"

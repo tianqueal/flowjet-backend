@@ -21,50 +21,42 @@ import java.time.Instant
 @Entity
 @Table(name = "projects")
 class ProjectEntity(
-  @field:Schema(description = "Unique identifier of the project", example = "1")
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long? = null,
-
-  @field:Schema(description = "Name of the project", example = "Project Alpha")
-  @Column(name = "name", nullable = false, length = 100)
-  var name: String,
-
-  @field:Schema(description = "Description of the project", example = "This is a sample project description.")
-  @Column(name = "description")
-  @Lob
-  var description: String? = null,
-
-  @field:Schema(description = "Status of the project")
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "project_status_id", nullable = false)
-  var projectStatus: ProjectStatusEntity,
-
-  @field:Schema(description = "User who created the project")
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  var projectOwner: UserEntity,
-
-  @field:Schema(description = "List of members in the project")
-  @OneToMany(
-    mappedBy = "project",
-    fetch = FetchType.LAZY,
-    cascade = [CascadeType.ALL],
-    orphanRemoval = true
-  )
-  var projectMembers: MutableSet<ProjectMemberEntity> = mutableSetOf(),
-
-  @field:Schema(description = "Creation timestamp of the project")
-  @CreationTimestamp
-  @Column(name = "created_at", nullable = false)
-  var createdAt: Instant = Instant.now(),
-
-  @field:Schema(description = "Last updated timestamp of the project")
-  @UpdateTimestamp
-  @Column(name = "updated_at", nullable = false)
-  var updatedAt: Instant = Instant.now(),
-
-  @field:Schema(description = "Deletion timestamp of the project, if deleted")
-  @Column(name = "deleted_at")
-  var deletedAt: Instant? = null,
+    @field:Schema(description = "Unique identifier of the project", example = "1")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null,
+    @field:Schema(description = "Name of the project", example = "Project Alpha")
+    @Column(name = "name", nullable = false, length = 100)
+    var name: String,
+    @field:Schema(description = "Description of the project", example = "This is a sample project description.")
+    @Column(name = "description")
+    @Lob
+    var description: String? = null,
+    @field:Schema(description = "Status of the project")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_status_id", nullable = false)
+    var projectStatus: ProjectStatusEntity,
+    @field:Schema(description = "User who created the project")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    var projectOwner: UserEntity,
+    @field:Schema(description = "List of members in the project")
+    @OneToMany(
+        mappedBy = "project",
+        fetch = FetchType.LAZY,
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true,
+    )
+    var projectMembers: MutableSet<ProjectMemberEntity> = mutableSetOf(),
+    @field:Schema(description = "Creation timestamp of the project")
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    var createdAt: Instant = Instant.now(),
+    @field:Schema(description = "Last updated timestamp of the project")
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    var updatedAt: Instant = Instant.now(),
+    @field:Schema(description = "Deletion timestamp of the project, if deleted")
+    @Column(name = "deleted_at")
+    var deletedAt: Instant? = null,
 )

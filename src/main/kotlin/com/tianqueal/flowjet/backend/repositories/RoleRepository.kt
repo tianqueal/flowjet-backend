@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface RoleRepository : CrudRepository<RoleEntity, Int> {
-  fun findAllByCodeIn(codes: Set<RoleEnum>): Set<RoleEntity>
+    fun findAllByCodeIn(codes: Set<RoleEnum>): Set<RoleEntity>
 }

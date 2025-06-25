@@ -11,20 +11,20 @@ import org.springframework.transaction.annotation.Transactional
 @Service(BeanNames.AUTHENTICATED_USER_SERVICE)
 @Transactional(readOnly = true)
 class AuthenticatedUserService(
-  private val userRepository: UserRepository,
+    private val userRepository: UserRepository,
 ) {
-  fun getAuthenticatedUserEntity(): UserEntity {
-    val username = AuthFunctions.getAuthenticatedUsername()
+    fun getAuthenticatedUserEntity(): UserEntity {
+        val username = AuthFunctions.getAuthenticatedUsername()
 
-    return userRepository.findByUsername(username)
-      ?: throw UserNotFoundException(username)
-  }
-
-  fun getAuthenticatedUserId(): Long {
-    val user = getAuthenticatedUserEntity()
-
-    return requireNotNull(user.id) {
-      "Authenticated user '${user.username}' has a null ID, which is not permitted."
+        return userRepository.findByUsername(username)
+            ?: throw UserNotFoundException(username)
     }
-  }
+
+    fun getAuthenticatedUserId(): Long {
+        val user = getAuthenticatedUserEntity()
+
+        return requireNotNull(user.id) {
+            "Authenticated user '${user.username}' has a null ID, which is not permitted."
+        }
+    }
 }

@@ -10,17 +10,17 @@ import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.reflect.KClass
 
 @Schema(
-  description = "Project description",
-  example = "This is a sample project description.",
-  maxLength = 1000,
-  nullable = true
+    description = "Project description",
+    example = "This is a sample project description.",
+    maxLength = 1000,
+    nullable = true,
 )
 @Size(max = 1000, message = ValidationMessageKeys.VALIDATION_PROJECT_DESCRIPTION_SIZE)
 @Constraint(validatedBy = [])
 @Target(FIELD)
 @Retention(RUNTIME)
 annotation class ProjectDescriptionConstraint(
-  val message: String = "Invalid project description",
-  val groups: Array<KClass<*>> = [],
-  val payload: Array<KClass<out Payload>> = [],
+    val message: String = "Invalid project description",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
 )

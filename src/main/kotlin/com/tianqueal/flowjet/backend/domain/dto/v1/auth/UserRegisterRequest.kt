@@ -10,15 +10,12 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Schema(description = "User registration request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserRegisterRequest(
-  @field:UserUsernameConstraint
-  val username: String,
-
-  @field:UserEmailConstraint
-  val email: String,
-
-  @field:UserNameConstraint
-  val name: String,
-
-  @field:UserPasswordConstraint
-  val password: String,
+    @field:UserUsernameConstraint
+    val username: String,
+    @field:UserEmailConstraint
+    val email: String,
+    @field:UserNameConstraint
+    val name: String,
+    @field:UserPasswordConstraint
+    val password: String,
 )

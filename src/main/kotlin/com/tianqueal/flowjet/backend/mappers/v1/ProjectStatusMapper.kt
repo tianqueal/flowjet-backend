@@ -6,9 +6,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProjectStatusMapper {
-  fun toDto(entity: ProjectStatusEntity): ProjectStatusResponse = ProjectStatusResponse(
-    id = entity.id ?: -1,
-    code = entity.code,
-    name = entity.name,
-  )
+    fun toDto(entity: ProjectStatusEntity): ProjectStatusResponse =
+        ProjectStatusResponse(
+            id = entity.id ?: -1,
+            code = entity.code,
+            name = entity.name,
+        )
 }

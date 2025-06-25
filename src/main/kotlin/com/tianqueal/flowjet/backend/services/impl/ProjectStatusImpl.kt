@@ -6,10 +6,11 @@ import com.tianqueal.flowjet.backend.repositories.ProjectStatusRepository
 import com.tianqueal.flowjet.backend.services.ProjectStatusService
 
 class ProjectStatusImpl(
-  private val projectStatusRepository: ProjectStatusRepository,
-  private val projectStatusMapper: ProjectStatusMapper,
+    private val projectStatusRepository: ProjectStatusRepository,
+    private val projectStatusMapper: ProjectStatusMapper,
 ) : ProjectStatusService {
-  override fun finAll(): List<ProjectStatusResponse> =
-    projectStatusRepository.findAll()
-      .map(projectStatusMapper::toDto)
+    override fun finAll(): List<ProjectStatusResponse> =
+        projectStatusRepository
+            .findAll()
+            .map(projectStatusMapper::toDto)
 }

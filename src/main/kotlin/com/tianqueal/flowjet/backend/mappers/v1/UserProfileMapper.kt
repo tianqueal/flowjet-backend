@@ -8,13 +8,15 @@ import org.springframework.stereotype.Component
 
 @Component
 class UserProfileMapper(
-  private val avatarService: AvatarService,
+    private val avatarService: AvatarService,
 ) {
-  fun toDto(entity: UserEntity): UserProfileResponse = UserProfileResponse(
-    id = entity.id ?: -1,
-    username = entity.username,
-    name = entity.name,
-    avatarUrl = entity.avatarUrl?.takeIf { it.isNotBlank() }
-      ?: avatarService.getAvatarUrl(entity.email, AvatarConstants.DEFAULT_SIZE)
-  )
+    fun toDto(entity: UserEntity): UserProfileResponse =
+        UserProfileResponse(
+            id = entity.id ?: -1,
+            username = entity.username,
+            name = entity.name,
+            avatarUrl =
+                entity.avatarUrl?.takeIf { it.isNotBlank() }
+                    ?: avatarService.getAvatarUrl(entity.email, AvatarConstants.DEFAULT_SIZE),
+        )
 }

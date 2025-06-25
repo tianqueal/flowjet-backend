@@ -6,8 +6,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class RoleMapper {
-  fun toDto(code: RoleEnum, name: String): RoleResponse = RoleResponse(
-    code = code,
-    name = name
-  )
+    fun toDto(
+        code: RoleEnum,
+        name: String,
+    ): RoleResponse =
+        RoleResponse(
+            code = code,
+            name = name,
+        )
 }

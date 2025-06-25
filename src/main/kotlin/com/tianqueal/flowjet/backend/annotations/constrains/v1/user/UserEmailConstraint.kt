@@ -8,15 +8,15 @@ import jakarta.validation.Payload
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.annotation.AnnotationRetention.RUNTIME
+import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.reflect.KClass
 
 @Schema(
-  description = "User email address",
-  example = "john.doe@example.com",
-  maxLength = 255,
-  requiredMode = RequiredMode.REQUIRED
+    description = "User email address",
+    example = "john.doe@example.com",
+    maxLength = 255,
+    requiredMode = RequiredMode.REQUIRED,
 )
 @NotBlank(message = ValidationMessageKeys.VALIDATION_USER_EMAIL_NOT_BLANK)
 @Email(message = ValidationMessageKeys.VALIDATION_USER_EMAIL_INVALID)
@@ -25,7 +25,7 @@ import kotlin.reflect.KClass
 @Target(FIELD)
 @Retention(RUNTIME)
 annotation class UserEmailConstraint(
-  val message: String = "Invalid email address",
-  val groups: Array<KClass<*>> = [],
-  val payload: Array<KClass<out Payload>> = [],
+    val message: String = "Invalid email address",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
 )

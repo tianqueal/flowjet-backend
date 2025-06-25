@@ -6,11 +6,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProjectMemberMapper(
-  private val userProfileMapper: UserProfileMapper,
+    private val userProfileMapper: UserProfileMapper,
 ) {
-  fun toDto(entity: ProjectMemberEntity): ProjectMemberResponse = ProjectMemberResponse(
-    member = userProfileMapper.toDto(entity.user),
-    memberRole = entity.memberRole.code,
-    memberSince = entity.createdAt
-  )
+    fun toDto(entity: ProjectMemberEntity): ProjectMemberResponse =
+        ProjectMemberResponse(
+            member = userProfileMapper.toDto(entity.user),
+            memberRole = entity.memberRole.code,
+            memberSince = entity.createdAt,
+        )
 }

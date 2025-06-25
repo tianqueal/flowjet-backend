@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @PreAuthorize("isAuthenticated()")
 @SecurityRequirement(name = SecurityConstants.SECURITY_SCHEME_BEARER)
 @Tag(
-  name = "User Profile resource",
-  description = "Endpoints for managing user profiles",
+    name = "User Profile resource",
+    description = "Endpoints for managing user profiles",
 )
 class UserProfileController

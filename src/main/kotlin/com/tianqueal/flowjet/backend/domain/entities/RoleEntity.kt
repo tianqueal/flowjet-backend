@@ -15,17 +15,15 @@ import jakarta.persistence.Table
 @Entity
 @Table(name = "roles")
 class RoleEntity(
-  @field:Schema(description = "Unique identifier of the role")
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Int? = null,
-
-  @field:Schema(description = "Unique code of the role")
-  @Column(name = "code", nullable = false, unique = true, length = 32)
-  @Enumerated(EnumType.STRING)
-  var code: RoleEnum,
-
-  @field:Schema(description = "Name of the role")
-  @Column(name = "name", nullable = false, length = 64)
-  var name: String,
+    @field:Schema(description = "Unique identifier of the role")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Int? = null,
+    @field:Schema(description = "Unique code of the role")
+    @Column(name = "code", nullable = false, unique = true, length = 32)
+    @Enumerated(EnumType.STRING)
+    var code: RoleEnum,
+    @field:Schema(description = "Name of the role")
+    @Column(name = "name", nullable = false, length = 64)
+    var name: String,
 )

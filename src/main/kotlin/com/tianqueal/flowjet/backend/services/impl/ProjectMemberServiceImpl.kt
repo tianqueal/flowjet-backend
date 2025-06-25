@@ -13,21 +13,25 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class ProjectMemberServiceImpl(
-  private val projectMemberRepository: ProjectMemberRepository,
-  private val projectMemberMapper: ProjectMemberMapper,
+    private val projectMemberRepository: ProjectMemberRepository,
+    private val projectMemberMapper: ProjectMemberMapper,
 ) : ProjectMemberService {
-  @Transactional(readOnly = true)
-  override fun findAll(
-    projectId: Long,
-    memberRoleId: Int?,
-    username: String?,
-    pageable: Pageable,
-  ): Page<ProjectMemberResponse> = projectMemberRepository.findAll(
-    ProjectMemberSpecification.filterBy(projectId, memberRoleId, username),
-    pageable
-  ).map(projectMemberMapper::toDto)
+    @Transactional(readOnly = true)
+    override fun findAll(
+        projectId: Long,
+        memberRoleId: Int?,
+        username: String?,
+        pageable: Pageable,
+    ): Page<ProjectMemberResponse> =
+        projectMemberRepository
+            .findAll(
+                ProjectMemberSpecification.filterBy(projectId, memberRoleId, username),
+                pageable,
+            ).map(projectMemberMapper::toDto)
 
-  @Transactional(readOnly = true)
-  override fun isMember(projectId: Long, userId: Long): Boolean =
-    projectMemberRepository.isMember(projectId, userId)
+    @Transactional(readOnly = true)
+    override fun isMember(
+        projectId: Long,
+        userId: Long,
+    ): Boolean = projectMemberRepository.isMember(projectId, userId)
 }

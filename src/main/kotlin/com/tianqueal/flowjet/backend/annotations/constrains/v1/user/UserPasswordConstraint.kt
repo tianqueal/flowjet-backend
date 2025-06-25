@@ -14,24 +14,24 @@ import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.reflect.KClass
 
 @Schema(
-  description = "Password for the user",
-  example = "SecureP@ssw0rd",
-  minLength = 8,
-  maxLength = 64,
-  pattern = ValidationPatterns.PASSWORD,
-  requiredMode = RequiredMode.REQUIRED
+    description = "Password for the user",
+    example = "SecureP@ssw0rd",
+    minLength = 8,
+    maxLength = 64,
+    pattern = ValidationPatterns.PASSWORD,
+    requiredMode = RequiredMode.REQUIRED,
 )
 @NotBlank(message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_NOT_BLANK)
 @Size(min = 8, max = 64, message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_SIZE)
 @Pattern(
-  regexp = ValidationPatterns.PASSWORD,
-  message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_PATTERN
+    regexp = ValidationPatterns.PASSWORD,
+    message = ValidationMessageKeys.VALIDATION_USER_PASSWORD_PATTERN,
 )
 @Constraint(validatedBy = [])
 @Target(FIELD)
 @Retention(RUNTIME)
 annotation class UserPasswordConstraint(
-  val message: String = "Invalid password",
-  val groups: Array<KClass<*>> = [],
-  val payload: Array<KClass<out Payload>> = [],
+    val message: String = "Invalid password",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
 )

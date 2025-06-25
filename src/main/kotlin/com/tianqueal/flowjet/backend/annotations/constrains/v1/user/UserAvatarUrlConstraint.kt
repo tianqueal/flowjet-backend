@@ -11,10 +11,10 @@ import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.reflect.KClass
 
 @Schema(
-  description = "URL of the user's avatar image",
-  example = "https://example.com/avatar.jpg",
-  maxLength = 255,
-  nullable = true
+    description = "URL of the user's avatar image",
+    example = "https://example.com/avatar.jpg",
+    maxLength = 255,
+    nullable = true,
 )
 @Size(max = 255, message = ValidationMessageKeys.VALIDATION_USER_AVATAR_URL_SIZE)
 @URL(message = ValidationMessageKeys.VALIDATION_USER_AVATAR_URL_INVALID)
@@ -22,7 +22,7 @@ import kotlin.reflect.KClass
 @Target(FIELD)
 @Retention(RUNTIME)
 annotation class UserAvatarUrlConstraint(
-  val message: String = "Invalid avatar URL",
-  val groups: Array<KClass<*>> = [],
-  val payload: Array<KClass<out Payload>> = [],
+    val message: String = "Invalid avatar URL",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
 )

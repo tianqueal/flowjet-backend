@@ -12,10 +12,10 @@ import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.reflect.KClass
 
 @Schema(
-  description = "Project name",
-  example = "My Project",
-  maxLength = 100,
-  requiredMode = RequiredMode.REQUIRED
+    description = "Project name",
+    example = "My Project",
+    maxLength = 100,
+    requiredMode = RequiredMode.REQUIRED,
 )
 @NotBlank(message = ValidationMessageKeys.VALIDATION_PROJECT_NAME_NOT_BLANK)
 @Size(max = 100, message = ValidationMessageKeys.VALIDATION_PROJECT_NAME_SIZE)
@@ -23,7 +23,7 @@ import kotlin.reflect.KClass
 @Target(FIELD)
 @Retention(RUNTIME)
 annotation class ProjectNameConstraint(
-  val message: String = "Invalid project name",
-  val groups: Array<KClass<*>> = [],
-  val payload: Array<KClass<out Payload>> = [],
+    val message: String = "Invalid project name",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
 )

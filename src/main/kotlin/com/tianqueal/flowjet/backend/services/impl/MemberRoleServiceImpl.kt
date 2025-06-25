@@ -6,10 +6,11 @@ import com.tianqueal.flowjet.backend.repositories.MemberRoleRepository
 import com.tianqueal.flowjet.backend.services.MemberRoleService
 
 class MemberRoleServiceImpl(
-  private val memberRoleRepository: MemberRoleRepository,
-  private val memberRoleMapper: MemberRoleMapper,
+    private val memberRoleRepository: MemberRoleRepository,
+    private val memberRoleMapper: MemberRoleMapper,
 ) : MemberRoleService {
-  override fun findAll(): List<MemberRoleResponse> =
-    memberRoleRepository.findAll()
-      .map(memberRoleMapper::toDto)
+    override fun findAll(): List<MemberRoleResponse> =
+        memberRoleRepository
+            .findAll()
+            .map(memberRoleMapper::toDto)
 }

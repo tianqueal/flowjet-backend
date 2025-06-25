@@ -14,24 +14,24 @@ import kotlin.annotation.AnnotationTarget.FIELD
 import kotlin.reflect.KClass
 
 @Schema(
-  description = "Full name of the user",
-  example = "John Doe",
-  minLength = 3,
-  maxLength = 100,
-  pattern = ValidationPatterns.NAME,
-  requiredMode = RequiredMode.REQUIRED
+    description = "Full name of the user",
+    example = "John Doe",
+    minLength = 3,
+    maxLength = 100,
+    pattern = ValidationPatterns.NAME,
+    requiredMode = RequiredMode.REQUIRED,
 )
 @NotBlank(message = ValidationMessageKeys.VALIDATION_USER_NAME_NOT_BLANK)
 @Size(min = 3, max = 100, message = ValidationMessageKeys.VALIDATION_USER_NAME_SIZE)
 @Pattern(
-  regexp = ValidationPatterns.NAME,
-  message = ValidationMessageKeys.VALIDATION_USER_NAME_PATTERN
+    regexp = ValidationPatterns.NAME,
+    message = ValidationMessageKeys.VALIDATION_USER_NAME_PATTERN,
 )
 @Constraint(validatedBy = [])
 @Target(FIELD)
 @Retention(RUNTIME)
 annotation class UserNameConstraint(
-  val message: String = "Invalid user name",
-  val groups: Array<KClass<*>> = [],
-  val payload: Array<KClass<out Payload>> = [],
+    val message: String = "Invalid user name",
+    val groups: Array<KClass<*>> = [],
+    val payload: Array<KClass<out Payload>> = [],
 )

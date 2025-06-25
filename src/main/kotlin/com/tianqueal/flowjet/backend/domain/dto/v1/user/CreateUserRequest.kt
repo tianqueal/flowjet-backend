@@ -11,18 +11,14 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Schema(description = "DTO for creating a new user")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CreateUserRequest(
-  @field:UserUsernameConstraint
-  val username: String,
-
-  @field:UserEmailConstraint
-  val email: String,
-
-  @field:UserNameConstraint
-  val name: String,
-
-  @field:UserPasswordConstraint
-  val password: String,
-
-  @field:UserAvatarUrlConstraint
-  val avatarUrl: String? = null,
+    @field:UserUsernameConstraint
+    val username: String,
+    @field:UserEmailConstraint
+    val email: String,
+    @field:UserNameConstraint
+    val name: String,
+    @field:UserPasswordConstraint
+    val password: String,
+    @field:UserAvatarUrlConstraint
+    val avatarUrl: String? = null,
 )

@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ProjectRepository : JpaRepository<ProjectEntity, Long>, JpaSpecificationExecutor<ProjectEntity>
+interface ProjectRepository :
+    JpaRepository<ProjectEntity, Long>,
+    JpaSpecificationExecutor<ProjectEntity>

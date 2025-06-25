@@ -12,25 +12,20 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode
 @Schema(description = "DTO for creating a new admin user")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CreateAdminUserRequest(
-  @field:UserUsernameConstraint
-  val username: String,
-
-  @field:UserEmailConstraint
-  val email: String,
-
-  @field:UserNameConstraint
-  val name: String,
-
-  @field:UserPasswordConstraint
-  val password: String,
-
-  @field:UserAvatarUrlConstraint
-  val avatarUrl: String? = null,
-
-  @field:Schema(
-    description = "Indicates whether the user is verified",
-    defaultValue = "false",
-    requiredMode = RequiredMode.NOT_REQUIRED
-  )
-  val isVerified: Boolean? = false
+    @field:UserUsernameConstraint
+    val username: String,
+    @field:UserEmailConstraint
+    val email: String,
+    @field:UserNameConstraint
+    val name: String,
+    @field:UserPasswordConstraint
+    val password: String,
+    @field:UserAvatarUrlConstraint
+    val avatarUrl: String? = null,
+    @field:Schema(
+        description = "Indicates whether the user is verified",
+        defaultValue = "false",
+        requiredMode = RequiredMode.NOT_REQUIRED,
+    )
+    val isVerified: Boolean? = false,
 )

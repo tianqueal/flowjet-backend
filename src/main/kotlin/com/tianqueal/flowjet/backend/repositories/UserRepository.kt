@@ -9,28 +9,37 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
 @Repository
-interface UserRepository : JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
-  fun findByEmail(email: String): UserEntity?
-  fun findByUsername(username: String): UserEntity?
-  fun findByUsernameOrEmail(username: String, email: String): UserEntity?
-  fun existsByUsername(username: String): Boolean
-  fun existsByEmail(email: String): Boolean
+interface UserRepository :
+    JpaRepository<UserEntity, Long>,
+    JpaSpecificationExecutor<UserEntity> {
+    fun findByEmail(email: String): UserEntity?
 
-  // @Modifying
-  // @Transactional
-  // @Query(value = "DELETE FROM users WHERE id = :id", nativeQuery = true)
-  // fun hardDeleteById(id: Long)
+    fun findByUsername(username: String): UserEntity?
 
-  @Modifying
-  @Transactional
-  @Query(value = "DELETE FROM users", nativeQuery = true)
-  fun hardDeleteAll()
+    fun findByUsernameOrEmail(
+        username: String,
+        email: String,
+    ): UserEntity?
 
-  // @Transactional(readOnly = true)
-  // @Query(value = "SELECT u FROM UserEntity u WHERE u.deletedAt IS NOT NULL")
-  // fun findAllDeleted(): Set<UserEntity>
+    fun existsByUsername(username: String): Boolean
 
-  // @Transactional(readOnly = true)
-  // @Query(value = "SELECT u FROM UserEntity u WHERE u.id = :id")
-  // fun findByIdIncludingDeleted(id: Long): UserEntity?
+    fun existsByEmail(email: String): Boolean
+
+    // @Modifying
+    // @Transactional
+    // @Query(value = "DELETE FROM users WHERE id = :id", nativeQuery = true)
+    // fun hardDeleteById(id: Long)
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM users", nativeQuery = true)
+    fun hardDeleteAll()
+
+    // @Transactional(readOnly = true)
+    // @Query(value = "SELECT u FROM UserEntity u WHERE u.deletedAt IS NOT NULL")
+    // fun findAllDeleted(): Set<UserEntity>
+
+    // @Transactional(readOnly = true)
+    // @Query(value = "SELECT u FROM UserEntity u WHERE u.id = :id")
+    // fun findByIdIncludingDeleted(id: Long): UserEntity?
 }

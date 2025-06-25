@@ -7,6 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Schema(description = "Request to reset user password")
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PasswordResetRequest(
-  @field:UserEmailConstraint
-  val email: String,
+    @field:UserEmailConstraint
+    val email: String,
 )

@@ -7,7 +7,6 @@ import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.SecurityConstants
 import com.tianqueal.flowjet.backend.utils.functions.AuthFunctions
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -18,39 +17,41 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
 
 @RestController
 @RequestMapping("${ApiPaths.V1}${ApiPaths.USERS_ME}")
 @PreAuthorize("isAuthenticated()")
 @SecurityRequirement(name = SecurityConstants.SECURITY_SCHEME_BEARER)
 @Tag(
-  name = "Current User Management",
-  description = "Endpoints for managing the current user's profile"
+    name = "Current User Management",
+    description = "Endpoints for managing the current user's profile",
 )
 class UserMeController(
-  private val userService: UserService,
+    private val userService: UserService,
 ) {
-  @Operation(
-    summary = "Get current authenticated user's details",
-    description = "Retrieves the profile information of the currently logged-in user."
-  )
-  @GetMapping
-  fun getCurrentUser(): ResponseEntity<UserResponse> {
-    val username = AuthFunctions.getAuthenticatedUsername()
-    val currentUser = userService.findByUsername(username)
-    return ResponseEntity.ok(currentUser)
-  }
+    @Operation(
+        summary = "Get current authenticated user's details",
+        description = "Retrieves the profile information of the currently logged-in user.",
+    )
+    @GetMapping
+    fun getCurrentUser(): ResponseEntity<UserResponse> {
+        val username = AuthFunctions.getAuthenticatedUsername()
+        val currentUser = userService.findByUsername(username)
+        return ResponseEntity.ok(currentUser)
+    }
 
-  @Operation(
-    summary = "Update current user's profile",
-    description = "Updates the profile information of the currently logged-in user."
-  )
-  @PutMapping
-  fun updateCurrentUser(
-    @SwaggerRequestBody(description = "Updated user data")
-    @Valid @RequestBody updateUserProfileRequest: UpdateUserProfileRequest,
-  ): ResponseEntity<UserResponse> {
-    val updatedUser = userService.updateProfile(updateUserProfileRequest)
-    return ResponseEntity.ok(updatedUser)
-  }
+    @Operation(
+        summary = "Update current user's profile",
+        description = "Updates the profile information of the currently logged-in user.",
+    )
+    @PutMapping
+    fun updateCurrentUser(
+        @SwaggerRequestBody(description = "Updated user data")
+        @Valid
+        @RequestBody updateUserProfileRequest: UpdateUserProfileRequest,
+    ): ResponseEntity<UserResponse> {
+        val updatedUser = userService.updateProfile(updateUserProfileRequest)
+        return ResponseEntity.ok(updatedUser)
+    }
 }

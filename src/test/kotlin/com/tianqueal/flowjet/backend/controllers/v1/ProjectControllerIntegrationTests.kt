@@ -20,514 +20,549 @@ import org.springframework.test.web.servlet.put
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class ProjectControllerIntegrationTests @Autowired constructor(
-    private val projectRepository: ProjectRepository,
-    private val projectService: ProjectService,
-) : AuthenticatableControllerTest() {
-    @BeforeEach
-    fun setUp() {
-        super.baseSetUp()
-        projectRepository.deleteAll()
-    }
-
-    @Test
-    fun `getAllProjects with valid token should return OK and paginated projects`() {
-        // Arrange
-        val (user, token) = createTestUserAndGetToken()
-
-        listOf("Project Alpha", "Project Beta").forEach {
-            projectService.create(
-                userId = user.id,
-                createProjectRequest = TestDataUtils.createTestProjectRequest(it)
-            )
+class ProjectControllerIntegrationTests
+    @Autowired
+    constructor(
+        private val projectRepository: ProjectRepository,
+        private val projectService: ProjectService,
+    ) : AuthenticatableControllerTest() {
+        @BeforeEach
+        fun setUp() {
+            super.baseSetUp()
+            projectRepository.deleteAll()
         }
 
-        // Act
-        val result = mockMvc.get(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, token)
-        }
-            .andExpect { status { isOk() } }
-            .andReturn()
+        @Test
+        fun `getAllProjects with valid token should return OK and paginated projects`() {
+            // Arrange
+            val (user, token) = createTestUserAndGetToken()
 
-        // Assert
-        val responseContent = result.response.contentAsString
-        assertTrue(responseContent.contains("Project Alpha"), "Response should contain 'Project Alpha'")
-        assertTrue(responseContent.contains("Project Beta"), "Response should contain 'Project Beta'")
-        assertTrue(responseContent.contains("\"totalElements\""), "Response should contain total elements")
-        assertTrue(responseContent.contains("\"content\""), "Response should contain project content")
-    }
+            listOf("Project Alpha", "Project Beta").forEach {
+                projectService.create(
+                    userId = user.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest(it),
+                )
+            }
 
-    @Test
-    fun `getAllProjects without token should return Unauthorized`() {
-        // Arrange - No token provided
+            // Act
+            val result =
+                mockMvc
+                    .get(PROJECTS_URI) {
+                        header(HttpHeaders.AUTHORIZATION, token)
+                    }.andExpect { status { isOk() } }
+                    .andReturn()
 
-        // Act & Assert
-        mockMvc.get(PROJECTS_URI)
-            .andExpect { status { isUnauthorized() } }
-    }
-
-    @Test
-    fun `getAllProjects should return only owned projects`() {
-        // Arrange
-        val (user1, user2, user3) = createMultipleTestUsersAndGetTokens(3)
-
-        // Create project
-        listOf(user1, user2).forEach {
-            projectService.create(
-                userId = it.first.id,
-                createProjectRequest = TestDataUtils.createTestProjectRequest("${it.first.username} Project")
-            )
+            // Assert
+            val responseContent = result.response.contentAsString
+            assertTrue(responseContent.contains("Project Alpha"), "Response should contain 'Project Alpha'")
+            assertTrue(responseContent.contains("Project Beta"), "Response should contain 'Project Beta'")
+            assertTrue(responseContent.contains("\"totalElements\""), "Response should contain total elements")
+            assertTrue(responseContent.contains("\"content\""), "Response should contain project content")
         }
 
-        // Act
-        val result = mockMvc.get(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, user3.second)
-        }
-            .andExpect { status { isOk() } }
-            .andReturn()
+        @Test
+        fun `getAllProjects without token should return Unauthorized`() {
+            // Arrange - No token provided
 
-        // Assert - member should not see the owned project
-        val responseContent = result.response.contentAsString
-        assertTrue(responseContent.contains("\"totalElements\":0"))
-    }
-
-    @Test
-    fun `getAllProjects with name filter should return filtered results`() {
-        // Arrange
-        val (user, token) = createTestUserAndGetToken()
-
-        listOf("Alpha Project", "Beta Project", "Gamma Task").forEach {
-            projectService.create(
-                userId = user.id,
-                createProjectRequest = TestDataUtils.createTestProjectRequest(it)
-            )
+            // Act & Assert
+            mockMvc
+                .get(PROJECTS_URI)
+                .andExpect { status { isUnauthorized() } }
         }
 
-        // Act
-        val result = mockMvc.get(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, token)
-            param("name", "Project")
-        }
-            .andExpect { status { isOk() } }
-            .andReturn()
+        @Test
+        fun `getAllProjects should return only owned projects`() {
+            // Arrange
+            val (user1, user2, user3) = createMultipleTestUsersAndGetTokens(3)
 
-        // Assert
-        val responseContent = result.response.contentAsString
-        assertTrue(responseContent.contains("Alpha Project"))
-        assertTrue(responseContent.contains("Beta Project"))
-        assertThat(responseContent).doesNotContain("Gamma Task")
-    }
+            // Create project
+            listOf(user1, user2).forEach {
+                projectService.create(
+                    userId = it.first.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest("${it.first.username} Project"),
+                )
+            }
 
-    @Test
-    fun `getAllProjects with pagination should respect page parameters`() {
-        // Arrange
-        val (user, token) = createTestUserAndGetToken()
+            // Act
+            val result =
+                mockMvc
+                    .get(PROJECTS_URI) {
+                        header(HttpHeaders.AUTHORIZATION, user3.second)
+                    }.andExpect { status { isOk() } }
+                    .andReturn()
 
-        // Create 5 projects
-        repeat(5) { index ->
-            projectService.create(
-                userId = user.id,
-                createProjectRequest = TestDataUtils.createTestProjectRequest("Project $index")
-            )
+            // Assert - member should not see the owned project
+            val responseContent = result.response.contentAsString
+            assertTrue(responseContent.contains("\"totalElements\":0"))
         }
 
-        // Act
-        val result = mockMvc.get(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, token)
-            param("p", "0")
-            param("s", "2")
+        @Test
+        fun `getAllProjects with name filter should return filtered results`() {
+            // Arrange
+            val (user, token) = createTestUserAndGetToken()
+
+            listOf("Alpha Project", "Beta Project", "Gamma Task").forEach {
+                projectService.create(
+                    userId = user.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest(it),
+                )
+            }
+
+            // Act
+            val result =
+                mockMvc
+                    .get(PROJECTS_URI) {
+                        header(HttpHeaders.AUTHORIZATION, token)
+                        param("name", "Project")
+                    }.andExpect { status { isOk() } }
+                    .andReturn()
+
+            // Assert
+            val responseContent = result.response.contentAsString
+            assertTrue(responseContent.contains("Alpha Project"))
+            assertTrue(responseContent.contains("Beta Project"))
+            assertThat(responseContent).doesNotContain("Gamma Task")
         }
-            .andExpect { status { isOk() } }
-            .andReturn()
 
-        // Assert
-        val responseContent = result.response.contentAsString
-        assertTrue(responseContent.contains("\"size\":2"), "Response should contain page size 2")
-        assertTrue(responseContent.contains("\"totalElements\":5"), "Response should contain total elements 5")
-    }
+        @Test
+        fun `getAllProjects with pagination should respect page parameters`() {
+            // Arrange
+            val (user, token) = createTestUserAndGetToken()
 
-    @Test
-    fun `getProjectById with valid ID and permission should return project`() {
-        // Arrange
-        val (user, token) = createTestUserAndGetToken()
+            // Create 5 projects
+            repeat(5) { index ->
+                projectService.create(
+                    userId = user.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest("Project $index"),
+                )
+            }
 
-        val project = projectService.create(
-            userId = user.id,
-            createProjectRequest = TestDataUtils.createTestProjectRequest()
-        )
+            // Act
+            val result =
+                mockMvc
+                    .get(PROJECTS_URI) {
+                        header(HttpHeaders.AUTHORIZATION, token)
+                        param("p", "0")
+                        param("s", "2")
+                    }.andExpect { status { isOk() } }
+                    .andReturn()
 
-        // Act
-        val result = mockMvc.get("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, token)
+            // Assert
+            val responseContent = result.response.contentAsString
+            assertTrue(responseContent.contains("\"size\":2"), "Response should contain page size 2")
+            assertTrue(responseContent.contains("\"totalElements\":5"), "Response should contain total elements 5")
         }
-            .andExpect { status { isOk() } }
-            .andReturn()
 
-        // Assert
-        val projectResponse = objectMapper.readValue(
-            result.response.contentAsByteArray,
-            ProjectResponse::class.java
-        )
-        assertEquals(project.id, projectResponse.id)
-        assertEquals(project.name, projectResponse.name)
-    }
+        @Test
+        fun `getProjectById with valid ID and permission should return project`() {
+            // Arrange
+            val (user, token) = createTestUserAndGetToken()
 
-    @Test
-    fun `getProjectById with invalid ID should return NotFound`() {
-        // Arrange
-        val (_, token) = createTestUserAndGetToken()
-        val nonExistentId = 99999L
+            val project =
+                projectService.create(
+                    userId = user.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest(),
+                )
 
-        // Act & Assert
-        mockMvc.get("$PROJECTS_URI/$nonExistentId") {
-            header(HttpHeaders.AUTHORIZATION, token)
+            // Act
+            val result =
+                mockMvc
+                    .get("$PROJECTS_URI/${project.id}") {
+                        header(HttpHeaders.AUTHORIZATION, token)
+                    }.andExpect { status { isOk() } }
+                    .andReturn()
+
+            // Assert
+            val projectResponse =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    ProjectResponse::class.java,
+                )
+            assertEquals(project.id, projectResponse.id)
+            assertEquals(project.name, projectResponse.name)
         }
-            .andExpect { status { isNotFound() } }
-    }
 
-    @Test
-    fun `getProjectById without permission should return Forbidden`() {
-        // Arrange
-        val user1 = createTestUser("test.user1")
-        val (_, token) = createTestUserAndGetToken("test.user2")
+        @Test
+        fun `getProjectById with invalid ID should return NotFound`() {
+            // Arrange
+            val (_, token) = createTestUserAndGetToken()
+            val nonExistentId = 99999L
 
-        val project = projectService.create(
-            userId = user1.id,
-            createProjectRequest = TestDataUtils.createTestProjectRequest()
-        )
-
-        // Act & Assert
-        mockMvc.get("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, token)
+            // Act & Assert
+            mockMvc
+                .get("$PROJECTS_URI/$nonExistentId") {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                }.andExpect { status { isNotFound() } }
         }
-            .andExpect { status { isForbidden() } }
-    }
 
-    @Test
-    fun `getProjectById without token should return Unauthorized`() {
-        // Arrange
-        val user = createTestUser()
-        val project = projectService.create(
-            userId = user.id,
-            TestDataUtils.createTestProjectRequest()
-        )
+        @Test
+        fun `getProjectById without permission should return Forbidden`() {
+            // Arrange
+            val user1 = createTestUser("test.user1")
+            val (_, token) = createTestUserAndGetToken("test.user2")
 
-        // Act & Assert
-        mockMvc.get("$PROJECTS_URI/${project.id}")
-            .andExpect { status { isUnauthorized() } }
-    }
+            val project =
+                projectService.create(
+                    userId = user1.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest(),
+                )
 
-    @Test
-    fun `createProject with valid data should return Created with Location header`() {
-        // Arrange
-        val (_, token) = createTestUserAndGetToken()
-        val createRequest = TestDataUtils.createTestProjectRequest()
-
-        // Act
-        val result = mockMvc.post(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, token)
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(createRequest)
+            // Act & Assert
+            mockMvc
+                .get("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                }.andExpect { status { isForbidden() } }
         }
-            .andExpect { status { isCreated() } }
-            .andReturn()
 
-        // Assert
-        val locationHeader = result.response.getHeader(HttpHeaders.LOCATION)
-        assertThat(locationHeader).isNotNull
-        assertThat(locationHeader).contains(PROJECTS_URI)
+        @Test
+        fun `getProjectById without token should return Unauthorized`() {
+            // Arrange
+            val user = createTestUser()
+            val project =
+                projectService.create(
+                    userId = user.id,
+                    TestDataUtils.createTestProjectRequest(),
+                )
 
-        val projectResponse = objectMapper.readValue(
-            result.response.contentAsByteArray,
-            ProjectResponse::class.java
-        )
-        assertEquals(createRequest.name, projectResponse.name)
-        assertEquals(createRequest.description, projectResponse.description)
-    }
-
-    @Test
-    fun `createProject with invalid data should return BadRequest`() {
-        // Arrange
-        val (_, token) = createTestUserAndGetToken()
-
-        val invalidRequest = CreateProjectRequest(
-            name = "", // Invalid: empty name
-            description = null,
-            projectStatusId = -1 // Invalid: negative ID
-        )
-
-        // Act & Assert
-        mockMvc.post(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, token)
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(invalidRequest)
+            // Act & Assert
+            mockMvc
+                .get("$PROJECTS_URI/${project.id}")
+                .andExpect { status { isUnauthorized() } }
         }
-            .andExpect { status { isBadRequest() } }
-    }
 
-    @Test
-    fun `createProject without token should return Unauthorized`() {
-        // Arrange
-        val createRequest = TestDataUtils.createTestProjectRequest()
+        @Test
+        fun `createProject with valid data should return Created with Location header`() {
+            // Arrange
+            val (_, token) = createTestUserAndGetToken()
+            val createRequest = TestDataUtils.createTestProjectRequest()
 
-        // Act & Assert
-        mockMvc.post(PROJECTS_URI) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(createRequest)
+            // Act
+            val result =
+                mockMvc
+                    .post(PROJECTS_URI) {
+                        header(HttpHeaders.AUTHORIZATION, token)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = objectMapper.writeValueAsBytes(createRequest)
+                    }.andExpect { status { isCreated() } }
+                    .andReturn()
+
+            // Assert
+            val locationHeader = result.response.getHeader(HttpHeaders.LOCATION)
+            assertThat(locationHeader).isNotNull
+            assertThat(locationHeader).contains(PROJECTS_URI)
+
+            val projectResponse =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    ProjectResponse::class.java,
+                )
+            assertEquals(createRequest.name, projectResponse.name)
+            assertEquals(createRequest.description, projectResponse.description)
         }
-            .andExpect { status { isUnauthorized() } }
-    }
 
-    @Test
-    fun `createProject with malformed JSON should return BadRequest`() {
-        // Arrange
-        val (_, token) = createTestUserAndGetToken()
-        val malformedJson = """{"name": "Test", "invalid": }"""
+        @Test
+        fun `createProject with invalid data should return BadRequest`() {
+            // Arrange
+            val (_, token) = createTestUserAndGetToken()
 
-        // Act & Assert
-        mockMvc.post(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, token)
-            contentType = MediaType.APPLICATION_JSON
-            content = malformedJson
+            val invalidRequest =
+                CreateProjectRequest(
+                    name = "", // Invalid: empty name
+                    description = null,
+                    projectStatusId = -1, // Invalid: negative ID
+                )
+
+            // Act & Assert
+            mockMvc
+                .post(PROJECTS_URI) {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(invalidRequest)
+                }.andExpect { status { isBadRequest() } }
         }
-            .andExpect { status { isBadRequest() } }
-    }
 
-    @Test
-    fun `updateProject with valid data and ownership should return updated project`() {
-        // Arrange
-        val (user, token) = createTestUserAndGetToken()
+        @Test
+        fun `createProject without token should return Unauthorized`() {
+            // Arrange
+            val createRequest = TestDataUtils.createTestProjectRequest()
 
-        val project = projectService.create(
-            userId = user.id,
-            createProjectRequest = TestDataUtils.createTestProjectRequest("Original Name")
-        )
-
-        val updateRequest = UpdateProjectRequest(
-            name = "Updated Name",
-            description = "Updated Description",
-            projectStatusId = 1
-        )
-
-        // Act
-        val result = mockMvc.put("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, token)
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(updateRequest)
+            // Act & Assert
+            mockMvc
+                .post(PROJECTS_URI) {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(createRequest)
+                }.andExpect { status { isUnauthorized() } }
         }
-            .andExpect { status { isOk() } }
-            .andReturn()
 
-        // Assert
-        val updatedProject = objectMapper.readValue(
-            result.response.contentAsByteArray,
-            ProjectResponse::class.java
-        )
-        assertEquals(updateRequest.name, updatedProject.name)
-        assertEquals(updateRequest.description, updatedProject.description)
-    }
+        @Test
+        fun `createProject with malformed JSON should return BadRequest`() {
+            // Arrange
+            val (_, token) = createTestUserAndGetToken()
+            val malformedJson = """{"name": "Test", "invalid": }"""
 
-    @Test
-    fun `updateProject with invalid ID should return NotFound`() {
-        // Arrange
-        val (_, token) = createTestUserAndGetToken()
-        val nonExistentId = 99999L
-
-        val updateRequest = UpdateProjectRequest(
-            name = "Updated Name",
-            description = "Updated Description",
-            projectStatusId = 1
-        )
-
-        // Act & Assert
-        mockMvc.put("$PROJECTS_URI/$nonExistentId") {
-            header(HttpHeaders.AUTHORIZATION, token)
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(updateRequest)
+            // Act & Assert
+            mockMvc
+                .post(PROJECTS_URI) {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                    contentType = MediaType.APPLICATION_JSON
+                    content = malformedJson
+                }.andExpect { status { isBadRequest() } }
         }
-            .andExpect { status { isNotFound() } }
-    }
 
-    @Test
-    fun `updateProject without ownership should return Forbidden`() {
-        // Arrange
-        val (user1, user2) = createMultipleTestUsersAndGetTokens(2)
+        @Test
+        fun `updateProject with valid data and ownership should return updated project`() {
+            // Arrange
+            val (user, token) = createTestUserAndGetToken()
 
-        val project = projectService.create(
-            userId = user1.first.id,
-            TestDataUtils.createTestProjectRequest()
-        )
+            val project =
+                projectService.create(
+                    userId = user.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest("Original Name"),
+                )
 
-        val updateRequest = UpdateProjectRequest(
-            name = "Malicious Update",
-            description = "Should not work",
-            projectStatusId = 1
-        )
+            val updateRequest =
+                UpdateProjectRequest(
+                    name = "Updated Name",
+                    description = "Updated Description",
+                    projectStatusId = 1,
+                )
 
-        // Act & Assert
-        mockMvc.put("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, user2.second)
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(updateRequest)
+            // Act
+            val result =
+                mockMvc
+                    .put("$PROJECTS_URI/${project.id}") {
+                        header(HttpHeaders.AUTHORIZATION, token)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = objectMapper.writeValueAsBytes(updateRequest)
+                    }.andExpect { status { isOk() } }
+                    .andReturn()
+
+            // Assert
+            val updatedProject =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    ProjectResponse::class.java,
+                )
+            assertEquals(updateRequest.name, updatedProject.name)
+            assertEquals(updateRequest.description, updatedProject.description)
         }
-            .andExpect { status { isForbidden() } }
-    }
 
-    @Test
-    fun `updateProject with invalid data should return BadRequest`() {
-        // Arrange
-        val (user, token) = createTestUserAndGetToken()
+        @Test
+        fun `updateProject with invalid ID should return NotFound`() {
+            // Arrange
+            val (_, token) = createTestUserAndGetToken()
+            val nonExistentId = 99999L
 
-        val project = projectService.create(
-            userId = user.id,
-            TestDataUtils.createTestProjectRequest()
-        )
+            val updateRequest =
+                UpdateProjectRequest(
+                    name = "Updated Name",
+                    description = "Updated Description",
+                    projectStatusId = 1,
+                )
 
-        val invalidUpdateRequest = UpdateProjectRequest(
-            name = "", // Invalid: empty name
-            description = "Valid description",
-            projectStatusId = -1 // Invalid: negative ID
-        )
-
-        // Act & Assert
-        mockMvc.put("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, token)
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(invalidUpdateRequest)
+            // Act & Assert
+            mockMvc
+                .put("$PROJECTS_URI/$nonExistentId") {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(updateRequest)
+                }.andExpect { status { isNotFound() } }
         }
-            .andExpect { status { isBadRequest() } }
-    }
 
-    @Test
-    fun `deleteProject with valid ID and ownership should return NoContent`() {
-        // Arrange
-        val (user, token) = createTestUserAndGetToken()
+        @Test
+        fun `updateProject without ownership should return Forbidden`() {
+            // Arrange
+            val (user1, user2) = createMultipleTestUsersAndGetTokens(2)
 
-        val project = projectService.create(
-            userId = user.id,
-            TestDataUtils.createTestProjectRequest()
-        )
+            val project =
+                projectService.create(
+                    userId = user1.first.id,
+                    TestDataUtils.createTestProjectRequest(),
+                )
 
-        // Act
-        mockMvc.delete("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, token)
+            val updateRequest =
+                UpdateProjectRequest(
+                    name = "Malicious Update",
+                    description = "Should not work",
+                    projectStatusId = 1,
+                )
+
+            // Act & Assert
+            mockMvc
+                .put("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, user2.second)
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(updateRequest)
+                }.andExpect { status { isForbidden() } }
         }
-            .andExpect { status { isNoContent() } }
 
-        // Assert - Verify project is actually deleted
-        mockMvc.get("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, token)
+        @Test
+        fun `updateProject with invalid data should return BadRequest`() {
+            // Arrange
+            val (user, token) = createTestUserAndGetToken()
+
+            val project =
+                projectService.create(
+                    userId = user.id,
+                    TestDataUtils.createTestProjectRequest(),
+                )
+
+            val invalidUpdateRequest =
+                UpdateProjectRequest(
+                    name = "", // Invalid: empty name
+                    description = "Valid description",
+                    projectStatusId = -1, // Invalid: negative ID
+                )
+
+            // Act & Assert
+            mockMvc
+                .put("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(invalidUpdateRequest)
+                }.andExpect { status { isBadRequest() } }
         }
-            .andExpect { status { isNotFound() } }
-    }
 
-    @Test
-    fun `deleteProject with invalid ID should return NotFound`() {
-        // Arrange
-        val (_, token) = createTestUserAndGetToken()
-        val nonExistentId = 99999L
+        @Test
+        fun `deleteProject with valid ID and ownership should return NoContent`() {
+            // Arrange
+            val (user, token) = createTestUserAndGetToken()
 
-        // Act & Assert
-        mockMvc.delete("$PROJECTS_URI/$nonExistentId") {
-            header(HttpHeaders.AUTHORIZATION, token)
+            val project =
+                projectService.create(
+                    userId = user.id,
+                    TestDataUtils.createTestProjectRequest(),
+                )
+
+            // Act
+            mockMvc
+                .delete("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                }.andExpect { status { isNoContent() } }
+
+            // Assert - Verify project is actually deleted
+            mockMvc
+                .get("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                }.andExpect { status { isNotFound() } }
         }
-            .andExpect { status { isNotFound() } }
-    }
 
-    @Test
-    fun `deleteProject without ownership should return Forbidden`() {
-        // Arrange
-        val (user1, user2) = createMultipleTestUsersAndGetTokens(2)
+        @Test
+        fun `deleteProject with invalid ID should return NotFound`() {
+            // Arrange
+            val (_, token) = createTestUserAndGetToken()
+            val nonExistentId = 99999L
 
-        val project = projectService.create(
-            userId = user1.first.id,
-            createProjectRequest = TestDataUtils.createTestProjectRequest()
-        )
-
-        // Act & Assert
-        mockMvc.delete("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, user2.second)
+            // Act & Assert
+            mockMvc
+                .delete("$PROJECTS_URI/$nonExistentId") {
+                    header(HttpHeaders.AUTHORIZATION, token)
+                }.andExpect { status { isNotFound() } }
         }
-            .andExpect { status { isForbidden() } }
 
-        // Assert - Verify project still exists
-        mockMvc.get("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, user1.second)
+        @Test
+        fun `deleteProject without ownership should return Forbidden`() {
+            // Arrange
+            val (user1, user2) = createMultipleTestUsersAndGetTokens(2)
+
+            val project =
+                projectService.create(
+                    userId = user1.first.id,
+                    createProjectRequest = TestDataUtils.createTestProjectRequest(),
+                )
+
+            // Act & Assert
+            mockMvc
+                .delete("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, user2.second)
+                }.andExpect { status { isForbidden() } }
+
+            // Assert - Verify project still exists
+            mockMvc
+                .get("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, user1.second)
+                }.andExpect { status { isOk() } }
         }
-            .andExpect { status { isOk() } }
+
+        @Test
+        fun `deleteProject without token should return Unauthorized`() {
+            // Arrange
+            val user = createTestUser()
+
+            val project =
+                projectService.create(
+                    userId = user.id,
+                    TestDataUtils.createTestProjectRequest(),
+                )
+
+            // Act & Assert
+            mockMvc
+                .delete("$PROJECTS_URI/${project.id}")
+                .andExpect { status { isUnauthorized() } }
+        }
+
+        // ================================
+        // Cross-cutting Concerns & Edge Cases
+        // ================================
+
+        @Test
+        fun `all endpoints should require authentication`() {
+            // Arrange
+            val createRequest = TestDataUtils.createTestProjectRequest()
+            val updateRequest = UpdateProjectRequest("name", "desc", 1)
+
+            // Act & Assert - All endpoints should return 401 without token
+            mockMvc.get(PROJECTS_URI).andExpect { status { isUnauthorized() } }
+            mockMvc.get("$PROJECTS_URI/1").andExpect { status { isUnauthorized() } }
+            mockMvc
+                .post(PROJECTS_URI) {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(createRequest)
+                }.andExpect { status { isUnauthorized() } }
+            mockMvc
+                .put("$PROJECTS_URI/1") {
+                    contentType = MediaType.APPLICATION_JSON
+                    content = objectMapper.writeValueAsBytes(updateRequest)
+                }.andExpect { status { isUnauthorized() } }
+            mockMvc.delete("$PROJECTS_URI/1").andExpect { status { isUnauthorized() } }
+        }
+
+        @Test
+        fun `all endpoints should reject invalid JWT tokens`() {
+            // Arrange
+            val invalidToken = "Bearer invalid-jwt-token-123"
+
+            // Act & Assert
+            mockMvc
+                .get(PROJECTS_URI) {
+                    header(HttpHeaders.AUTHORIZATION, invalidToken)
+                }.andExpect { status { isUnauthorized() } }
+        }
+
+        @Test
+        fun `endpoints should handle concurrent access properly`() {
+            // Arrange
+            val (user1, user2) = createMultipleTestUsersAndGetTokens(2)
+
+            val project =
+                projectService.create(
+                    userId = user1.first.id,
+                    TestDataUtils.createTestProjectRequest(),
+                )
+
+            // Act & Assert - User1 (owner) can access, User2 cannot
+            mockMvc
+                .get("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, user1.second)
+                }.andExpect { status { isOk() } }
+
+            mockMvc
+                .get("$PROJECTS_URI/${project.id}") {
+                    header(HttpHeaders.AUTHORIZATION, user2.second)
+                }.andExpect { status { isForbidden() } }
+        }
+
+        companion object {
+            private const val PROJECTS_URI = "${ApiPaths.V1}${ApiPaths.PROJECTS}"
+        }
     }
-
-    @Test
-    fun `deleteProject without token should return Unauthorized`() {
-        // Arrange
-        val user = createTestUser()
-
-        val project = projectService.create(
-            userId = user.id,
-            TestDataUtils.createTestProjectRequest()
-        )
-
-        // Act & Assert
-        mockMvc.delete("$PROJECTS_URI/${project.id}")
-            .andExpect { status { isUnauthorized() } }
-    }
-
-    // ================================
-    // Cross-cutting Concerns & Edge Cases
-    // ================================
-
-    @Test
-    fun `all endpoints should require authentication`() {
-        // Arrange
-        val createRequest = TestDataUtils.createTestProjectRequest()
-        val updateRequest = UpdateProjectRequest("name", "desc", 1)
-
-        // Act & Assert - All endpoints should return 401 without token
-        mockMvc.get(PROJECTS_URI).andExpect { status { isUnauthorized() } }
-        mockMvc.get("$PROJECTS_URI/1").andExpect { status { isUnauthorized() } }
-        mockMvc.post(PROJECTS_URI) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(createRequest)
-        }.andExpect { status { isUnauthorized() } }
-        mockMvc.put("$PROJECTS_URI/1") {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsBytes(updateRequest)
-        }.andExpect { status { isUnauthorized() } }
-        mockMvc.delete("$PROJECTS_URI/1").andExpect { status { isUnauthorized() } }
-    }
-
-    @Test
-    fun `all endpoints should reject invalid JWT tokens`() {
-        // Arrange
-        val invalidToken = "Bearer invalid-jwt-token-123"
-
-        // Act & Assert
-        mockMvc.get(PROJECTS_URI) {
-            header(HttpHeaders.AUTHORIZATION, invalidToken)
-        }.andExpect { status { isUnauthorized() } }
-    }
-
-    @Test
-    fun `endpoints should handle concurrent access properly`() {
-        // Arrange
-        val (user1, user2) = createMultipleTestUsersAndGetTokens(2)
-
-        val project = projectService.create(
-            userId = user1.first.id,
-            TestDataUtils.createTestProjectRequest()
-        )
-
-        // Act & Assert - User1 (owner) can access, User2 cannot
-        mockMvc.get("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, user1.second)
-        }.andExpect { status { isOk() } }
-
-        mockMvc.get("$PROJECTS_URI/${project.id}") {
-            header(HttpHeaders.AUTHORIZATION, user2.second)
-        }.andExpect { status { isForbidden() } }
-    }
-
-    companion object {
-        private const val PROJECTS_URI = "${ApiPaths.V1}${ApiPaths.PROJECTS}"
-    }
-}

@@ -5,9 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "Response DTO for user roles")
 data class RoleResponse(
-  @field:Schema(description = "Code identifier for the role", example = "ROLE_USER", implementation = RoleEnum::class)
-  val code: RoleEnum,
-
-  @field:Schema(description = "Name of the role", example = "User")
-  val name: String,
+    @field:Schema(description = "Code identifier for the role", example = "ROLE_USER", implementation = RoleEnum::class)
+    val code: RoleEnum,
+    @field:Schema(description = "Name of the role", example = "User")
+    val name: String,
 )

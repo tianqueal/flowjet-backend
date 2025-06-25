@@ -20,17 +20,15 @@ import org.springframework.web.bind.annotation.RestController
 @PreAuthorize("isAuthenticated()")
 @SecurityRequirement(name = SecurityConstants.SECURITY_SCHEME_BEARER)
 @Tag(
-  name = "Project Member Management",
-  description = "Endpoints for managing project members"
+    name = "Project Member Management",
+    description = "Endpoints for managing project members",
 )
 class ProjectMemberController(
-  private val projectMemberService: ProjectMemberService,
+    private val projectMemberService: ProjectMemberService,
 ) {
-  @GetMapping(ApiPaths.MEMBERS)
-  fun getProjectMembers(
-    @Parameter(description = "ID of the project to retrieve members for")
-    @PathVariable id: Long,
-  ): ResponseEntity<PagedModel<ProjectMemberResponse>> {
-    return ResponseEntity.ok(null)
-  }
+    @GetMapping(ApiPaths.MEMBERS)
+    fun getProjectMembers(
+        @Parameter(description = "ID of the project to retrieve members for")
+        @PathVariable id: Long,
+    ): ResponseEntity<PagedModel<ProjectMemberResponse>> = ResponseEntity.ok(null)
 }

@@ -6,27 +6,30 @@ import jakarta.persistence.criteria.Predicate
 import org.springframework.data.jpa.domain.Specification
 
 object UserSpecification {
-  fun filterBy(
-    username: String?,
-    email: String?,
-    name: String?,
-  ): Specification<UserEntity> = Specification { root, _, cb ->
-    val predicates = mutableListOf<Predicate>()
+    fun filterBy(
+        username: String?,
+        email: String?,
+        name: String?,
+    ): Specification<UserEntity> =
+        Specification { root, _, cb ->
+            val predicates = mutableListOf<Predicate>()
 
-    if (!username.isNullOrBlank()) {
-      predicates += cb.like(
-        cb.lower(root.get(UserEntity_.username)), "%${username.lowercase()}%"
-      )
-    }
+            if (!username.isNullOrBlank()) {
+                predicates +=
+                    cb.like(
+                        cb.lower(root.get(UserEntity_.username)),
+                        "%${username.lowercase()}%",
+                    )
+            }
 
-    if (!email.isNullOrBlank()) {
-      predicates += cb.like(cb.lower(root.get(UserEntity_.email)), "%${email.lowercase()}%")
-    }
+            if (!email.isNullOrBlank()) {
+                predicates += cb.like(cb.lower(root.get(UserEntity_.email)), "%${email.lowercase()}%")
+            }
 
-    if (!name.isNullOrBlank()) {
-      predicates += cb.like(cb.lower(root.get(UserEntity_.name)), "%${name.lowercase()}%")
-    }
+            if (!name.isNullOrBlank()) {
+                predicates += cb.like(cb.lower(root.get(UserEntity_.name)), "%${name.lowercase()}%")
+            }
 
-    cb.and(*predicates.toTypedArray())
-  }
+            cb.and(*predicates.toTypedArray())
+        }
 }
