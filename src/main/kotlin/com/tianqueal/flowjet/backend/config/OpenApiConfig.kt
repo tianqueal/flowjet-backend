@@ -14,40 +14,40 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class OpenApiConfig(
-  @Value(value = "\${info.app.name:myapp}")
+  @Value("\${info.app.name:myapp}")
   private var apiTitle: String,
 
-  @Value(value = "\${info.app.version:1.0.0}")
+  @Value("\${info.app.version:1.0.0}")
   private var apiVersion: String,
 
-  @Value(value = "\${info.app.description:My Application}")
+  @Value("\${info.app.description:My Application}")
   private var apiDescription: String,
 
-  @Value(value = "\${info.app.author:tianqueal}")
+  @Value("\${info.app.author:tianqueal}")
   private var contactName: String,
 
-  @Value(value = "\${info.app.contactEmail:user@example.com}")
+  @Value("\${info.app.contactEmail:user@example.com}")
   private var contactEmail: String,
 
-  @Value(value = "\${info.app.contactUrl:https://example.com}")
+  @Value("\${info.app.contactUrl:https://example.com}")
   private var contactUrl: String,
 
-  @Value(value = "\${info.app.license:MIT}")
+  @Value("\${info.app.license:MIT}")
   private var licenseName: String,
 
-  @Value(value = "\${info.app.licenseUrl:https://opensource.org/license/mit}")
+  @Value("\${info.app.licenseUrl:https://opensource.org/license/mit}")
   private var licenseUrl: String,
 
-  @Value(value = "\${info.app.server.dev.url:http://localhost:8080}")
+  @Value("\${info.app.server.dev.url:http://localhost:8080}")
   private var devServerUrl: String,
 
-  @Value(value = "\${info.app.server.dev.description:Local Development Server}")
+  @Value("\${info.app.server.dev.description:Local Development Server}")
   private var devServerDescription: String,
 
-  @Value(value = "\${info.app.server.prod.url:http://localhost:8080}")
+  @Value("\${info.app.server.prod.url:http://localhost:8080}")
   private var prodServerUrl: String,
 
-  @Value(value = "\${info.app.server.prod.description:Production Server}")
+  @Value("\${info.app.server.prod.description:Production Server}")
   private var prodServerDescription: String,
 ) {
   @Bean
@@ -82,6 +82,6 @@ class OpenApiConfig(
                 "JWT Authorization header using the ${SecurityConstants.HTTP_AUTH_SCHEME_BEARER} scheme. Example: '${SecurityConstants.HTTP_AUTH_SCHEME_BEARER} {token}'"
               )
           )
-      );
+      )
   }
 }
