@@ -21,7 +21,7 @@ import java.util.Date
  */
 @Component
 class JwtTokenProvider(
-  @Qualifier(BeanNames.JWT_SIGNING_PRIVATE_KEY)
+  @field:Qualifier(BeanNames.JWT_SIGNING_PRIVATE_KEY)
   private val signingKey: PrivateKey,
   private val jwtDecoder: JwtDecoder
 ) {
