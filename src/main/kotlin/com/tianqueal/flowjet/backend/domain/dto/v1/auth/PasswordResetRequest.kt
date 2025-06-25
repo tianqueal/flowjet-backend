@@ -1,17 +1,12 @@
 package com.tianqueal.flowjet.backend.domain.dto.v1.auth
 
-import com.tianqueal.flowjet.backend.utils.constants.ValidationMessageKeys
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.tianqueal.flowjet.backend.annotations.constrains.v1.user.UserEmailConstraint
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
 
+@Schema(description = "Request to reset user password")
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class PasswordResetRequest(
-  @Schema(
-    description =
-      "The email address associated with the account. A reset link will be sent to this email.",
-    example = "john.doe@example.com",
-  )
-  @field:NotBlank(message = ValidationMessageKeys.VALIDATION_USER_EMAIL_NOT_BLANK)
-  @field:Email(message = ValidationMessageKeys.VALIDATION_USER_EMAIL_INVALID)
+  @field:UserEmailConstraint
   val email: String,
 )

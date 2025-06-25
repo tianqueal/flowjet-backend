@@ -1,22 +1,16 @@
 package com.tianqueal.flowjet.backend.domain.dto.v1.auth
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.tianqueal.flowjet.backend.annotations.constrains.v1.auth.UsernameOrEmailConstraint
 import com.tianqueal.flowjet.backend.utils.constants.ValidationMessageKeys
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode
-import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = "DTO for login request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class LoginRequest(
-  @field:Schema(
-    description = "Username or email address for login",
-    example = "user / user@example.com",
-    nullable = false,
-    requiredMode = RequiredMode.REQUIRED
-  )
-  @field:NotBlank(message = ValidationMessageKeys.VALIDATION_AUTH_USERNAME_OR_EMAIL_NOT_BLANK)
+  @field:UsernameOrEmailConstraint
   val usernameOrEmail: String,
 
   @field:Schema(
