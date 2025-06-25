@@ -39,5 +39,5 @@ class EmailVerificationServiceImpl(
    * @param token The email verification token.
    */
   override fun verifyTokenAndMarkAsVerified(token: String) =
-    userService.markUserAsVerifiedByUsername(jwtTokenProvider.getSubjectFromToken(token))
+    userService.verify(jwtTokenProvider.getSubjectFromToken(token))
 }
