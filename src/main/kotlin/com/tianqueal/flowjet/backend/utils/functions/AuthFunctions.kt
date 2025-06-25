@@ -4,7 +4,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.context.SecurityContextHolder
 
 object AuthFunctions {
-  fun getAuthenticatedUsernameOrEmail(): String {
+  fun getAuthenticatedUsername(): String {
     val auth = SecurityContextHolder.getContext().authentication
     if (auth == null || !auth.isAuthenticated || auth.principal == null) {
       throw InsufficientAuthenticationException(
