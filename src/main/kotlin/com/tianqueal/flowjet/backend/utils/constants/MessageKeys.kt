@@ -17,7 +17,9 @@ object MessageKeys {
   const val ERROR_AUTH_VALIDATION_REGISTER = "error.auth.validation.register"
   const val ERROR_AUTH_FORBIDDEN = "error.auth.forbidden"
   const val ERROR_RESOURCE_NOT_FOUND = "error.resource.notFound"
-
+  const val ERROR_PROJECT_STATUS_NOT_FOUND = "error.projectStatus.notFound"
+  const val ERROR_PROJECT_NOT_FOUND = "error.project.notFound"
+  const val ERROR_INVALID_JSON_FORMAT = "error.invalidJsonFormat"
   // Authentication success messages
   const val AUTH_LOGIN_SUCCESS = "auth.login.success"
   const val AUTH_REGISTER_SUCCESS = "auth.register.success"
