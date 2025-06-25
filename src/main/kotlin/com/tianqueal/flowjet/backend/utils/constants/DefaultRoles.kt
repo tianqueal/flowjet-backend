@@ -1,8 +1,8 @@
 package com.tianqueal.flowjet.backend.utils.constants
 
-import com.tianqueal.flowjet.backend.utils.enums.RoleName
+import com.tianqueal.flowjet.backend.utils.enums.RoleEnum
 
 object DefaultRoles {
-  val USER: Set<RoleName> = setOf(RoleName.ROLE_USER)
-  val ADMIN: Set<RoleName> = setOf(RoleName.ROLE_ADMIN)
+  val USER: Set<RoleEnum> = setOf(RoleEnum.ROLE_USER)
+  val ADMIN: Set<RoleEnum> = setOf(RoleEnum.ROLE_ADMIN)
 }
