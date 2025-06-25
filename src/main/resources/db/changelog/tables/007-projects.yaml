@@ -21,8 +21,6 @@ databaseChangeLog:
               - column:
                   name: description
                   type: text
-                  constraints:
-                    nullable: false
               - column:
                   name: project_status_id
                   type: int
