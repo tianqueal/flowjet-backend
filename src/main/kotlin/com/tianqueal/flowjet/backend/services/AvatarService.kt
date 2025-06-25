@@ -1,5 +1,5 @@
 package com.tianqueal.flowjet.backend.services
 
-interface GravatarService {
+interface AvatarService {
   fun getAvatarUrl(email: String?, size: Int): String
 }
