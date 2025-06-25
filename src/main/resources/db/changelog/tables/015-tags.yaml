@@ -15,27 +15,12 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: code
-                  type: varchar(50)
+                  type: varchar(32)
                   constraints:
                     unique: true
                     nullable: false
               - column:
-                  name: color_bg_light
-                  type: varchar(7)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: color_text_light
-                  type: varchar(7)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: color_bg_dark
-                  type: varchar(7)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: color_text_dark
-                  type: varchar(7)
+                  name: name
+                  type: varchar(64)
                   constraints:
                     nullable: false
