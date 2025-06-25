@@ -1,6 +1,7 @@
 package com.tianqueal.flowjet.backend.domain.entities
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -10,6 +11,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import java.time.Instant
 import org.hibernate.annotations.CreationTimestamp
@@ -23,28 +25,28 @@ import org.hibernate.annotations.UpdateTimestamp
 @SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
 class UserEntity(
-  @Schema(description = "Unique identifier of the user", example = "1")
+  @field:Schema(description = "Unique identifier of the user")
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long? = null,
 
-  @Schema(description = "Username of the user", example = "john.doe")
+  @field:Schema(description = "Username of the user")
   @Column(name = "username", nullable = false, unique = true, length = 50)
   var username: String,
 
-  @Schema(description = "User email address", example = "jdoe@example.com")
+  @field:Schema(description = "User email address")
   @Column(name = "email", nullable = false, unique = true, length = 255)
   var email: String,
 
-  @Schema(description = "Full name of the user", example = "John Doe")
+  @field:Schema(description = "Full name of the user")
   @Column(name = "name", nullable = false, length = 100)
   var name: String,
 
-  @Schema(description = "Password hashed of the user")
+  @field:Schema(description = "Password hashed of the user")
   @Column(name = "password_hash", nullable = false, length = 255)
   var passwordHash: String,
 
-  @Schema(description = "User's roles")
+  @field:Schema(description = "User's roles")
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(
     name = "user_roles",
@@ -53,75 +55,71 @@ class UserEntity(
   )
   var roles: MutableSet<RoleEntity> = mutableSetOf(),
 
-  @Schema(
-    description = "URL of the user's avatar image",
-    example = "https://example.com/avatar.jpg",
-    nullable = true
+  @field:Schema(description = "List of project memberships for the user")
+  @OneToMany(
+    mappedBy = "user",
+    fetch = FetchType.LAZY,
+    cascade = [CascadeType.ALL],
+    orphanRemoval = true
   )
+  var projectsMemberships: MutableSet<ProjectMemberEntity> = mutableSetOf(),
+
+  @field:Schema(description = "URL of the user's avatar image", nullable = true)
   @Column(name = "avatar_url", length = 255)
   var avatarUrl: String? = null,
 
-  @Schema(
+  @field:Schema(
     description = "Timestamp when the user account was verified",
-    example = "2020-01-01T00:00:00Z",
     nullable = true,
   )
   @Column(name = "verified_at")
   var verifiedAt: Instant? = null,
 
-  @Schema(
+  @field:Schema(
     description =
       "Indicates when the user account itself expires. Used for temporary accounts (e.g., trials, contracts). If null, the account never expires.",
-    example = "2020-01-01T00:00:00Z",
     nullable = true,
   )
   @Column(name = "account_expired_at")
   var accountExpiredAt: Instant? = null,
 
-  @Schema(
+  @field:Schema(
     description =
       "Indicates when the user account was locked, typically for security reasons like multiple failed login attempts. If null, the account is not locked.",
-    example = "2020-01-01T00:00:00Z",
     nullable = true,
   )
   @Column(name = "locked_at")
   var lockedAt: Instant? = null,
 
-  @Schema(
+  @field:Schema(
     description =
       "Indicates when the user's credentials (e.g., password) expire, forcing a change. If null, the credentials never expire.",
-    example = "2020-01-01T00:00:00Z",
     nullable = true,
   )
   @Column(name = "credentials_expired_at")
   var credentialsExpiredAt: Instant? = null,
 
-  @Schema(
+  @field:Schema(
     description =
       "Master switch indicating if the user is administratively disabled. Stores the timestamp of when the disabling action occurred. If null, the user is enabled.",
-    example = "2020-01-01T00:00:00Z",
     nullable = true,
   )
   @Column(name = "disabled_at")
   var disabledAt: Instant? = null,
 
-  @Schema(description = "Creation timestamp", example = "2020-01-01T00:00:00Z")
+  @field:Schema(description = "Creation timestamp")
   @CreationTimestamp
   @Column(name = "created_at", nullable = false)
-  var createdAt: Instant? = null,
+  var createdAt: Instant = Instant.now(),
 
-  @Schema(description = "Last update timestamp", example = "2020-01-01T00:00:00Z")
+  @field:Schema(description = "Last update timestamp")
   @UpdateTimestamp
   @Column(name = "updated_at", nullable = false)
-  var updatedAt: Instant? = null,
+  var updatedAt: Instant = Instant.now(),
 
-  @Schema(
-    description = "Logical deletion timestamp (null if not deleted)",
-    example = "2020-01-01T00:00:00Z",
-    nullable = true
-  )
+  @field:Schema(description = "Logical deletion timestamp (null if not deleted)", nullable = true)
   @Column(name = "deleted_at")
-  var deletedAt: Instant? = null
+  var deletedAt: Instant? = null,
 ) {
   fun isVerified(): Boolean = verifiedAt != null
 
@@ -135,15 +133,15 @@ class UserEntity(
     return credentialsExpiredAt?.isAfter(Instant.now()) ?: true
   }
 
-  fun isEnabled(): Boolean = disabledAt == null;
+  fun isEnabled(): Boolean = disabledAt == null
 
   fun isDeleted(): Boolean = deletedAt != null
 
-  fun markAsDeleted() {
-    deletedAt = Instant.now()
-  }
+  //  fun markAsDeleted() {
+  //    deletedAt = Instant.now()
+  //  }
 
-  fun restore() {
-    deletedAt = null
-  }
+  //  fun restore() {
+  //    deletedAt = null
+  //  }
 }
