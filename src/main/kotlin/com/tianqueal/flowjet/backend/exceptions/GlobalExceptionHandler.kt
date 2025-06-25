@@ -2,13 +2,20 @@ package com.tianqueal.flowjet.backend.exceptions
 
 import com.tianqueal.flowjet.backend.domain.dto.v1.error.ErrorResponse
 import com.tianqueal.flowjet.backend.exceptions.business.AppException
+import com.tianqueal.flowjet.backend.exceptions.business.ProjectNotFoundException
+import com.tianqueal.flowjet.backend.exceptions.business.ProjectStatusNotFoundException
+import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyExistsException
+import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyVerifiedException
+import com.tianqueal.flowjet.backend.exceptions.business.UserNotFoundException
 import com.tianqueal.flowjet.backend.utils.constants.MessageKeys
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.MessageSource
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.security.authentication.AccountExpiredException
 import org.springframework.security.authentication.BadCredentialsException
@@ -24,8 +31,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.servlet.resource.NoResourceFoundException
-import kotlin.reflect.full.findAnnotation
 
 /**
  * Global exception handler for the application.
@@ -37,16 +42,18 @@ import kotlin.reflect.full.findAnnotation
  */
 @ControllerAdvice
 class GlobalExceptionHandler(
-  private val messageSource: MessageSource
+  private val messageSource: MessageSource,
 ) {
   /**
    * Handles validation errors for request bodies (e.g., @Valid failures).
    * Returns a 400 Bad Request with details about which fields failed validation.
    */
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ApiResponse(description = "Invalid input data or request format")
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
     ex: MethodArgumentNotValidException,
-    request: HttpServletRequest
+    request: HttpServletRequest,
   ): ResponseEntity<ErrorResponse> {
     val fieldErrors = ex.bindingResult.fieldErrors
       .groupBy { it.field }
@@ -67,47 +74,76 @@ class GlobalExceptionHandler(
   }
 
   /**
-   * Handles custom application exceptions (AppException).
-   * Returns the status defined by @ResponseStatus or defaults to 500 Internal Server Error.
+   * Handles JSON parsing errors (e.g., invalid JSON format).
+   * Returns a 400 Bad Request with a message indicating the JSON format is invalid.
    */
-  @ExceptionHandler(AppException::class)
-  fun handleAppException(
-    ex: AppException,
-    request: HttpServletRequest
+  @ApiResponse(description = "Invalid JSON format in request body")
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(HttpMessageNotReadableException::class)
+  fun handleHttpMessageNotReadable(
+    ex: HttpMessageNotReadableException,
+    request: HttpServletRequest,
   ): ResponseEntity<ErrorResponse> {
     val locale = LocaleContextHolder.getLocale()
-    val code = ex.errorCode
-    val message = messageSource.getMessage(code, ex.args, ex.message, locale)
-    val responseStatus = ex::class.findAnnotation<ResponseStatus>()
-    val status = responseStatus?.value ?: HttpStatus.INTERNAL_SERVER_ERROR
+    val code = MessageKeys.ERROR_INVALID_JSON_FORMAT
+    val message = messageSource.getMessage(code, null, "Invalid JSON format", locale)
     val errorResponse = ErrorResponse(
       code = code,
       error = ex::class.simpleName,
       message = message ?: "Unexpected error",
-      path = request.requestURI,
-      details = ex.args.takeIf { it.isNotEmpty() }
+      path = request.requestURI
     )
 
     log.warn(
-      "{} ({}): {} - Args: {}",
+      "{}: {} - Cause: {}",
       ex::class.simpleName,
-      status,
       message,
-      ex.args,
-      ex
+      ex.cause?.message ?: "No cause"
     )
 
-    return ResponseEntity(errorResponse, status)
+    return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+  }
+
+  /**
+   * Handles JWT-related exceptions (invalid, expired, etc.).
+   * Returns 401 Unauthorized with a JWT error message.
+   */
+  @ApiResponse(description = "JWT processing error")
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  @ExceptionHandler(JwtException::class)
+  fun handleJwtException(
+    ex: JwtException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponse> {
+    val locale = LocaleContextHolder.getLocale()
+    val code = MessageKeys.ERROR_AUTH_JWT
+    val message = messageSource.getMessage(code, null, "JWT processing error", locale)
+    val errorResponse = ErrorResponse(
+      code = code,
+      error = ex::class.simpleName,
+      message = message ?: "Unexpected error",
+      path = request.requestURI
+    )
+
+    log.warn(
+      "{}: {}",
+      JwtException::class.simpleName,
+      message,
+    )
+
+    return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
   }
 
   /**
    * Handles authentication-related exceptions (login, credentials, account status).
    * Returns 401 Unauthorized with an appropriate message.
    */
+  @ApiResponse(description = "Unauthorized access or authentication failure")
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
   @ExceptionHandler(AuthenticationException::class)
   fun handleAuthenticationException(
     ex: AuthenticationException,
-    request: HttpServletRequest
+    request: HttpServletRequest,
   ): ResponseEntity<ErrorResponse> {
     val locale = LocaleContextHolder.getLocale()
     val (code, messageArgs) = when (ex) {
@@ -163,41 +199,15 @@ class GlobalExceptionHandler(
   }
 
   /**
-   * Handles JWT-related exceptions (invalid, expired, etc.).
-   * Returns 401 Unauthorized with a JWT error message.
-   */
-  @ExceptionHandler(JwtException::class)
-  fun handleJwtException(
-    ex: JwtException,
-    request: HttpServletRequest
-  ): ResponseEntity<ErrorResponse> {
-    val locale = LocaleContextHolder.getLocale()
-    val code = MessageKeys.ERROR_AUTH_JWT
-    val message = messageSource.getMessage(code, null, "JWT processing error", locale)
-    val errorResponse = ErrorResponse(
-      code = code,
-      error = ex::class.simpleName,
-      message = message ?: "Unexpected error",
-      path = request.requestURI
-    )
-
-    log.warn(
-      "{}: {}",
-      JwtException::class.simpleName,
-      message,
-    )
-
-    return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
-  }
-
-  /**
    * Handles authorisation failures (e.g., insufficient permissions).
    * Returns 403 Forbidden with a suitable message.
    */
+  @ApiResponse(description = "Access denied or insufficient permissions")
+  @ResponseStatus(HttpStatus.FORBIDDEN)
   @ExceptionHandler(AuthorizationDeniedException::class)
   fun handleAuthorizationDeniedException(
     ex: AuthorizationDeniedException,
-    request: HttpServletRequest
+    request: HttpServletRequest,
   ): ResponseEntity<ErrorResponse> {
     val locale = LocaleContextHolder.getLocale()
     val code = MessageKeys.ERROR_AUTH_FORBIDDEN
@@ -220,43 +230,36 @@ class GlobalExceptionHandler(
   }
 
   /**
-   * Handles requests for static or dynamic resources that do not exist.
-   * Returns 404 Not Found with resource details.
+   * Handles not found exceptions (e.g., project status, project, user).
+   * Returns 404 Not Found with a detailed error response.
    */
-  @ExceptionHandler(NoResourceFoundException::class)
-  fun handleNoResourceFoundException(
-    ex: NoResourceFoundException,
-    request: HttpServletRequest
+  @ApiResponse(description = "Resource not found")
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ExceptionHandler(
+    ProjectStatusNotFoundException::class,
+    ProjectNotFoundException::class,
+    UserNotFoundException::class,
+  )
+  fun handleNotFoundExceptions(
+    ex: AppException,
+    request: HttpServletRequest,
   ): ResponseEntity<ErrorResponse> {
-    val locale = LocaleContextHolder.getLocale()
-    val code = MessageKeys.ERROR_RESOURCE_NOT_FOUND
-    val message = messageSource.getMessage(code, null, "Resource not found", locale)
-    val errorResponse = ErrorResponse(
-      code = code,
-      error = ex::class.simpleName,
-      message = message ?: "Unexpected error",
-      path = request.requestURI
-    )
-
-    log.warn(
-      "{}: {} - Resource: {}",
-      NoResourceFoundException::class.simpleName,
-      message,
-      ex.resourcePath,
-      ex
-    )
-
-    return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    val status = HttpStatus.NOT_FOUND
+    val errorResponse = buildErrorResponse(ex, request)
+    logWarning(ex, status, errorResponse)
+    return ResponseEntity(errorResponse, status)
   }
 
   /**
    * Handles HTTP method not allowed errors (e.g., POST on a GET-only endpoint).
    * Returns 405 Method Not Allowed with details about supported methods.
    */
+  @ApiResponse(description = "HTTP method not allowed")
+  @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
   @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
   fun handleMethodNotSupported(
     ex: HttpRequestMethodNotSupportedException,
-    request: HttpServletRequest
+    request: HttpServletRequest,
   ): ResponseEntity<ErrorResponse> {
     val locale = LocaleContextHolder.getLocale()
     val code = MessageKeys.ERROR_METHOD_NOT_ALLOWED
@@ -291,13 +294,35 @@ class GlobalExceptionHandler(
   }
 
   /**
+   * Handles conflict exceptions (e.g., user already exists).
+   * Returns 409 Conflict with a detailed error response.
+   */
+  @ApiResponse(description = "Conflict with existing resource")
+  @ResponseStatus(HttpStatus.CONFLICT)
+  @ExceptionHandler(
+    UserAlreadyExistsException::class,
+    UserAlreadyVerifiedException::class,
+  )
+  fun handleConflictExceptions(
+    ex: AppException,
+    request: HttpServletRequest,
+  ): ResponseEntity<ErrorResponse> {
+    val status: HttpStatus = HttpStatus.CONFLICT
+    val errorResponse = buildErrorResponse(ex, request)
+    logWarning(ex, status, errorResponse)
+    return ResponseEntity(errorResponse, status)
+  }
+
+  /**
    * Handles all other uncaught exceptions.
    * Returns 500 Internal Server Error with a generic error message.
    */
+  @ApiResponse(description = "Internal server error")
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(Exception::class)
   fun handleGenericException(
     ex: Exception,
-    request: HttpServletRequest
+    request: HttpServletRequest,
   ): ResponseEntity<ErrorResponse> {
     val locale = LocaleContextHolder.getLocale()
     val code = MessageKeys.ERROR_APP_GENERIC
@@ -321,6 +346,41 @@ class GlobalExceptionHandler(
     )
 
     return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+  }
+
+  /**
+   * Logs a warning for AppException with detailed information.
+   * This method is used internally to log exceptions consistently.
+   */
+  private fun logWarning(ex: AppException, status: HttpStatus, response: ErrorResponse) {
+    log.warn(
+      "{} ({}): {} - Details: {}",
+      response.error,
+      status.value(),
+      response.message,
+      response.details,
+      ex
+    )
+  }
+
+  /**
+   * Builds a detailed error response for AppException.
+   * This method is used internally to create consistent error responses.
+   */
+  private fun buildErrorResponse(
+    ex: AppException,
+    request: HttpServletRequest,
+  ): ErrorResponse {
+    val locale = LocaleContextHolder.getLocale()
+    val message = messageSource.getMessage(ex.errorCode, ex.args, ex.message, locale)
+
+    return ErrorResponse(
+      code = ex.errorCode,
+      error = ex::class.simpleName,
+      message = message ?: "Unexpected error",
+      path = request.requestURI,
+      details = ex.args.takeIf { it.isNotEmpty() }
+    )
   }
 
   companion object {
