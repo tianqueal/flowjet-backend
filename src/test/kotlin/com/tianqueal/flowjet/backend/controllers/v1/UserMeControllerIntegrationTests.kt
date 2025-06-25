@@ -1,148 +1,109 @@
 package com.tianqueal.flowjet.backend.controllers.v1
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.tianqueal.flowjet.backend.domain.dto.v1.user.CreateUserRequest
-import com.tianqueal.flowjet.backend.domain.dto.v1.user.UpdateUserSelfRequest
+import com.tianqueal.flowjet.backend.domain.dto.v1.user.UpdateUserProfileRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UserResponse
-import com.tianqueal.flowjet.backend.repositories.UserRepository
-import com.tianqueal.flowjet.backend.services.UserService
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
-import com.tianqueal.flowjet.backend.utils.constants.DefaultRoles
-import com.tianqueal.flowjet.backend.utils.functions.TestDataUtils
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
-import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.put
-import org.springframework.transaction.annotation.Transactional
 import kotlin.test.assertEquals
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
-class UserMeControllerIntegrationTests @Autowired constructor(
-  private val mockMvc: MockMvc,
-  private val objectMapper: ObjectMapper,
-  private val userRepository: UserRepository,
-  private val userService: UserService,
-) {
-  @BeforeEach
-  fun setUp() {
-    userRepository.hardDeleteAll()
-  }
+class UserMeControllerIntegrationTests : AuthenticatableControllerTest() {
+    @Test
+    fun `getCurrentUser should return user profile for authenticated user`() {
+        // Arrange
+        val (user, token) = createTestUserAndGetToken()
 
-  @Test
-  fun `getCurrentUser should return user profile for authenticated user`() {
-    // Arrange
-    val (user, auth) = createAndAuthUser()
+        // Act
+        val result = mockMvc.get(BASE_URI) {
+            header(HttpHeaders.AUTHORIZATION, token)
+        }
+            .andExpect { status { isOk() } }
+            .andReturn()
 
-    // Act
-    val result = mockMvc.get(BASE_URI) {
-      with(auth)
+        // Assert
+        val userResponse = objectMapper.readValue(
+            result.response.contentAsByteArray,
+            UserResponse::class.java
+        )
+        assertEquals(user.username, userResponse.username)
+        assertEquals(user.email, userResponse.email)
+        assertEquals(user.name, userResponse.name)
     }
-      .andExpect { status { isOk() } }
-      .andReturn()
 
-    // Assert
-    val userResponse = objectMapper.readValue(result.response.contentAsString, UserResponse::class.java)
-    assertEquals(user.username, userResponse.username)
-    assertEquals(user.email, userResponse.email)
-    assertEquals(user.name, userResponse.name)
-  }
+    @Test
+    fun `getCurrentUser should return 401 for unauthenticated request`() {
+        // Arrange: No authentication
 
-  @Test
-  fun `getCurrentUser should return 401 for unauthenticated request`() {
-    // Arrange: No authentication
-
-    // Act & Assert
-    mockMvc.get(BASE_URI)
-      .andExpect { status { isUnauthorized() } }
-  }
-
-  @Test
-  fun `updateCurrentUser should update user profile for authenticated user`() {
-    // Arrange
-    val (user, auth) = createAndAuthUser()
-
-    val updateRequest = UpdateUserSelfRequest(
-      name = "Updated Name",
-      avatarUrl = "https://example.com/avatar.png"
-    )
-
-    // Act
-    val result = mockMvc.put(BASE_URI) {
-      contentType = MediaType.APPLICATION_JSON
-      content = objectMapper.writeValueAsString(updateRequest)
-      with(auth)
+        // Act & Assert
+        mockMvc.get(BASE_URI)
+            .andExpect { status { isUnauthorized() } }
     }
-      .andExpect { status { isOk() } }
-      .andReturn()
 
-    // Assert
-    val userResponse = objectMapper.readValue(result.response.contentAsString, UserResponse::class.java)
-    assertEquals("Updated Name", userResponse.name)
-    assertEquals(user.username, userResponse.username)
-    assertEquals(user.email, userResponse.email)
-    assertEquals("https://example.com/avatar.png", userResponse.avatarUrl)
-  }
+    @Test
+    fun `updateCurrentUser should update user profile for authenticated user`() {
+        // Arrange
+        val (user, token) = createTestUserAndGetToken()
 
-  @Test
-  fun `updateCurrentUser should return 401 for unauthenticated request`() {
-    // Arrange: No authentication
-    val updateRequest = UpdateUserSelfRequest(
-      name = "Should Not Update",
-    )
+        val updateRequest = UpdateUserProfileRequest(
+            name = "Updated Name",
+            avatarUrl = "https://example.com/avatar.png"
+        )
 
-    // Act & Assert
-    mockMvc.put(BASE_URI) {
-      contentType = MediaType.APPLICATION_JSON
-      content = objectMapper.writeValueAsString(updateRequest)
+        // Act
+        val result = mockMvc.put(BASE_URI) {
+            header(HttpHeaders.AUTHORIZATION, token)
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsBytes(updateRequest)
+        }
+            .andExpect { status { isOk() } }
+            .andReturn()
+
+        // Assert
+        val userResponse = objectMapper.readValue(
+            result.response.contentAsByteArray,
+            UserResponse::class.java
+        )
+        assertEquals(updateRequest.name, userResponse.name)
+        assertEquals(user.username, userResponse.username)
+        assertEquals(user.email, userResponse.email)
+        assertEquals(updateRequest.avatarUrl, userResponse.avatarUrl)
     }
-      .andExpect { status { isUnauthorized() } }
-  }
 
-  @Test
-  fun `updateCurrentUser should return 400 for invalid data`() {
-    // Arrange
-    val (_, auth) = createAndAuthUser()
-    val invalidRequest = UpdateUserSelfRequest(
-      name = "", // Not blank
-      avatarUrl = "" // Not blank and valid URL
-    )
+    @Test
+    fun `updateCurrentUser should return 401 for unauthenticated request`() {
+        // Arrange: No authentication
+        val updateRequest = UpdateUserProfileRequest(name = "Should Not Update")
 
-    // Act & Assert
-    mockMvc.put(BASE_URI) {
-      contentType = MediaType.APPLICATION_JSON
-      content = objectMapper.writeValueAsString(invalidRequest)
-      with(auth)
+        // Act & Assert
+        mockMvc.put(BASE_URI) {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsBytes(updateRequest)
+        }
+            .andExpect { status { isUnauthorized() } }
     }
-      .andExpect { status { isBadRequest() } }
-  }
 
-  private fun createAndAuthUser(
-    username: String = TestDataUtils.DEFAULT_USERNAME,
-    email: String = TestDataUtils.DEFAULT_EMAIL,
-    name: String = TestDataUtils.DEFAULT_NAME,
-    password: String = TestDataUtils.DEFAULT_PASSWORD
-  ) = Pair(
-    userService.createUserByAdmin(
-      CreateUserRequest(
-        username = username,
-        email = email,
-        name = name,
-        password = password
-      )
-    ),
-    SecurityMockMvcRequestPostProcessors.user(username)
-      .roles(*DefaultRoles.USER.map { it.shortName() }.toTypedArray())
-  )
+    @Test
+    fun `updateCurrentUser should return 400 for invalid data`() {
+        // Arrange
+        val (_, token) = createTestUserAndGetToken()
+        val invalidRequest = UpdateUserProfileRequest(
+            name = "", // Not blank Constraint
+            avatarUrl = "" // Not blank and valid URL Constraint
+        )
 
-  companion object {
-    private const val BASE_URI = "${ApiPaths.V1}${ApiPaths.USERS_ME}"
-  }
+        // Act & Assert
+        mockMvc.put(BASE_URI) {
+            header(HttpHeaders.AUTHORIZATION, token)
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsBytes(invalidRequest)
+        }
+            .andExpect { status { isBadRequest() } }
+    }
+
+    companion object {
+        private const val BASE_URI = "${ApiPaths.V1}${ApiPaths.USERS_ME}"
+    }
 }
