@@ -20,6 +20,13 @@ object MessageKeys {
     const val ERROR_PROJECT_STATUS_NOT_FOUND = "error.projectStatus.notFound"
     const val ERROR_PROJECT_NOT_FOUND = "error.project.notFound"
     const val ERROR_INVALID_JSON_FORMAT = "error.invalidJsonFormat"
+    const val ERROR_MEMBER_ROLE_NOT_FOUND = "error.memberRole.notFound"
+    const val ERROR_PROJECT_MEMBER_NOT_FOUND = "error.projectMember.notFound"
+    const val ERROR_PROJECT_MEMBER_ALREADY_EXISTS = "error.projectMember.alreadyExists"
+    const val ERROR_CANNOT_ASSIGN_OWNER_ROLE = "error.projectMember.cannotAssignOwnerRole"
+    const val ERROR_CANNOT_ADD_OWNER_AS_PROJECT_MEMBER = "error.projectMember.cannotAddOwnerAsProjectMember"
+    const val ERROR_CANNOT_SELF_MANAGE_PROJECT_MEMBERSHIP = "error.projectMember.cannotSelfManageProjectMembership"
+    const val ERROR_INVALID_ARGUMENT = "error.invalidArgument"
 
     // Authentication success messages
     const val AUTH_LOGIN_SUCCESS = "auth.login.success"
@@ -34,7 +41,11 @@ object MessageKeys {
     const val EMAIL_VERIFICATION_SUBJECT = "email.verification.subject"
     const val EMAIL_VERIFICATION_SUCCESS = "email.verification.success"
     const val EMAIL_PASSWORD_RESET_SUBJECT = "email.passwordReset.subject"
+    const val EMAIL_PROJECT_MEMBER_INVITATION_SUBJECT = "email.projectMemberInvitation.subject"
 
     const val PASSWORD_RESET_REQUEST_SUCCESS = "passwordReset.request.success"
     const val PASSWORD_RESET_CONFIRM_SUCCESS = "passwordReset.confirm.success"
+
+    const val PROJECT_MEMBER_INVITATION_SENT = "projectMember.invitation.sent"
+    const val PROJECT_MEMBER_INVITATION_SUCCESS = "projectMember.invitation.success"
 }
