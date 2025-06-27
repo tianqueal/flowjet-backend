@@ -12,7 +12,14 @@ object PublicEndpoints {
             "${ApiPaths.PASSWORD_RESET}/confirm",
         )
 
+    private val NON_AUTH_PATHS =
+        listOf(
+            "${ApiPaths.PROJECTS}/*${ApiPaths.MEMBERS}/accept-invitation",
+        )
+
     fun auth(version: String) = AUTH_PATHS.map { "$version${ApiPaths.AUTH}$it" }.toSet()
 
-    fun forVersion(version: String): Set<String> = SWAGGER + auth(version)
+    fun nonAuthPaths(version: String) = NON_AUTH_PATHS.map { "$version$it" }.toSet()
+
+    fun forVersion(version: String): Set<String> = SWAGGER + auth(version) + nonAuthPaths(version)
 }
