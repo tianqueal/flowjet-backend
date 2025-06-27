@@ -26,4 +26,7 @@ object ValidationMessageKeys {
     const val VALIDATION_PROJECT_NAME_NOT_BLANK = "{validation.project.name.notBlank}"
     const val VALIDATION_PROJECT_NAME_SIZE = "{validation.project.name.size}"
     const val VALIDATION_PROJECT_DESCRIPTION_SIZE = "{validation.project.description.size}"
+
+    const val VALIDATION_IDENTIFIER_NUMBER_NOT_NULL = "{validation.identifier.number.notNull}"
+    const val VALIDATION_IDENTIFIER_NUMBER_POSITIVE = "{validation.identifier.number.positive}"
 }
