@@ -3,8 +3,10 @@ package com.tianqueal.flowjet.backend.domain.dto.v1.project
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.tianqueal.flowjet.backend.annotations.constrains.v1.project.ProjectDescriptionConstraint
 import com.tianqueal.flowjet.backend.annotations.constrains.v1.project.ProjectNameConstraint
+import com.tianqueal.flowjet.backend.utils.constants.ValidationMessageKeys
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Positive
 
 @Schema(description = "Request DTO for updating an existing project")
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -13,6 +15,7 @@ data class UpdateProjectRequest(
     var name: String,
     @field:ProjectDescriptionConstraint
     var description: String? = null,
-    @field:NotNull
+    @field:NotNull(message = ValidationMessageKeys.VALIDATION_IDENTIFIER_NUMBER_NOT_NULL)
+    @field:Positive(message = ValidationMessageKeys.VALIDATION_IDENTIFIER_NUMBER_POSITIVE)
     var projectStatusId: Int,
 )
