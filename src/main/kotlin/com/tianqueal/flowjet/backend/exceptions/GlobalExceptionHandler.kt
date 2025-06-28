@@ -2,6 +2,12 @@ package com.tianqueal.flowjet.backend.exceptions
 
 import com.tianqueal.flowjet.backend.domain.dto.v1.error.ErrorResponse
 import com.tianqueal.flowjet.backend.exceptions.business.AppException
+import com.tianqueal.flowjet.backend.exceptions.business.CannotAddOwnerAsProjectMemberException
+import com.tianqueal.flowjet.backend.exceptions.business.CannotAssignOwnerRoleException
+import com.tianqueal.flowjet.backend.exceptions.business.CannotSelfManageProjectMembershipException
+import com.tianqueal.flowjet.backend.exceptions.business.MemberRoleNotFoundException
+import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberAlreadyExistsException
+import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectStatusNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyExistsException
@@ -9,6 +15,7 @@ import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyVerifiedExce
 import com.tianqueal.flowjet.backend.exceptions.business.UserNotFoundException
 import com.tianqueal.flowjet.backend.utils.constants.MessageKeys
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.MessageSource
@@ -31,6 +38,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 /**
  * Global exception handler for the application.
@@ -67,7 +75,7 @@ class GlobalExceptionHandler(
         val errorResponse =
             ErrorResponse(
                 code = code,
-                error = MethodArgumentNotValidException::class.simpleName,
+                error = ex::class.simpleName,
                 message = message,
                 path = request.requestURI,
                 details = fieldErrors,
@@ -102,6 +110,58 @@ class GlobalExceptionHandler(
             ex::class.simpleName,
             message,
             ex.cause?.message ?: "No cause",
+            ex,
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+    /**
+     * Handles business logic exceptions that result in bad requests.
+     * Returns 400 Bad Request with a detailed error response.
+     */
+    @ApiResponse(description = "Bad request due to business logic violations")
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(
+        CannotAddOwnerAsProjectMemberException::class,
+        CannotSelfManageProjectMembershipException::class,
+        CannotAssignOwnerRoleException::class,
+    )
+    fun handleBadRequestExceptions(
+        ex: AppException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ErrorResponse> {
+        val status: HttpStatus = HttpStatus.BAD_REQUEST
+        val errorResponse = buildErrorResponse(ex, request)
+        logWarning(ex, status, errorResponse)
+        return ResponseEntity(errorResponse, status)
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(
+        IllegalArgumentException::class,
+    )
+    fun handleIllegalArgumentException(
+        ex: IllegalArgumentException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ErrorResponse> {
+        val locale = LocaleContextHolder.getLocale()
+        val code = MessageKeys.ERROR_INVALID_ARGUMENT
+        val message = messageSource.getMessage(code, null, "Invalid argument", locale)
+        val errorResponse =
+            ErrorResponse(
+                code = code,
+                error = ex::class.simpleName,
+                message = message ?: "Unexpected error",
+                path = request.requestURI,
+            )
+
+        log.warn(
+            "{}: {} - Cause: {}",
+            ex::class.simpleName,
+            message,
+            ex.cause?.message ?: "No cause",
+            ex,
         )
 
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
@@ -131,7 +191,7 @@ class GlobalExceptionHandler(
 
         log.warn(
             "{}: {}",
-            JwtException::class.simpleName,
+            ex::class.simpleName,
             message,
         )
 
@@ -187,7 +247,7 @@ class GlobalExceptionHandler(
         if (ex.cause != null) {
             log.warn(
                 "{}: {} - Type: {} - Cause: {} - Cause Type: {}",
-                AuthenticationException::class.simpleName,
+                ex::class.simpleName,
                 message,
                 ex::class.simpleName,
                 ex.cause?.message,
@@ -197,7 +257,7 @@ class GlobalExceptionHandler(
         } else {
             log.warn(
                 "{}: {} - Type: {}",
-                AuthenticationException::class.simpleName,
+                ex::class.simpleName,
                 message,
                 ex::class.simpleName,
                 ex,
@@ -231,12 +291,70 @@ class GlobalExceptionHandler(
 
         log.warn(
             "{}: {}",
-            AuthorizationDeniedException::class.simpleName,
+            ex::class.simpleName,
             message,
             ex,
         )
 
         return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun handleNoResourceFoundException(
+        ex: NoResourceFoundException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ErrorResponse> {
+        val locale = LocaleContextHolder.getLocale()
+        val code = MessageKeys.ERROR_RESOURCE_NOT_FOUND
+        val message = messageSource.getMessage(code, null, "Resource not found", locale)
+        val errorResponse =
+            ErrorResponse(
+                code = code,
+                error = ex::class.simpleName,
+                message = message ?: "Unexpected error",
+                path = request.requestURI,
+            )
+
+        log.warn(
+            "{}: {}",
+            ex::class.simpleName,
+            message,
+            ex,
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    }
+
+    /**
+     * Handles entity not found exceptions (e.g., JPA entity not found).
+     * Returns 404 Not Found with a detailed error response.
+     */
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EntityNotFoundException::class)
+    fun handleEntityNotFoundException(
+        ex: EntityNotFoundException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ErrorResponse> {
+        val locale = LocaleContextHolder.getLocale()
+        val code = MessageKeys.ERROR_RESOURCE_NOT_FOUND
+        val message = messageSource.getMessage(code, null, "Resource not found", locale)
+        val errorResponse =
+            ErrorResponse(
+                code = code,
+                error = ex::class.simpleName,
+                message = message ?: "Unexpected error",
+                path = request.requestURI,
+            )
+
+        log.warn(
+            "{}: {}",
+            ex::class.simpleName,
+            message,
+            ex,
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
     /**
@@ -249,6 +367,8 @@ class GlobalExceptionHandler(
         ProjectStatusNotFoundException::class,
         ProjectNotFoundException::class,
         UserNotFoundException::class,
+        MemberRoleNotFoundException::class,
+        ProjectMemberNotFoundException::class,
     )
     fun handleNotFoundExceptions(
         ex: AppException,
@@ -295,15 +415,12 @@ class GlobalExceptionHandler(
 
         log.warn(
             "{}: {} - Supported: {}",
-            HttpRequestMethodNotSupportedException::class.simpleName,
+            ex::class.simpleName,
             ex.method,
             ex.supportedMethods,
         )
 
-        return ResponseEntity(
-            errorResponse,
-            HttpStatus.METHOD_NOT_ALLOWED,
-        )
+        return ResponseEntity(errorResponse, HttpStatus.METHOD_NOT_ALLOWED)
     }
 
     /**
@@ -315,6 +432,7 @@ class GlobalExceptionHandler(
     @ExceptionHandler(
         UserAlreadyExistsException::class,
         UserAlreadyVerifiedException::class,
+        ProjectMemberAlreadyExistsException::class,
     )
     fun handleConflictExceptions(
         ex: AppException,
