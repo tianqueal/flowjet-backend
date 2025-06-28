@@ -26,6 +26,21 @@ class ProjectPermissionService(
         userId: Long,
     ): Boolean = projectMemberRepository.isMember(id, userId)
 
+    fun canAddMember(
+        id: Long,
+        userId: Long,
+    ): Boolean = isOwner(id, userId)
+
+    fun canUpdateMemberRole(
+        id: Long,
+        userId: Long,
+    ): Boolean = isOwner(id, userId)
+
+    fun canRemoveMember(
+        id: Long,
+        userId: Long,
+    ): Boolean = isOwner(id, userId)
+
     fun canRead(
         id: Long,
         userId: Long,
