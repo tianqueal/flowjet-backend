@@ -170,7 +170,7 @@ class AuthControllerIntegrationTests
         fun `verify email with valid token should return OK`() {
             // Arrange
             val user = createTestUser()
-            val token = emailVerificationService.generateEmailVerificationToken(user)
+            val token = emailVerificationService.generateToken(user)
 
             // Act
             val uri =

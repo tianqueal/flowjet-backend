@@ -18,21 +18,20 @@ class EmailVerificationServiceImpl(
      * @param user The user for whom the token is generated.
      * @return The generated email verification token.
      */
-    override fun generateEmailVerificationToken(user: UserResponse): String =
-        jwtTokenProvider.generateEmailVerificationTokenDetails(user.username).token
+    override fun generateToken(user: UserResponse): String = jwtTokenProvider.generateEmailVerificationTokenDetails(user.username).token
 
     /**
      * Sends an email verification to the user.
      * @param user The user to whom the verification email is sent.
      * @param apiVersionPath The API version path to include in the email.
      */
-    override fun sendEmailVerification(
+    override fun sendEmail(
         user: UserResponse,
         apiVersionPath: String,
     ) = emailService.sendEmailVerification(
         to = user.email,
         name = user.username,
-        token = generateEmailVerificationToken(user),
+        token = generateToken(user),
         apiVersionPath = apiVersionPath,
     )
 

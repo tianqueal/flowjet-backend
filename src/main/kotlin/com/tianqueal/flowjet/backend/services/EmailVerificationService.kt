@@ -3,9 +3,9 @@ package com.tianqueal.flowjet.backend.services
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UserResponse
 
 interface EmailVerificationService {
-    fun generateEmailVerificationToken(user: UserResponse): String
+    fun generateToken(user: UserResponse): String
 
-    fun sendEmailVerification(
+    fun sendEmail(
         user: UserResponse,
         apiVersionPath: String,
     )
