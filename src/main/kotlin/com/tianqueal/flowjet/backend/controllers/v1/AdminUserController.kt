@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -51,6 +52,7 @@ class AdminUserController(
         @RequestParam(required = false) email: String?,
         @Parameter(description = "Filter by user name (case-insensitive, partial match)")
         @RequestParam(required = false) name: String?,
+        @ParameterObject
         @PageableDefault(
             page = PaginationConstants.DEFAULT_PAGE_NUMBER,
             size = PaginationConstants.DEFAULT_PAGE_SIZE,
