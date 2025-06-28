@@ -88,7 +88,7 @@ class AuthController(
         @RequestBody userRegisterRequest: UserRegisterRequest,
     ): ResponseEntity<UserRegisterResponse> {
         val createdUser = userService.registerUser(userRegisterRequest)
-        emailVerificationService.sendEmailVerification(
+        emailVerificationService.sendEmail(
             user = createdUser,
             apiVersionPath = ApiPaths.V1,
         )
