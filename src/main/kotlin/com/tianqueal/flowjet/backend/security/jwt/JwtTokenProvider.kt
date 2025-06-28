@@ -92,6 +92,22 @@ class JwtTokenProvider(
         )
 
     /**
+     * Generates a project member invitation token for the given user ID and role ID.
+     * @param userId The ID of the user being invited.
+     * @param projectMemberRoleId The ID of the role being assigned to the user.
+     * @return JwtResponse with token details, subject formatted as "projectId:userId".
+     */
+    fun generateProjectMemberInvitationTokenDetails(
+        userId: Long,
+        projectMemberRoleId: Int,
+    ): JwtResponse =
+        generateTokenDetails(
+            subject = "$userId:$projectMemberRoleId",
+            expiresInSeconds = SecurityConstants.DEFAULT_PROJECT_MEMBER_INVITATION_TOKEN_EXPIRATION_SECONDS,
+            purpose = SecurityConstants.TOKEN_PURPOSE_PROJECT_MEMBER_INVITATION,
+        )
+
+    /**
      * Generates a JWT token with custom claims.
      * @param subject The subject of the token (typically username or email).
      * @param purpose The purpose of the token (e.g., access_token, email_verification).
