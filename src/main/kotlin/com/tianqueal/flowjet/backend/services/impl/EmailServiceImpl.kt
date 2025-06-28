@@ -1,5 +1,6 @@
 package com.tianqueal.flowjet.backend.services.impl
 
+import com.tianqueal.flowjet.backend.domain.entities.ProjectEntity
 import com.tianqueal.flowjet.backend.services.EmailService
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.MessageKeys
@@ -94,6 +95,43 @@ class EmailServiceImpl(
         val subject = messageSource.getMessage(MessageKeys.EMAIL_PASSWORD_RESET_SUBJECT, null, locale)
 
         sendEmailFromTemplate(to, subject, TemplatePaths.EMAIL_PASSWORD_RESET, model, locale)
+    }
+
+    /**
+     * Sends a project member invitation email.
+     * @param to The recipient's email address.
+     * @param name The name of the user being invited.
+     * @param projectEntity The project entity to which the user is being invited.
+     * @param token The invitation token.
+     * @param locale The locale for the email content.
+     * @param apiVersionPath The API version path to use in the invitation URL.
+     */
+    override fun sendProjectMemberInvitation(
+        to: String,
+        name: String,
+        projectEntity: ProjectEntity,
+        token: String,
+        locale: Locale,
+        apiVersionPath: String,
+    ) {
+        val projectMemberInvitationUrl =
+            UriComponentsBuilder
+                .fromUriString(frontendBaseUrl)
+                .path("${apiVersionPath}${ApiPaths.PROJECTS}/${projectEntity.id}${ApiPaths.MEMBERS}")
+                .pathSegment("/accept-invitation")
+                .queryParam("token", token)
+                .toUriString()
+
+        val model =
+            mutableMapOf<String, Any>(
+                "appName" to appName,
+                "name" to name,
+                "projectName" to projectEntity.name,
+                "projectMemberInvitationUrl" to projectMemberInvitationUrl,
+            )
+        val subject = messageSource.getMessage(MessageKeys.EMAIL_PROJECT_MEMBER_INVITATION_SUBJECT, null, locale)
+
+        sendEmailFromTemplate(to, subject, TemplatePaths.EMAIL_PROJECT_MEMBER_INVITATION, model, locale)
     }
 
     /**
