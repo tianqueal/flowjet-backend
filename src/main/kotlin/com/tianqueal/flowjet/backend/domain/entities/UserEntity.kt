@@ -1,7 +1,6 @@
 package com.tianqueal.flowjet.backend.domain.entities
 
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -53,8 +52,6 @@ class UserEntity(
     @OneToMany(
         mappedBy = "user",
         fetch = FetchType.LAZY,
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true,
     )
     var projectsMemberships: MutableSet<ProjectMemberEntity> = mutableSetOf(),
     @field:Schema(description = "URL of the user's avatar image", nullable = true)
