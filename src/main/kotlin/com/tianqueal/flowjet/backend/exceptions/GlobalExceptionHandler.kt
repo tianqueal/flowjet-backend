@@ -364,7 +364,6 @@ class GlobalExceptionHandler(
     @ApiResponse(description = "Resource not found")
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(
-        ProjectStatusNotFoundException::class,
         ProjectNotFoundException::class,
         UserNotFoundException::class,
         MemberRoleNotFoundException::class,
