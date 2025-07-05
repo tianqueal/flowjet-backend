@@ -10,7 +10,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
-import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.SQLDelete
@@ -48,12 +47,12 @@ class UserEntity(
         inverseJoinColumns = [JoinColumn(name = "role_id")],
     )
     var roles: MutableSet<RoleEntity> = mutableSetOf(),
-    @field:Schema(description = "List of project memberships for the user")
-    @OneToMany(
-        mappedBy = "user",
-        fetch = FetchType.LAZY,
-    )
-    var projectsMemberships: MutableSet<ProjectMemberEntity> = mutableSetOf(),
+//    @field:Schema(description = "List of project memberships for the user")
+//    @OneToMany(
+//        mappedBy = "user",
+//        fetch = FetchType.LAZY,
+//    )
+//    var projectsMemberships: MutableSet<ProjectMemberEntity> = mutableSetOf(),
     @field:Schema(description = "URL of the user's avatar image", nullable = true)
     @Column(name = "avatar_url", length = 255)
     var avatarUrl: String? = null,
