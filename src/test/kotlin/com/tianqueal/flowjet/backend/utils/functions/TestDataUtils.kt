@@ -17,23 +17,34 @@ object TestDataUtils {
         name: String = DEFAULT_NAME,
         password: String = DEFAULT_PASSWORD,
         avatarUrl: String? = null,
-    ) = CreateUserRequest(username, email, name, password, avatarUrl)
+    ) = CreateUserRequest(
+        username = username,
+        email = email,
+        name = name,
+        password = password,
+        avatarUrl = avatarUrl,
+    )
 
     fun createTestUserRegisterRequest(
         username: String = DEFAULT_USERNAME,
         email: String = DEFAULT_EMAIL,
         name: String = DEFAULT_NAME,
         password: String = DEFAULT_PASSWORD,
-    ) = UserRegisterRequest(username, email, name, password)
+    ) = UserRegisterRequest(
+        username = username,
+        email = email,
+        name = name,
+        password = password,
+    )
 
     fun createTestLoginRequest(
         usernameOrEmail: String = DEFAULT_USERNAME,
         password: String = DEFAULT_PASSWORD,
         rememberMe: Boolean = false,
     ) = LoginRequest(
-        usernameOrEmail,
-        password,
-        rememberMe,
+        usernameOrEmail = usernameOrEmail,
+        password = password,
+        rememberMe = rememberMe,
     )
 
     fun createTestProjectRequest(
@@ -45,18 +56,5 @@ object TestDataUtils {
             name = name,
             description = description,
             statusId = projectStatusId,
-        )
-
-    fun createTestUserRequest(
-        username: String = DEFAULT_USERNAME,
-        email: String = DEFAULT_EMAIL,
-        name: String = DEFAULT_NAME,
-        password: String = DEFAULT_PASSWORD,
-    ): CreateUserRequest =
-        CreateUserRequest(
-            username = username,
-            email = email,
-            name = name,
-            password = password,
         )
 }
