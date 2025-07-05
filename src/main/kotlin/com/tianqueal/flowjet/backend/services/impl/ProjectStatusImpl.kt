@@ -13,7 +13,7 @@ class ProjectStatusImpl(
     private val projectStatusRepository: ProjectStatusRepository,
     private val projectStatusMapper: ProjectStatusMapper,
 ) : ProjectStatusService {
-    override fun finAll(): List<ProjectStatusResponse> =
+    override fun findAll(): List<ProjectStatusResponse> =
         projectStatusRepository
             .findAll()
             .map(projectStatusMapper::toDto)
