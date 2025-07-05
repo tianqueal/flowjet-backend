@@ -9,7 +9,7 @@ import com.tianqueal.flowjet.backend.exceptions.business.MemberRoleNotFoundExcep
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectNotFoundException
-import com.tianqueal.flowjet.backend.exceptions.business.ProjectStatusNotFoundException
+import com.tianqueal.flowjet.backend.exceptions.business.TaskNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyVerifiedException
 import com.tianqueal.flowjet.backend.exceptions.business.UserNotFoundException
@@ -368,6 +368,7 @@ class GlobalExceptionHandler(
         UserNotFoundException::class,
         MemberRoleNotFoundException::class,
         ProjectMemberNotFoundException::class,
+        TaskNotFoundException::class,
     )
     fun handleNotFoundExceptions(
         ex: AppException,
