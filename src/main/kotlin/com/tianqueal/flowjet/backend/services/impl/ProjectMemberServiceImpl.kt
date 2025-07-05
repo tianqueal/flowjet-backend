@@ -103,7 +103,7 @@ class ProjectMemberServiceImpl(
         if (projectMemberInvitationRequest.userId == authenticatedUserId) {
             throw CannotSelfManageProjectMembershipException(projectId)
         }
-        if (projectMemberInvitationRequest.userId == projectEntity.projectOwner.id) {
+        if (projectMemberInvitationRequest.userId == projectEntity.owner.id) {
             throw CannotAddOwnerAsProjectMemberException(projectId, projectMemberInvitationRequest.userId)
         }
         if (memberRoleEntity.code == MemberRoleEnum.PROJECT_OWNER) {
@@ -183,14 +183,14 @@ class ProjectMemberServiceImpl(
         }
 
         val memberToRemove =
-            projectEntity.projectMembers.find { it.id.userId == userId }
+            projectEntity.members.find { it.id.userId == userId }
                 ?: throw ProjectMemberNotFoundException(projectId = projectId, userId = userId)
 
 //        if (userId == authenticatedUserId) {
 //            throw CannotSelfManageProjectMembershipException(projectId)
 //        }
 
-        projectEntity.projectMembers.remove(memberToRemove)
+        projectEntity.members.remove(memberToRemove)
         projectMemberRepository.delete(memberToRemove)
         projectRepository.save(projectEntity)
     }
@@ -269,7 +269,7 @@ class ProjectMemberServiceImpl(
                 userEntity = userEntity,
                 memberRoleEntity = memberRoleEntity,
             )
-        projectEntity.projectMembers.add(memberEntity)
+        projectEntity.members.add(memberEntity)
         projectRepository.save(projectEntity)
 
         // return memberEntity.let(projectMemberMapper::toDto)

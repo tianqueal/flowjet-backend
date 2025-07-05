@@ -13,7 +13,7 @@ interface ProjectService {
         accessType: ProjectAccessType,
         name: String?,
         description: String?,
-        projectStatusId: Int?,
+        statusId: Int?,
         pageable: Pageable,
     ): Page<ProjectResponse>
 

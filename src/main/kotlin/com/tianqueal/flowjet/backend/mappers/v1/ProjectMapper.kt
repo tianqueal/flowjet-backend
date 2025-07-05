@@ -20,9 +20,9 @@ class ProjectMapper(
             id = entity.id ?: -1,
             name = entity.name,
             description = entity.description,
-            projectStatus = projectStatusMapper.toDto(entity.projectStatus),
-            projectOwner = userProfileMapper.toDto(entity.projectOwner),
-            projectMembers = entity.projectMembers.map { projectMemberMapper.toDto(it) }.toSet(),
+            status = projectStatusMapper.toDto(entity.status),
+            owner = userProfileMapper.toDto(entity.owner),
+            members = entity.members.map { projectMemberMapper.toDto(it) }.toSet(),
             createdAt = entity.createdAt,
         )
 
@@ -33,8 +33,8 @@ class ProjectMapper(
         ProjectEntity(
             name = dto.name,
             description = dto.description,
-            projectStatus = projectStatusRepository.getReferenceById(dto.projectStatusId),
-            projectOwner = user,
+            status = projectStatusRepository.getReferenceById(dto.statusId),
+            owner = user,
         )
 
     fun updateEntityFromDto(
@@ -43,6 +43,6 @@ class ProjectMapper(
     ) {
         entity.name = dto.name
         entity.description = dto.description
-        entity.projectStatus = projectStatusRepository.getReferenceById(dto.projectStatusId)
+        entity.status = projectStatusRepository.getReferenceById(dto.statusId)
     }
 }

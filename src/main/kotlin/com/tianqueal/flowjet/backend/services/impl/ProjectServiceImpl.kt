@@ -35,7 +35,7 @@ class ProjectServiceImpl(
         accessType: ProjectAccessType,
         name: String?,
         description: String?,
-        projectStatusId: Int?,
+        statusId: Int?,
         pageable: Pageable,
     ): Page<ProjectResponse> {
         val userId = authenticatedUserService.getAuthenticatedUserId()
@@ -45,7 +45,7 @@ class ProjectServiceImpl(
                 ProjectAccessType.MEMBER_OF -> ProjectSpecification.isMember(userId)
                 ProjectAccessType.ALL_ACCESSIBLE -> ProjectSpecification.isOwnerOrMember(userId)
             }
-        val filterSpec = ProjectSpecification.filterBy(name, description, projectStatusId)
+        val filterSpec = ProjectSpecification.filterBy(name, description, statusId)
         return projectRepository
             .findAll(
                 securitySpec.and(filterSpec),
@@ -59,7 +59,7 @@ class ProjectServiceImpl(
             projectRepository.findByIdOrNull(id)
                 ?: throw ProjectNotFoundException(id)
         val userId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canRead(id, userId)) {
+        if (!projectPermissionService.canRead(projectEntity, userId)) {
             throw AuthorizationDeniedException("Access Denied: You do not have permission to view this project.")
         }
         return projectEntity.let(projectMapper::toDto)
@@ -94,7 +94,7 @@ class ProjectServiceImpl(
             projectRepository.findByIdOrNull(id)
                 ?: throw ProjectNotFoundException(id)
         val userId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canUpdate(id, userId)) {
+        if (!projectPermissionService.canUpdateProject(projectEntity, userId)) {
             throw AuthorizationDeniedException("Access Denied: You do not have permission to update this project.")
         }
         projectMapper.updateEntityFromDto(
@@ -110,9 +110,8 @@ class ProjectServiceImpl(
         val projectEntity =
             projectRepository.findByIdOrNull(id)
                 ?: throw ProjectNotFoundException(id)
-        val projectId = projectEntity.id ?: throw ProjectNotFoundException(id)
         val userId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canDelete(projectId, userId)) {
+        if (!projectPermissionService.canDeleteProject(projectEntity, userId)) {
             throw AuthorizationDeniedException("Access Denied: You do not have permission to delete this project.")
         }
         projectRepository.delete(projectEntity)

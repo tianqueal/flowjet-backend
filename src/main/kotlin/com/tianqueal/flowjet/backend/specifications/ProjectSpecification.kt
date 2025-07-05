@@ -12,13 +12,13 @@ import org.springframework.data.jpa.domain.Specification
 object ProjectSpecification {
     fun isOwner(userId: Long): Specification<ProjectEntity> =
         Specification { root, _, cb ->
-            cb.equal(root.get(ProjectEntity_.projectOwner).get(UserEntity_.id), userId)
+            cb.equal(root.get(ProjectEntity_.owner).get(UserEntity_.id), userId)
         }
 
     fun isMember(userId: Long): Specification<ProjectEntity> =
         Specification { root, query, cb ->
             query?.distinct(true)
-            val memberJoin = root.join(ProjectEntity_.projectMembers, JoinType.LEFT)
+            val memberJoin = root.join(ProjectEntity_.members, JoinType.LEFT)
             cb.equal(memberJoin.get(ProjectMemberEntity_.user).get(UserEntity_.id), userId)
         }
 
@@ -41,7 +41,7 @@ object ProjectSpecification {
             }
 
             if (projectStatusId != null) {
-                predicates += cb.equal(root.get(ProjectEntity_.projectStatus).get(ProjectStatusEntity_.id), projectStatusId)
+                predicates += cb.equal(root.get(ProjectEntity_.status).get(ProjectStatusEntity_.id), projectStatusId)
             }
 
             cb.and(*predicates.toTypedArray())
