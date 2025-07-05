@@ -43,13 +43,11 @@ class ProjectMemberController(
     private val projectMemberService: ProjectMemberService,
     private val messageSource: MessageSource,
 ) {
-    @Operation(
-        summary = "Get all members of a project",
-    )
+    @Operation(summary = "Get all members of a project")
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     @SecurityRequirement(name = SecurityConstants.SECURITY_SCHEME_BEARER)
-    fun getProjectMembers(
+    fun getAllProjectMembers(
         @Parameter(description = "ID of the project to retrieve members for")
         @PathVariable projectId: Long,
         @Parameter(description = "Filter by member role ID")
