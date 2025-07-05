@@ -12,10 +12,10 @@ import jakarta.validation.constraints.Positive
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UpdateProjectRequest(
     @field:ProjectNameConstraint
-    var name: String,
+    val name: String,
     @field:ProjectDescriptionConstraint
-    var description: String? = null,
+    val description: String? = null,
     @field:NotNull(message = ValidationMessageKeys.VALIDATION_IDENTIFIER_NUMBER_NOT_NULL)
     @field:Positive(message = ValidationMessageKeys.VALIDATION_IDENTIFIER_NUMBER_POSITIVE)
-    var projectStatusId: Int,
+    val statusId: Int,
 )

@@ -35,11 +35,11 @@ class ProjectEntity(
     @field:Schema(description = "Status of the project")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_status_id", nullable = false)
-    var projectStatus: ProjectStatusEntity,
+    var status: ProjectStatusEntity,
     @field:Schema(description = "User who created the project")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    var projectOwner: UserEntity,
+    var owner: UserEntity,
     @field:Schema(description = "List of members in the project")
     @OneToMany(
         mappedBy = "project",
@@ -47,7 +47,7 @@ class ProjectEntity(
         cascade = [CascadeType.ALL],
         orphanRemoval = true,
     )
-    var projectMembers: MutableSet<ProjectMemberEntity> = mutableSetOf(),
+    var members: MutableSet<ProjectMemberEntity> = mutableSetOf(),
     @field:Schema(description = "Creation timestamp of the project")
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -56,7 +56,7 @@ class ProjectEntity(
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     var updatedAt: Instant = Instant.now(),
-    @field:Schema(description = "Deletion timestamp of the project, if deleted")
-    @Column(name = "deleted_at")
-    var deletedAt: Instant? = null,
+//    @field:Schema(description = "Deletion timestamp of the project, if deleted")
+//    @Column(name = "deleted_at")
+//    var deletedAt: Instant? = null,
 )
