@@ -16,7 +16,6 @@ object ValidationMessageKeys {
     const val VALIDATION_USER_NAME_PATTERN = "{validation.user.name.pattern}"
     const val VALIDATION_USER_AVATAR_URL_SIZE = "{validation.user.avatarUrl.size}"
     const val VALIDATION_USER_AVATAR_URL_INVALID = "{validation.user.avatarUrl.invalid}"
-    const val VALIDATION_USER_AVATAR_URL_NOT_BLANK = "{validation.user.avatarUrl.notBlank}"
 
     // Validation - auth
     const val VALIDATION_AUTH_USERNAME_OR_EMAIL_NOT_BLANK = "{validation.auth.usernameOrEmail.notBlank}"
