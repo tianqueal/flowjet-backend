@@ -348,8 +348,9 @@ class ProjectMemberControllerIntegrationTests
                 val project = createTestProject(ownerToken)
                 val invitationToken =
                     projectMemberService.generateInvitationToken(
+                        projectId = project.id,
                         userId = newMember.id,
-                        projectMemberRoleId = memberRoleRegistry.getRoleId(MemberRoleEnum.PROJECT_MEMBER),
+                        memberRoleId = memberRoleRegistry.getRoleId(MemberRoleEnum.PROJECT_MEMBER),
                     )
 
                 val result =
@@ -367,6 +368,33 @@ class ProjectMemberControllerIntegrationTests
 
                 assertTrue(invitationAcceptResponse.message.contains("invitation accepted successfully", ignoreCase = true))
                 assertTrue(projectMemberRepository.existsById(ProjectMemberId(project.id, newMember.id)))
+            }
+
+            @Test
+            fun `accept invitation with mismatching projectId in URL should return Forbidden`() {
+                // Arrange
+                val (_, ownerToken) = createTestUserAndGetToken("project.owner")
+                val (invitee, _) = createTestUserAndGetToken("invitee")
+                val legitProject = createTestProject(ownerToken)
+                val otherProject = createTestProject(ownerToken)
+
+                val token =
+                    projectMemberService.generateInvitationToken(
+                        projectId = legitProject.id,
+                        userId = invitee.id,
+                        memberRoleId = memberRoleRegistry.getRoleId(MemberRoleEnum.PROJECT_MEMBER),
+                    )
+
+                // Act & Assert
+                mockMvc
+                    .get("${buildMembersUri(otherProject.id)}/accept-invitation") {
+                        queryParam("token", token)
+                    }.andExpect { status { isForbidden() } }
+
+                assertFalse(
+                    projectMemberRepository.isMember(otherProject.id, invitee.id),
+                    "Invitee should NOT be added to otherProject",
+                )
             }
 
             @Test
@@ -624,8 +652,9 @@ class ProjectMemberControllerIntegrationTests
 
                 val invitationToken =
                     projectMemberService.generateInvitationToken(
+                        projectId = project.id,
                         userId = addMemberRequest.userId,
-                        projectMemberRoleId = addMemberRequest.memberRoleId,
+                        memberRoleId = addMemberRequest.memberRoleId,
                     )
 
                 mockMvc
@@ -1309,8 +1338,9 @@ class ProjectMemberControllerIntegrationTests
 
                 val invitationToken =
                     projectMemberService.generateInvitationToken(
+                        projectId = project.id,
                         userId = member.id,
-                        projectMemberRoleId = addRequest.memberRoleId,
+                        memberRoleId = addRequest.memberRoleId,
                     )
 
                 mockMvc

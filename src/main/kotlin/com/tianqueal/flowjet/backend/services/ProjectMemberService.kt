@@ -40,8 +40,9 @@ interface ProjectMemberService {
     ): Boolean
 
     fun generateInvitationToken(
+        projectId: Long,
         userId: Long,
-        projectMemberRoleId: Int,
+        memberRoleId: Int,
     ): String
 
     fun sendInvitationEmail(

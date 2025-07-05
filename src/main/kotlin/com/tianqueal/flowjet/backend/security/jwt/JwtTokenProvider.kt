@@ -93,16 +93,18 @@ class JwtTokenProvider(
 
     /**
      * Generates a project member invitation token for the given user ID and role ID.
+     * @param projectId The ID of the project to which the user is being invited.
      * @param userId The ID of the user being invited.
-     * @param projectMemberRoleId The ID of the role being assigned to the user.
+     * @param memberRoleId The ID of the role being assigned to the user.
      * @return JwtResponse with token details, subject formatted as "projectId:userId".
      */
     fun generateProjectMemberInvitationTokenDetails(
+        projectId: Long,
         userId: Long,
-        projectMemberRoleId: Int,
+        memberRoleId: Int,
     ): JwtResponse =
         generateTokenDetails(
-            subject = "$userId:$projectMemberRoleId",
+            subject = "$projectId:$userId:$memberRoleId",
             expiresInSeconds = SecurityConstants.DEFAULT_PROJECT_MEMBER_INVITATION_TOKEN_EXPIRATION_SECONDS,
             purpose = SecurityConstants.TOKEN_PURPOSE_PROJECT_MEMBER_INVITATION,
         )

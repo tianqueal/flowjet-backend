@@ -50,11 +50,11 @@ object TestDataUtils {
     fun createTestProjectRequest(
         name: String = "Test Project",
         description: String = "Test project description",
-        projectStatusId: Int = 1,
+        statusId: Int = 1,
     ): CreateProjectRequest =
         CreateProjectRequest(
             name = name,
             description = description,
-            statusId = projectStatusId,
+            statusId = statusId,
         )
 }

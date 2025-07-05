@@ -80,8 +80,9 @@ abstract class AbstractProjectControllerTest : AbstractAuthenticatableController
     ) {
         val token =
             projectMemberService.generateInvitationToken(
+                projectId = projectId,
                 userId = userId,
-                projectMemberRoleId = memberRoleRegistry.getRoleId(memberRole),
+                memberRoleId = memberRoleRegistry.getRoleId(memberRole),
             )
         mockMvc
             .get("${buildMembersUri(projectId)}/accept-invitation") {

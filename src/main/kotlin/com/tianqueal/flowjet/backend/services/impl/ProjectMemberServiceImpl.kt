@@ -202,9 +202,16 @@ class ProjectMemberServiceImpl(
     ): Boolean = projectMemberRepository.isMember(projectId, userId)
 
     override fun generateInvitationToken(
+        projectId: Long,
         userId: Long,
-        projectMemberRoleId: Int,
-    ): String = jwtTokenProvider.generateProjectMemberInvitationTokenDetails(userId, projectMemberRoleId).token
+        memberRoleId: Int,
+    ): String =
+        jwtTokenProvider
+            .generateProjectMemberInvitationTokenDetails(
+                projectId = projectId,
+                userId = userId,
+                memberRoleId = memberRoleId,
+            ).token
 
     override fun sendInvitationEmail(
         projectEntity: ProjectEntity,
@@ -216,8 +223,9 @@ class ProjectMemberServiceImpl(
         name = user.name,
         token =
             generateInvitationToken(
+                projectId = projectEntity.id ?: -1,
                 userId = user.id ?: -1,
-                projectMemberRoleId = memberRoleEntity.id ?: -1,
+                memberRoleId = memberRoleEntity.id ?: -1,
             ),
         projectEntity = projectEntity,
         apiVersionPath = apiVersionPath,
@@ -229,18 +237,23 @@ class ProjectMemberServiceImpl(
     ) {
         val subject = jwtTokenProvider.getSubjectFromToken(token)
 
-        val (userId, memberRoleId) =
+        val (tokenProjectId, userId, memberRoleId) =
             try {
                 val parts = subject.split(":")
-                if (parts.size < 2) {
+                if (parts.size < 3) {
                     throw IllegalArgumentException("Invalid token format: $subject. Expected 'projectId:userId'")
                 }
-                Pair(parts[0].toLong(), parts[1].toInt())
+                Triple(first = parts[0].toLong(), second = parts[1].toLong(), third = parts[2].toInt())
             } catch (ex: NumberFormatException) {
                 throw IllegalArgumentException("Invalid token format: $subject", ex)
             } catch (ex: IndexOutOfBoundsException) {
                 throw IllegalArgumentException("Invalid token format: $subject. Expected 'projectId:userId'", ex)
             }
+
+        if (tokenProjectId != projectId) {
+            throw AuthorizationDeniedException("Token does not belong to project $projectId")
+        }
+
         acceptInvitation(projectId, userId, memberRoleId)
     }
 
