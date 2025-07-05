@@ -23,10 +23,14 @@ object ValidationMessageKeys {
     const val VALIDATION_AUTH_PASSWORD_NOT_NULL = "{validation.auth.password.notNull}"
     const val VALIDATION_AUTH_TOKEN_NOT_BLANK = "{validation.auth.token.notBlank}"
 
+    const val VALIDATION_IDENTIFIER_NUMBER_NOT_NULL = "{validation.identifier.number.notNull}"
+    const val VALIDATION_IDENTIFIER_NUMBER_POSITIVE = "{validation.identifier.number.positive}"
+
     const val VALIDATION_PROJECT_NAME_NOT_BLANK = "{validation.project.name.notBlank}"
     const val VALIDATION_PROJECT_NAME_SIZE = "{validation.project.name.size}"
     const val VALIDATION_PROJECT_DESCRIPTION_SIZE = "{validation.project.description.size}"
 
-    const val VALIDATION_IDENTIFIER_NUMBER_NOT_NULL = "{validation.identifier.number.notNull}"
-    const val VALIDATION_IDENTIFIER_NUMBER_POSITIVE = "{validation.identifier.number.positive}"
+    const val VALIDATION_TASK_NAME_NOT_BLANK = "{validation.task.name.notBlank}"
+    const val VALIDATION_TASK_NAME_SIZE = "{validation.task.name.size}"
+    const val VALIDATION_TASK_DESCRIPTION_SIZE = "{validation.task.description.size}"
 }
