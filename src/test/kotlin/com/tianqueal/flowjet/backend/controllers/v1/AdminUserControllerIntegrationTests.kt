@@ -6,6 +6,7 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.user.UserResponse
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.enums.RoleEnum
 import com.tianqueal.flowjet.backend.utils.functions.TestDataUtils
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
@@ -17,7 +18,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class AdminUserControllerIntegrationTests : AuthenticatableControllerTest() {
+@DisplayName("AdminUser Controller Integration Tests")
+class AdminUserControllerIntegrationTests : AbstractAuthenticatableControllerTest() {
     @Test
     fun `create user with valid data should return Created and user data`() {
         // Arrange

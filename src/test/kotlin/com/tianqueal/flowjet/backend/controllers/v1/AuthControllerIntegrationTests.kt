@@ -12,8 +12,10 @@ import com.tianqueal.flowjet.backend.services.EmailVerificationService
 import com.tianqueal.flowjet.backend.services.PasswordResetService
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.SecurityConstants
+import com.tianqueal.flowjet.backend.utils.constants.TestUris
 import com.tianqueal.flowjet.backend.utils.functions.TestDataUtils
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,12 +29,13 @@ import org.springframework.web.util.UriComponentsBuilder
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@DisplayName("Auth Controller Integration Tests")
 class AuthControllerIntegrationTests
     @Autowired
     constructor(
         private val emailVerificationService: EmailVerificationService,
         private val passwordResetService: PasswordResetService,
-    ) : AuthenticatableControllerTest() {
+    ) : AbstractAuthenticatableControllerTest() {
         @Test
         fun `login with valid username should return OK and JWT`() {
             createTestUser()
@@ -41,7 +44,7 @@ class AuthControllerIntegrationTests
 
             val result =
                 mockMvc
-                    .post(LOGIN_URI) {
+                    .post(TestUris.LOGIN_URI) {
                         contentType = MediaType.APPLICATION_JSON
                         content = objectMapper.writeValueAsBytes(loginRequest)
                     }.andExpect { status { isOk() } }
@@ -69,7 +72,7 @@ class AuthControllerIntegrationTests
 
             val result =
                 mockMvc
-                    .post(LOGIN_URI) {
+                    .post(TestUris.LOGIN_URI) {
                         contentType = MediaType.APPLICATION_JSON
                         content = objectMapper.writeValueAsBytes(loginRequest)
                     }.andExpect { status { isOk() } }
@@ -91,7 +94,7 @@ class AuthControllerIntegrationTests
             val loginRequest = TestDataUtils.createTestLoginRequest()
 
             mockMvc
-                .post(LOGIN_URI) {
+                .post(TestUris.LOGIN_URI) {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(loginRequest)
                 }.andExpect { status { isUnauthorized() } }
@@ -347,7 +350,7 @@ class AuthControllerIntegrationTests
             // Assert
             val loginRequest = LoginRequest(user.email, newPassword)
             mockMvc
-                .post(LOGIN_URI) {
+                .post(TestUris.LOGIN_URI) {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(loginRequest)
                 }.andExpect { status { isOk() } }

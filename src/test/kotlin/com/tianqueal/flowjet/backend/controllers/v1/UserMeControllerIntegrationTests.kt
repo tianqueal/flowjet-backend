@@ -3,6 +3,7 @@ package com.tianqueal.flowjet.backend.controllers.v1
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UpdateUserProfileRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UserResponse
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -10,7 +11,8 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.put
 import kotlin.test.assertEquals
 
-class UserMeControllerIntegrationTests : AuthenticatableControllerTest() {
+@DisplayName("UserMe Controller Integration Tests")
+class UserMeControllerIntegrationTests : AbstractAuthenticatableControllerTest() {
     @Test
     fun `getCurrentUser should return user profile for authenticated user`() {
         // Arrange

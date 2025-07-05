@@ -6,17 +6,12 @@ import com.icegreen.greenmail.util.ServerSetupTest
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberInvitationRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberInvitationResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberResponse
-import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectMemberRequest
 import com.tianqueal.flowjet.backend.domain.entities.keys.ProjectMemberId
 import com.tianqueal.flowjet.backend.exceptions.business.MemberRoleNotFoundException
 import com.tianqueal.flowjet.backend.repositories.ProjectMemberRepository
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
-import com.tianqueal.flowjet.backend.services.MemberRoleRegistry
-import com.tianqueal.flowjet.backend.services.ProjectMemberService
-import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.enums.MemberRoleEnum
-import com.tianqueal.flowjet.backend.utils.functions.TestDataUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -42,15 +37,11 @@ import kotlin.test.assertTrue
 class ProjectMemberControllerIntegrationTests
     @Autowired
     constructor(
-        private val memberRoleRegistry: MemberRoleRegistry,
         private val projectRepository: ProjectRepository,
         private val projectMemberRepository: ProjectMemberRepository,
-        private val projectMemberService: ProjectMemberService,
-    ) : AuthenticatableControllerTest() {
+    ) : AbstractProjectControllerTest() {
         @BeforeEach
         fun setUp() {
-            super.baseSetUp()
-            projectMemberRepository.deleteAll()
             projectRepository.deleteAll()
         }
 
@@ -69,8 +60,10 @@ class ProjectMemberControllerIntegrationTests
                 val (member2, _) = createTestUserAndGetToken("member.2")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
-                addMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member2.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act
                 val result =
@@ -95,7 +88,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, memberToken) = createTestUserAndGetToken("project.member")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act
                 val result =
@@ -118,7 +112,8 @@ class ProjectMemberControllerIntegrationTests
                 val (viewer, viewerToken) = createTestUserAndGetToken("project.viewer")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 // Act
                 mockMvc
@@ -195,7 +190,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken(memberUsername)
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act
                 val result =
@@ -220,7 +216,8 @@ class ProjectMemberControllerIntegrationTests
                 // Create 5 members
                 repeat(5) { index ->
                     val (member, _) = createTestUserAndGetToken("member$index")
-                    addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                    inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                    acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
                 }
 
                 // Act
@@ -253,11 +250,13 @@ class ProjectMemberControllerIntegrationTests
 
                 val project = createTestProject(ownerToken)
 
-                addMemberToProject(ownerToken, project.id, member.id, expectedRole)
+                inviteMemberToProject(ownerToken, project.id, member.id, expectedRole)
+                acceptMemberInvitation(project.id, member.id, expectedRole)
 
                 val anotherRole = MemberRoleEnum.entries.first { it != MemberRoleEnum.PROJECT_OWNER && it != roleToSet }
                 val (anotherMember, _) = createTestUserAndGetToken("another.member")
-                addMemberToProject(ownerToken, project.id, anotherMember.id, anotherRole)
+                inviteMemberToProject(ownerToken, project.id, anotherMember.id, anotherRole)
+                acceptMemberInvitation(project.id, anotherMember.id, anotherRole)
 
                 // Act
                 val result =
@@ -378,7 +377,8 @@ class ProjectMemberControllerIntegrationTests
                 val (newMember, _) = createTestUserAndGetToken("new.member")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 val addMemberRequest =
                     ProjectMemberInvitationRequest(
@@ -403,7 +403,8 @@ class ProjectMemberControllerIntegrationTests
                 val (newMember, _) = createTestUserAndGetToken("new.member")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val addMemberRequest =
                     ProjectMemberInvitationRequest(
@@ -448,7 +449,8 @@ class ProjectMemberControllerIntegrationTests
                 val (existingMember, _) = createTestUserAndGetToken("existing.member")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, existingMember.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, existingMember.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, existingMember.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val addMemberRequest =
                     ProjectMemberInvitationRequest(
@@ -705,7 +707,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.update")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val updateRequest =
                     UpdateProjectMemberRequest(
@@ -747,8 +750,10 @@ class ProjectMemberControllerIntegrationTests
                 val (member2, _) = createTestUserAndGetToken("member2")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
-                addMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, member2.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val updateRequest =
                     UpdateProjectMemberRequest(
@@ -771,7 +776,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, memberToken) = createTestUserAndGetToken("member.self.update")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val updateRequest =
                     UpdateProjectMemberRequest(
@@ -814,7 +820,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.update")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val updateRequest =
                     UpdateProjectMemberRequest(
@@ -857,7 +864,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.update")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val updateRequest =
                     UpdateProjectMemberRequest(
@@ -886,7 +894,8 @@ class ProjectMemberControllerIntegrationTests
                 val project = createTestProject(ownerToken)
 
                 val initialRole = MemberRoleEnum.entries.first { it != MemberRoleEnum.PROJECT_OWNER && it != roleToSet }
-                addMemberToProject(ownerToken, project.id, member.id, initialRole)
+                inviteMemberToProject(ownerToken, project.id, member.id, initialRole)
+                acceptMemberInvitation(project.id, member.id, initialRole)
 
                 val updateRequest = UpdateProjectMemberRequest(memberRoleId = memberRoleId)
 
@@ -916,7 +925,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.update")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 val updateRequest =
                     UpdateProjectMemberRequest(
@@ -957,7 +967,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.remove")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Verify member exists before deletion
                 assertTrue(projectMemberRepository.existsById(ProjectMemberId(project.id, member.id)))
@@ -980,8 +991,10 @@ class ProjectMemberControllerIntegrationTests
                 val (member2, _) = createTestUserAndGetToken("member2")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
-                addMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member2.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act & Assert
                 mockMvc
@@ -1000,7 +1013,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, memberToken) = createTestUserAndGetToken("member.self.remove")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act & Assert
                 mockMvc
@@ -1042,7 +1056,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.remove")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act & Assert
                 mockMvc
@@ -1058,7 +1073,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.remove")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act & Assert
                 mockMvc
@@ -1076,7 +1092,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.to.remove")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
 
                 // Act
                 mockMvc
@@ -1110,8 +1127,10 @@ class ProjectMemberControllerIntegrationTests
                 val (member2, _) = createTestUserAndGetToken("member2")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
-                addMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member1.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, member2.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, member2.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 // Act - Remove only member1
                 mockMvc
@@ -1132,7 +1151,8 @@ class ProjectMemberControllerIntegrationTests
                 val (member, _) = createTestUserAndGetToken("member.with.role")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, memberRole)
+                inviteMemberToProject(ownerToken, project.id, member.id, memberRole)
+                acceptMemberInvitation(project.id, member.id, memberRole)
 
                 // Act
                 mockMvc
@@ -1247,7 +1267,8 @@ class ProjectMemberControllerIntegrationTests
                 // Create 25 members
                 repeat(25) { index ->
                     val (member, _) = createTestUserAndGetToken("member$index")
-                    addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                    inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                    acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
                 }
 
                 // Act
@@ -1326,8 +1347,10 @@ class ProjectMemberControllerIntegrationTests
                 val (outsider, outsiderToken) = createTestUserAndGetToken("complete.outsider")
 
                 val project = createTestProject(ownerToken)
-                addMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
-                addMemberToProject(ownerToken, project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
+                inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
+                inviteMemberToProject(ownerToken, project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
+                acceptMemberInvitation(project.id, viewer.id, MemberRoleEnum.PROJECT_VIEWER)
 
                 val addRequest =
                     ProjectMemberInvitationRequest(outsider.id, memberRoleRegistry.getRoleId(MemberRoleEnum.PROJECT_VIEWER))
@@ -1357,104 +1380,9 @@ class ProjectMemberControllerIntegrationTests
             }
         }
 
-        // ================================
-        // Helper Methods
-        // ================================
-
-        /**
-         * Creates a test project for the given user ID
-         */
-        private fun createTestProject(ownerToken: String): ProjectResponse {
-            val response =
-                mockMvc
-                    .post(PROJECTS_URI) {
-                        header(HttpHeaders.AUTHORIZATION, ownerToken)
-                        contentType = MediaType.APPLICATION_JSON
-                        content = objectMapper.writeValueAsBytes(TestDataUtils.createTestProjectRequest())
-                    }.andExpect { status { isCreated() } }
-                    .andReturn()
-            return objectMapper.readValue(
-                response.response.contentAsByteArray,
-                ProjectResponse::class.java,
-            )
-        }
-
-        /**
-         * Adds a member to a project with the specified role
-         */
-        private fun addMemberToProject(
-            ownerToken: String,
-            projectId: Long,
-            userId: Long,
-            memberRole: MemberRoleEnum,
-            autoVerify: Boolean = true,
-        ) {
-//        val project = projectRepository.findByIdOrNull(projectId)
-//            ?: throw ProjectNotFoundException(projectId)
-//        val user = userRepository.findByIdOrNull(userId)
-//            ?: throw UserNotFoundException(userId)
-//        val role = memberRoleRepository.findByCode(memberRole)
-//            ?: throw MemberRoleNotFoundException(memberRole)
-//
-//        val member = ProjectMemberEntity(
-//            id = ProjectMemberId(projectId, userId),
-//            project = project,
-//            user = user,
-//            memberRole = role
-//        )
-//
-//        project.projectMembers.add(member)
-//
-//        projectRepository.save(project)
-            val projectMemberInvitationRequest =
-                ProjectMemberInvitationRequest(
-                    userId = userId,
-                    memberRoleId = memberRoleRegistry.getRoleId(memberRole),
-                )
-            mockMvc
-                .post(buildMembersUri(projectId)) {
-                    header(HttpHeaders.AUTHORIZATION, ownerToken)
-                    contentType = MediaType.APPLICATION_JSON
-                    content = objectMapper.writeValueAsBytes(projectMemberInvitationRequest)
-                }.andExpect { status { isAccepted() } }
-                .andReturn()
-
-            if (autoVerify) {
-                val token =
-                    projectMemberService.generateInvitationToken(
-                        userId = userId,
-                        projectMemberRoleId = projectMemberInvitationRequest.memberRoleId,
-                    )
-
-                mockMvc
-                    .get("${buildMembersUri(projectId)}/accept-invitation") {
-                        queryParam("token", token)
-                    }.andExpect { status { isOk() } }
-            }
-//        return objectMapper.readValue(
-//            response.response.contentAsByteArray,
-//            ProjectMemberResponse::class.java
-//        )
-        }
-
-        /**
-         * Builds the URI for project members collection
-         */
-        private fun buildMembersUri(projectId: Long): String = "${PROJECTS_URI}/$projectId${ApiPaths.MEMBERS}"
-
-        /**
-         * Builds the URI for a specific project member
-         */
-        private fun buildMemberUri(
-            projectId: Long,
-            userId: Long,
-        ): String = "${PROJECTS_URI}/$projectId${ApiPaths.MEMBERS}/$userId"
-
         companion object {
             @JvmField
             @RegisterExtension
             val greenMail = GreenMailExtension(ServerSetupTest.SMTP)
-
-            private const val PROJECTS_URI = "${ApiPaths.V1}${ApiPaths.PROJECTS}"
         }
     }

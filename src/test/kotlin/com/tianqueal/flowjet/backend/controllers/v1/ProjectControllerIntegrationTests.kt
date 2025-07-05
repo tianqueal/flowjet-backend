@@ -5,10 +5,11 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectRequest
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
 import com.tianqueal.flowjet.backend.services.ProjectService
-import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
+import com.tianqueal.flowjet.backend.utils.constants.TestUris
 import com.tianqueal.flowjet.backend.utils.functions.TestDataUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -20,15 +21,15 @@ import org.springframework.test.web.servlet.put
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@DisplayName("Project Controller Integration Tests")
 class ProjectControllerIntegrationTests
     @Autowired
     constructor(
         private val projectRepository: ProjectRepository,
         private val projectService: ProjectService,
-    ) : AuthenticatableControllerTest() {
+    ) : AbstractAuthenticatableControllerTest() {
         @BeforeEach
         fun setUp() {
-            super.baseSetUp()
             projectRepository.deleteAll()
         }
 
@@ -47,7 +48,7 @@ class ProjectControllerIntegrationTests
             // Act
             val result =
                 mockMvc
-                    .get(PROJECTS_URI) {
+                    .get(TestUris.PROJECTS_URI) {
                         header(HttpHeaders.AUTHORIZATION, token)
                     }.andExpect { status { isOk() } }
                     .andReturn()
@@ -66,7 +67,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .get(PROJECTS_URI)
+                .get(TestUris.PROJECTS_URI)
                 .andExpect { status { isUnauthorized() } }
         }
 
@@ -86,7 +87,7 @@ class ProjectControllerIntegrationTests
             // Act
             val result =
                 mockMvc
-                    .get(PROJECTS_URI) {
+                    .get(TestUris.PROJECTS_URI) {
                         header(HttpHeaders.AUTHORIZATION, user3.second)
                     }.andExpect { status { isOk() } }
                     .andReturn()
@@ -111,7 +112,7 @@ class ProjectControllerIntegrationTests
             // Act
             val result =
                 mockMvc
-                    .get(PROJECTS_URI) {
+                    .get(TestUris.PROJECTS_URI) {
                         header(HttpHeaders.AUTHORIZATION, token)
                         param("name", "Project")
                     }.andExpect { status { isOk() } }
@@ -140,7 +141,7 @@ class ProjectControllerIntegrationTests
             // Act
             val result =
                 mockMvc
-                    .get(PROJECTS_URI) {
+                    .get(TestUris.PROJECTS_URI) {
                         header(HttpHeaders.AUTHORIZATION, token)
                         param("p", "0")
                         param("s", "2")
@@ -167,7 +168,7 @@ class ProjectControllerIntegrationTests
             // Act
             val result =
                 mockMvc
-                    .get("$PROJECTS_URI/${project.id}") {
+                    .get("${TestUris.PROJECTS_URI}/${project.id}") {
                         header(HttpHeaders.AUTHORIZATION, token)
                     }.andExpect { status { isOk() } }
                     .andReturn()
@@ -190,7 +191,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .get("$PROJECTS_URI/$nonExistentId") {
+                .get("${TestUris.PROJECTS_URI}/$nonExistentId") {
                     header(HttpHeaders.AUTHORIZATION, token)
                 }.andExpect { status { isNotFound() } }
         }
@@ -209,7 +210,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .get("$PROJECTS_URI/${project.id}") {
+                .get("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, token)
                 }.andExpect { status { isForbidden() } }
         }
@@ -226,7 +227,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .get("$PROJECTS_URI/${project.id}")
+                .get("${TestUris.PROJECTS_URI}/${project.id}")
                 .andExpect { status { isUnauthorized() } }
         }
 
@@ -239,7 +240,7 @@ class ProjectControllerIntegrationTests
             // Act
             val result =
                 mockMvc
-                    .post(PROJECTS_URI) {
+                    .post(TestUris.PROJECTS_URI) {
                         header(HttpHeaders.AUTHORIZATION, token)
                         contentType = MediaType.APPLICATION_JSON
                         content = objectMapper.writeValueAsBytes(createRequest)
@@ -249,7 +250,7 @@ class ProjectControllerIntegrationTests
             // Assert
             val locationHeader = result.response.getHeader(HttpHeaders.LOCATION)
             assertThat(locationHeader).isNotNull
-            assertThat(locationHeader).contains(PROJECTS_URI)
+            assertThat(locationHeader).contains(TestUris.PROJECTS_URI)
 
             val projectResponse =
                 objectMapper.readValue(
@@ -269,12 +270,12 @@ class ProjectControllerIntegrationTests
                 CreateProjectRequest(
                     name = "", // Invalid: empty name
                     description = null,
-                    projectStatusId = -1, // Invalid: negative ID
+                    statusId = -1, // Invalid: negative ID
                 )
 
             // Act & Assert
             mockMvc
-                .post(PROJECTS_URI) {
+                .post(TestUris.PROJECTS_URI) {
                     header(HttpHeaders.AUTHORIZATION, token)
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(invalidRequest)
@@ -288,7 +289,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .post(PROJECTS_URI) {
+                .post(TestUris.PROJECTS_URI) {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(createRequest)
                 }.andExpect { status { isUnauthorized() } }
@@ -302,7 +303,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .post(PROJECTS_URI) {
+                .post(TestUris.PROJECTS_URI) {
                     header(HttpHeaders.AUTHORIZATION, token)
                     contentType = MediaType.APPLICATION_JSON
                     content = malformedJson
@@ -324,13 +325,13 @@ class ProjectControllerIntegrationTests
                 UpdateProjectRequest(
                     name = "Updated Name",
                     description = "Updated Description",
-                    projectStatusId = 1,
+                    statusId = 1,
                 )
 
             // Act
             val result =
                 mockMvc
-                    .put("$PROJECTS_URI/${project.id}") {
+                    .put("${TestUris.PROJECTS_URI}/${project.id}") {
                         header(HttpHeaders.AUTHORIZATION, token)
                         contentType = MediaType.APPLICATION_JSON
                         content = objectMapper.writeValueAsBytes(updateRequest)
@@ -357,12 +358,12 @@ class ProjectControllerIntegrationTests
                 UpdateProjectRequest(
                     name = "Updated Name",
                     description = "Updated Description",
-                    projectStatusId = 1,
+                    statusId = 1,
                 )
 
             // Act & Assert
             mockMvc
-                .put("$PROJECTS_URI/$nonExistentId") {
+                .put("${TestUris.PROJECTS_URI}/$nonExistentId") {
                     header(HttpHeaders.AUTHORIZATION, token)
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(updateRequest)
@@ -384,12 +385,12 @@ class ProjectControllerIntegrationTests
                 UpdateProjectRequest(
                     name = "Malicious Update",
                     description = "Should not work",
-                    projectStatusId = 1,
+                    statusId = 1,
                 )
 
             // Act & Assert
             mockMvc
-                .put("$PROJECTS_URI/${project.id}") {
+                .put("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, user2.second)
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(updateRequest)
@@ -411,12 +412,12 @@ class ProjectControllerIntegrationTests
                 UpdateProjectRequest(
                     name = "", // Invalid: empty name
                     description = "Valid description",
-                    projectStatusId = -1, // Invalid: negative ID
+                    statusId = -1, // Invalid: negative ID
                 )
 
             // Act & Assert
             mockMvc
-                .put("$PROJECTS_URI/${project.id}") {
+                .put("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, token)
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(invalidUpdateRequest)
@@ -436,13 +437,13 @@ class ProjectControllerIntegrationTests
 
             // Act
             mockMvc
-                .delete("$PROJECTS_URI/${project.id}") {
+                .delete("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, token)
                 }.andExpect { status { isNoContent() } }
 
             // Assert - Verify project is actually deleted
             mockMvc
-                .get("$PROJECTS_URI/${project.id}") {
+                .get("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, token)
                 }.andExpect { status { isNotFound() } }
         }
@@ -455,7 +456,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .delete("$PROJECTS_URI/$nonExistentId") {
+                .delete("${TestUris.PROJECTS_URI}/$nonExistentId") {
                     header(HttpHeaders.AUTHORIZATION, token)
                 }.andExpect { status { isNotFound() } }
         }
@@ -473,13 +474,13 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .delete("$PROJECTS_URI/${project.id}") {
+                .delete("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, user2.second)
                 }.andExpect { status { isForbidden() } }
 
             // Assert - Verify project still exists
             mockMvc
-                .get("$PROJECTS_URI/${project.id}") {
+                .get("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, user1.second)
                 }.andExpect { status { isOk() } }
         }
@@ -497,7 +498,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .delete("$PROJECTS_URI/${project.id}")
+                .delete("${TestUris.PROJECTS_URI}/${project.id}")
                 .andExpect { status { isUnauthorized() } }
         }
 
@@ -512,19 +513,19 @@ class ProjectControllerIntegrationTests
             val updateRequest = UpdateProjectRequest("name", "desc", 1)
 
             // Act & Assert - All endpoints should return 401 without token
-            mockMvc.get(PROJECTS_URI).andExpect { status { isUnauthorized() } }
-            mockMvc.get("$PROJECTS_URI/1").andExpect { status { isUnauthorized() } }
+            mockMvc.get(TestUris.PROJECTS_URI).andExpect { status { isUnauthorized() } }
+            mockMvc.get("${TestUris.PROJECTS_URI}/1").andExpect { status { isUnauthorized() } }
             mockMvc
-                .post(PROJECTS_URI) {
+                .post(TestUris.PROJECTS_URI) {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(createRequest)
                 }.andExpect { status { isUnauthorized() } }
             mockMvc
-                .put("$PROJECTS_URI/1") {
+                .put("${TestUris.PROJECTS_URI}/1") {
                     contentType = MediaType.APPLICATION_JSON
                     content = objectMapper.writeValueAsBytes(updateRequest)
                 }.andExpect { status { isUnauthorized() } }
-            mockMvc.delete("$PROJECTS_URI/1").andExpect { status { isUnauthorized() } }
+            mockMvc.delete("${TestUris.PROJECTS_URI}/1").andExpect { status { isUnauthorized() } }
         }
 
         @Test
@@ -534,7 +535,7 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert
             mockMvc
-                .get(PROJECTS_URI) {
+                .get(TestUris.PROJECTS_URI) {
                     header(HttpHeaders.AUTHORIZATION, invalidToken)
                 }.andExpect { status { isUnauthorized() } }
         }
@@ -552,17 +553,13 @@ class ProjectControllerIntegrationTests
 
             // Act & Assert - User1 (owner) can access, User2 cannot
             mockMvc
-                .get("$PROJECTS_URI/${project.id}") {
+                .get("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, user1.second)
                 }.andExpect { status { isOk() } }
 
             mockMvc
-                .get("$PROJECTS_URI/${project.id}") {
+                .get("${TestUris.PROJECTS_URI}/${project.id}") {
                     header(HttpHeaders.AUTHORIZATION, user2.second)
                 }.andExpect { status { isForbidden() } }
-        }
-
-        companion object {
-            private const val PROJECTS_URI = "${ApiPaths.V1}${ApiPaths.PROJECTS}"
         }
     }
