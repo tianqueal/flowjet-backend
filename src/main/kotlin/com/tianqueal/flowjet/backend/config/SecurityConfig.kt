@@ -39,7 +39,7 @@ import java.util.Base64
 @EnableWebSecurity
 @EnableMethodSecurity
 class SecurityConfig(
-    @Value("classpath:certs/private-key.pem")
+    @param:Value("classpath:certs/private-key.pem")
     private val privateKeyResource: Resource,
 ) {
     /**

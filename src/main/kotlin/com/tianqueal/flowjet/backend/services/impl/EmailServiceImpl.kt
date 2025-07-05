@@ -21,13 +21,13 @@ class EmailServiceImpl(
     private val javaMailSender: JavaMailSender,
     private val freeMarkerConfig: Configuration,
     private val messageSource: MessageSource,
-    @Value("\${info.app.name:myapp}")
+    @param:Value($$"${info.app.name:myapp}")
     private var appName: String,
-    @Value("\${info.app.mail.from:noreply@example.com}")
+    @param:Value($$"${info.app.mail.from:noreply@example.com}")
     private var from: String,
-    @Value("\${info.app.mail.fromName:Sender Name}")
+    @param:Value($$"${info.app.mail.fromName:Sender Name}")
     private var fromName: String,
-    @Value("\${info.app.frontend.base-url:http://localhost:3000}")
+    @param:Value($$"${info.app.frontend.base-url:http://localhost:3000}")
     private var frontendBaseUrl: String,
 ) : EmailService {
     /**

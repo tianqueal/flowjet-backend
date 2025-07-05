@@ -14,29 +14,29 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class OpenApiConfig(
-    @Value("\${info.app.name:myapp}")
+    @param:Value($$"${info.app.name:myapp}")
     private var apiTitle: String,
-    @Value("\${info.app.version:1.0.0}")
+    @param:Value($$"${info.app.version:1.0.0}")
     private var apiVersion: String,
-    @Value("\${info.app.description:My Application}")
+    @param:Value($$"${info.app.description:My Application}")
     private var apiDescription: String,
-    @Value("\${info.app.author:tianqueal}")
+    @param:Value($$"${info.app.author:tianqueal}")
     private var contactName: String,
-    @Value("\${info.app.contactEmail:user@example.com}")
+    @param:Value($$"${info.app.contactEmail:user@example.com}")
     private var contactEmail: String,
-    @Value("\${info.app.contactUrl:https://example.com}")
+    @param:Value($$"${info.app.contactUrl:https://example.com}")
     private var contactUrl: String,
-    @Value("\${info.app.license:MIT}")
+    @param:Value($$"${info.app.license:MIT}")
     private var licenseName: String,
-    @Value("\${info.app.licenseUrl:https://opensource.org/license/mit}")
+    @param:Value($$"${info.app.licenseUrl:https://opensource.org/license/mit}")
     private var licenseUrl: String,
-    @Value("\${info.app.server.dev.url:http://localhost:8080}")
+    @param:Value($$"${info.app.server.dev.url:http://localhost:8080}")
     private var devServerUrl: String,
-    @Value("\${info.app.server.dev.description:Local Development Server}")
+    @param:Value($$"${info.app.server.dev.description:Local Development Server}")
     private var devServerDescription: String,
-    @Value("\${info.app.server.prod.url:http://localhost:8080}")
+    @param:Value($$"${info.app.server.prod.url:http://localhost:8080}")
     private var prodServerUrl: String,
-    @Value("\${info.app.server.prod.description:Production Server}")
+    @param:Value($$"${info.app.server.prod.description:Production Server}")
     private var prodServerDescription: String,
 ) {
     @Bean
