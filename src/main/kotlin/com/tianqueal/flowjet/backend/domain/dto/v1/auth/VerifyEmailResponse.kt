@@ -2,6 +2,7 @@ package com.tianqueal.flowjet.backend.domain.dto.v1.auth
 
 import io.swagger.v3.oas.annotations.media.Schema
 
+@Schema(description = "Response DTO for email verification")
 data class VerifyEmailResponse(
     @field:Schema(
         description = "Indicates whether the email verification was successful",
