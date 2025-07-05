@@ -16,6 +16,7 @@ object MessageKeys {
     const val ERROR_AUTH_JWT = "error.auth.jwt"
     const val ERROR_AUTH_VALIDATION_REGISTER = "error.auth.validation.register"
     const val ERROR_AUTH_FORBIDDEN = "error.auth.forbidden"
+
     const val ERROR_RESOURCE_NOT_FOUND = "error.resource.notFound"
     const val ERROR_PROJECT_STATUS_NOT_FOUND = "error.projectStatus.notFound"
     const val ERROR_PROJECT_NOT_FOUND = "error.project.notFound"
@@ -27,6 +28,7 @@ object MessageKeys {
     const val ERROR_CANNOT_ADD_OWNER_AS_PROJECT_MEMBER = "error.projectMember.cannotAddOwnerAsProjectMember"
     const val ERROR_CANNOT_SELF_MANAGE_PROJECT_MEMBERSHIP = "error.projectMember.cannotSelfManageProjectMembership"
     const val ERROR_INVALID_ARGUMENT = "error.invalidArgument"
+    const val ERROR_TASK_NOT_FOUND = "error.task.notFound"
 
     // Authentication success messages
     const val AUTH_LOGIN_SUCCESS = "auth.login.success"
