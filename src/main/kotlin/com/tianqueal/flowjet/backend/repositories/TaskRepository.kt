@@ -11,5 +11,8 @@ interface TaskRepository :
     JpaRepository<TaskEntity, Long>,
     JpaSpecificationExecutor<TaskEntity> {
     @Query("SELECT t FROM TaskEntity t JOIN FETCH t.project WHERE t.id = :id AND t.project.id = :projectId")
-    fun findByIdAndProjectIdWithProject(id: Long, projectId: Long): TaskEntity?
+    fun findByIdAndProjectIdWithProject(
+        id: Long,
+        projectId: Long,
+    ): TaskEntity?
 }
