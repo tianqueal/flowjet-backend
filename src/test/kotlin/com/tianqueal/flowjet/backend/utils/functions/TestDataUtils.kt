@@ -44,7 +44,7 @@ object TestDataUtils {
         CreateProjectRequest(
             name = name,
             description = description,
-            projectStatusId = projectStatusId,
+            statusId = projectStatusId,
         )
 
     fun createTestUserRequest(
