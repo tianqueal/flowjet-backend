@@ -16,11 +16,12 @@ class ProjectMemberMapper(
     fun toDto(entity: ProjectMemberEntity): ProjectMemberResponse =
         ProjectMemberResponse(
             member = userProfileMapper.toDto(entity.user),
-            memberRole = MemberRoleResponse(
-                id = entity.memberRole.id ?: -1,
-                code = entity.memberRole.code,
-                name = entity.memberRole.name,
-            ),
+            memberRole =
+                MemberRoleResponse(
+                    id = entity.memberRole.id ?: -1,
+                    code = entity.memberRole.code,
+                    name = entity.memberRole.name,
+                ),
             memberSince = entity.createdAt,
         )
 
@@ -36,7 +37,10 @@ class ProjectMemberMapper(
             memberRole = memberRoleEntity,
         )
 
-    fun updateEntityFromDto(entity: ProjectMemberEntity, memberRoleEntity: MemberRoleEntity) {
+    fun updateEntityFromDto(
+        entity: ProjectMemberEntity,
+        memberRoleEntity: MemberRoleEntity,
+    ) {
         entity.memberRole = memberRoleEntity
     }
 }
