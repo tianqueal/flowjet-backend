@@ -28,6 +28,8 @@ object MessageKeys {
     const val ERROR_CANNOT_SELF_MANAGE_PROJECT_MEMBERSHIP = "error.projectMember.cannotSelfManageProjectMembership"
     const val ERROR_INVALID_ARGUMENT = "error.invalidArgument"
     const val ERROR_TASK_NOT_FOUND = "error.task.notFound"
+    const val ERROR_TASK_ASSIGNEE_NOT_FOUND = "error.task.assignee.notFound"
+    const val ERROR_TASK_ASSIGNEE_ALREADY_EXISTS = "error.task.assignee.alreadyExists"
 
     // Authentication success messages
     const val AUTH_LOGIN_SUCCESS = "auth.login.success"
