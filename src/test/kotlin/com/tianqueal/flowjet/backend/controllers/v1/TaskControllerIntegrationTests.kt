@@ -707,7 +707,7 @@ class TaskControllerIntegrationTests
             )
         }
 
-        private fun getDefaultTaskStatusId(): Int = taskStatusRepository.findAll().first().id ?: 1
+        private fun getDefaultTaskStatusId(): Int = taskStatusRepository.findAll().first().safeId
 
         private fun buildTasksUri(projectId: Long): String = "${TestUris.PROJECTS_URI}/$projectId${ApiPaths.TASKS}"
 
