@@ -11,4 +11,6 @@ data class MemberRoleResponse(
     val code: MemberRoleEnum,
     @field:Schema(description = "Name of the member role")
     val name: String,
+    @field:Schema(description = "Display order of the member role")
+    val displayOrder: Int,
 )

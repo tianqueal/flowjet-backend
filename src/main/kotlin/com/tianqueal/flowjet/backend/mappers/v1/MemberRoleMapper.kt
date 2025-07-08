@@ -11,5 +11,6 @@ class MemberRoleMapper {
             id = entity.safeId,
             code = entity.code,
             name = entity.name,
+            displayOrder = entity.displayOrder,
         )
 }
