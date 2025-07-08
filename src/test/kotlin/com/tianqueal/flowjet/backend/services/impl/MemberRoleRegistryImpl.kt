@@ -34,6 +34,5 @@ class MemberRoleRegistryImpl(
         roleCache[code]
             ?: throw IllegalArgumentException("Member role with code '$code' not found in registry.")
 
-    override fun getRoleId(code: MemberRoleEnum): Int =
-        getRole(code).id ?: throw IllegalArgumentException("Member role with code '$code' has a null ID.")
+    override fun getRoleId(code: MemberRoleEnum): Int = getRole(code).safeId
 }

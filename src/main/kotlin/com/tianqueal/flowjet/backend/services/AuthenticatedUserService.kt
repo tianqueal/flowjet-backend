@@ -20,11 +20,12 @@ class AuthenticatedUserService(
             ?: throw UserNotFoundException(username)
     }
 
-    fun getAuthenticatedUserId(): Long {
-        val user = getAuthenticatedUserEntity()
+    fun getAuthenticatedUserEntityWithRoles(): UserEntity {
+        val username = AuthFunctions.getAuthenticatedUsername()
 
-        return requireNotNull(user.id) {
-            "Authenticated user '${user.username}' has a null ID, which is not permitted."
-        }
+        return userRepository.findWithRolesByUsername(username)
+            ?: throw UserNotFoundException(username)
     }
+
+    fun getAuthenticatedUserId(): Long = getAuthenticatedUserEntity().safeId
 }

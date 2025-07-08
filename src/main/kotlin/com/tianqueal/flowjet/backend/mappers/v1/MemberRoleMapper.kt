@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class MemberRoleMapper {
     fun toDto(entity: MemberRoleEntity): MemberRoleResponse =
         MemberRoleResponse(
-            id = entity.id ?: -1,
+            id = entity.safeId,
             code = entity.code,
             name = entity.name,
         )

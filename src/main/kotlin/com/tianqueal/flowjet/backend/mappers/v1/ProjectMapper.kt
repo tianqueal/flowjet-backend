@@ -17,7 +17,7 @@ class ProjectMapper(
 ) {
     fun toDto(entity: ProjectEntity): ProjectResponse =
         ProjectResponse(
-            id = entity.id ?: -1,
+            id = entity.safeId,
             name = entity.name,
             description = entity.description,
             status = projectStatusMapper.toDto(entity.status),

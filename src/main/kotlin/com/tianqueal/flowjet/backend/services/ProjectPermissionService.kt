@@ -53,8 +53,8 @@ class ProjectPermissionService(
 //        projectEntity: ProjectEntity,
 //        userId: Long,
 //    ): Boolean {
-//        val projectMember = projectMemberRepository.findByIdOrNull(ProjectMemberId(projectEntity.id ?: -1, userId))
-//            ?: throw ProjectMemberNotFoundException(projectEntity.id ?: -1, userId)
+//        val projectMember = projectMemberRepository.findByIdOrNull(ProjectMemberId(projectEntity.safeId, userId))
+//            ?: throw ProjectMemberNotFoundException(projectEntity.safeId, userId)
 //        return projectMember.memberRole.id != viewerRole.id
 //    }
 
