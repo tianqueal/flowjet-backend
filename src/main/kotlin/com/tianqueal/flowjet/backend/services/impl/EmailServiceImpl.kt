@@ -117,7 +117,7 @@ class EmailServiceImpl(
         val projectMemberInvitationUrl =
             UriComponentsBuilder
                 .fromUriString(frontendBaseUrl)
-                .path("${apiVersionPath}${ApiPaths.PROJECTS}/${projectEntity.id}${ApiPaths.MEMBERS}")
+                .path("${apiVersionPath}${ApiPaths.PROJECTS}/${projectEntity.safeId}${ApiPaths.MEMBERS}")
                 .pathSegment("/accept-invitation")
                 .queryParam("token", token)
                 .toUriString()
