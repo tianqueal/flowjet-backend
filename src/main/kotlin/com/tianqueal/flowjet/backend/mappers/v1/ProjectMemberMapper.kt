@@ -18,9 +18,10 @@ class ProjectMemberMapper(
             member = userProfileMapper.toDto(entity.user),
             memberRole =
                 MemberRoleResponse(
-                    id = entity.memberRole.id ?: -1,
+                    id = entity.memberRole.safeId,
                     code = entity.memberRole.code,
                     name = entity.memberRole.name,
+                    displayOrder = entity.memberRole.displayOrder,
                 ),
             memberSince = entity.createdAt,
         )
@@ -31,7 +32,7 @@ class ProjectMemberMapper(
         memberRoleEntity: MemberRoleEntity,
     ): ProjectMemberEntity =
         ProjectMemberEntity(
-            id = ProjectMemberId(projectId = projectEntity.id ?: -1, userId = userEntity.id ?: -1),
+            id = ProjectMemberId(projectId = projectEntity.safeId, userId = userEntity.safeId),
             project = projectEntity,
             user = userEntity,
             memberRole = memberRoleEntity,

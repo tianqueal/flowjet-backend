@@ -102,6 +102,11 @@ class UserEntity(
     @Column(name = "deleted_at")
     var deletedAt: Instant? = null,
 ) {
+    val safeId: Long
+        get() =
+            id
+                ?: throw IllegalStateException("ID not initialized for $this")
+
     fun isVerified(): Boolean = verifiedAt != null
 
     fun isAccountNonExpired(): Boolean = accountExpiredAt?.isAfter(Instant.now()) ?: true

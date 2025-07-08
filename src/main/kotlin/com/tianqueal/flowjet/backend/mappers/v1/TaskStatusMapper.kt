@@ -6,6 +6,5 @@ import org.springframework.stereotype.Component
 
 @Component
 class TaskStatusMapper {
-    fun toDto(entity: TaskStatusEntity): TaskStatusResponse =
-        TaskStatusResponse(id = entity.id ?: -1, code = entity.code, name = entity.name)
+    fun toDto(entity: TaskStatusEntity): TaskStatusResponse = TaskStatusResponse(id = entity.safeId, code = entity.code, name = entity.name)
 }

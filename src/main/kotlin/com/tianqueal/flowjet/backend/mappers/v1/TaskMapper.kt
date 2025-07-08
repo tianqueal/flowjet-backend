@@ -17,7 +17,7 @@ class TaskMapper(
 ) {
     fun toDto(entity: TaskEntity): TaskResponse =
         TaskResponse(
-            id = entity.id ?: -1,
+            id = entity.safeId,
             name = entity.name,
             description = entity.description,
             status = entity.status.let(taskStatusMapper::toDto),

@@ -56,4 +56,9 @@ class TaskEntity(
 //    @field:Schema(description = "Deletion timestamp of the project, if deleted", nullable = true)
 //    @Column(name = "deleted_at", nullable = true)
 //    var deletedAt: Instant? = null,
-)
+) {
+    val safeId: Long
+        get() =
+            id
+                ?: throw IllegalStateException("ID not initialized for $this")
+}

@@ -26,4 +26,9 @@ class TaskStatusEntity(
     @field:Schema(description = "Name of the task status")
     @Column(name = "name", nullable = false, length = 64)
     var name: String,
-)
+) {
+    val safeId: Int
+        get() =
+            id
+                ?: throw IllegalStateException("ID not initialized for $this")
+}

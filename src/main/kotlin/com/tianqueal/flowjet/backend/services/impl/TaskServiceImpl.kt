@@ -85,8 +85,7 @@ class TaskServiceImpl(
         userEntity: UserEntity,
         createTaskRequest: CreateTaskRequest,
     ): TaskResponse {
-        val userId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canCreateTask(projectEntity, userId)) {
+        if (!projectPermissionService.canCreateTask(projectEntity, userEntity.safeId)) {
             throw AuthorizationDeniedException("You do not have permission to create tasks in this project.")
         }
 

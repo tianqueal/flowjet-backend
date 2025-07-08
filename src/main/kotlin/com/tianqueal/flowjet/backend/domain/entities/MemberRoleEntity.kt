@@ -26,4 +26,12 @@ class MemberRoleEntity(
     @field:Schema(description = "Name of the member role", example = "Admin")
     @Column(name = "name", nullable = false, length = 64)
     var name: String,
-)
+    @field:Schema(description = "Display order of the member role", example = "10")
+    @Column(name = "display_order", nullable = false)
+    var displayOrder: Int,
+) {
+    val safeId: Int
+        get() =
+            id
+                ?: throw IllegalStateException("ID not initialized for $this")
+}

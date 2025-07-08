@@ -17,14 +17,14 @@ class UserMapper(
 ) {
     fun toDto(entity: UserEntity): UserResponse =
         UserResponse(
-            id = entity.id ?: -1,
+            id = entity.safeId,
             username = entity.username,
             email = entity.email,
             name = entity.name,
             avatarUrl =
                 entity.avatarUrl?.takeIf { it.isNotBlank() }
                     ?: avatarService.getAvatarUrl(entity.email, 420),
-            roles = entity.roles.map { roleMapper.toDto(it.code, it.name) }.toSet(),
+            roles = entity.roles.map { roleMapper.toDto(it.code, it.name) },
             verifiedAt = entity.verifiedAt,
             accountExpiredAt = entity.accountExpiredAt,
             lockedAt = entity.lockedAt,

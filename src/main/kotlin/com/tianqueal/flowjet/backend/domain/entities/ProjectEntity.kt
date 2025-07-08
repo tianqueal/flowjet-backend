@@ -1,7 +1,6 @@
 package com.tianqueal.flowjet.backend.domain.entities
 
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -11,7 +10,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.Lob
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
@@ -40,14 +38,14 @@ class ProjectEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     var owner: UserEntity,
-    @field:Schema(description = "List of members in the project")
-    @OneToMany(
-        mappedBy = "project",
-        fetch = FetchType.LAZY,
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true,
-    )
-    var members: MutableSet<ProjectMemberEntity> = mutableSetOf(),
+//    @field:Schema(description = "List of members in the project")
+//    @OneToMany(
+//        mappedBy = "project",
+//        fetch = FetchType.LAZY,
+//        cascade = [CascadeType.ALL],
+//        orphanRemoval = true,
+//    )
+//    var members: MutableSet<ProjectMemberEntity> = mutableSetOf(),
     @field:Schema(description = "Creation timestamp of the project")
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -59,4 +57,9 @@ class ProjectEntity(
 //    @field:Schema(description = "Deletion timestamp of the project, if deleted")
 //    @Column(name = "deleted_at")
 //    var deletedAt: Instant? = null,
-)
+) {
+    val safeId: Long
+        get() =
+            id
+                ?: throw IllegalStateException("ID not initialized for $this")
+}

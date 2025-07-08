@@ -223,9 +223,9 @@ class ProjectMemberServiceImpl(
         name = user.name,
         token =
             generateInvitationToken(
-                projectId = projectEntity.id ?: -1,
-                userId = user.id ?: -1,
-                memberRoleId = memberRoleEntity.id ?: -1,
+                projectId = projectEntity.safeId,
+                userId = user.safeId,
+                memberRoleId = memberRoleEntity.safeId,
             ),
         projectEntity = projectEntity,
         apiVersionPath = apiVersionPath,

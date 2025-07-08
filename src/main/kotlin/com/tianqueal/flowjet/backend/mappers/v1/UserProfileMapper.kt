@@ -12,7 +12,7 @@ class UserProfileMapper(
 ) {
     fun toDto(entity: UserEntity): UserProfileResponse =
         UserProfileResponse(
-            id = entity.id ?: -1,
+            id = entity.safeId,
             username = entity.username,
             name = entity.name,
             avatarUrl =
