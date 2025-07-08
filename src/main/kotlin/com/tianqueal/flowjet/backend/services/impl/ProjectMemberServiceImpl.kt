@@ -79,12 +79,12 @@ class ProjectMemberServiceImpl(
     ) {
         // Phase 1: Check principal resource
         val projectEntity =
-            projectRepository.findByIdOrNull(projectId)
+            projectRepository.findWithOwnerById(projectId)
                 ?: throw ProjectNotFoundException(projectId)
 
         // Phase 2: Check authorization
         val authenticatedUserId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canAddMember(projectId, authenticatedUserId)) {
+        if (!projectPermissionService.canAddMember(projectEntity, authenticatedUserId)) {
             throw AuthorizationDeniedException(
                 "Access denied: You do not have permission to add members to this project.",
             )
@@ -141,20 +141,18 @@ class ProjectMemberServiceImpl(
         updateProjectMemberRequest: UpdateProjectMemberRequest,
     ): ProjectMemberResponse {
         val projectMember =
-            projectMemberRepository.findByIdOrNull(
+            projectMemberRepository.findWithProjectUserAndMemberRoleById(
                 ProjectMemberId(projectId = projectId, userId = userId),
             ) ?: throw ProjectMemberNotFoundException(projectId = projectId, userId = userId)
 
         val authenticatedUserId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canUpdateMemberRole(projectId, authenticatedUserId)) {
+        if (!projectPermissionService.canUpdateMemberRole(projectMember.project, authenticatedUserId)) {
             throw AuthorizationDeniedException(
                 "Access denied: You do not have permission to update member roles in this project.",
             )
         }
 
-        val memberRoleEntity =
-            memberRoleRepository.findByIdOrNull(updateProjectMemberRequest.memberRoleId)
-                ?: throw MemberRoleNotFoundException(updateProjectMemberRequest.memberRoleId)
+        val memberRoleEntity = memberRoleRepository.getReferenceById(updateProjectMemberRequest.memberRoleId)
 
         if (userId == authenticatedUserId) {
             throw CannotSelfManageProjectMembershipException(projectId)
@@ -171,35 +169,24 @@ class ProjectMemberServiceImpl(
         projectId: Long,
         userId: Long,
     ) {
-        val projectEntity =
-            projectRepository.findByIdOrNull(projectId)
-                ?: throw ProjectNotFoundException(projectId)
+        val memberId = ProjectMemberId(projectId, userId)
+        val projectMemberEntity =
+            projectMemberRepository.findWithProjectById(memberId)
+                ?: throw ProjectMemberNotFoundException(projectId, userId)
 
         val authenticatedUserId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canRemoveMember(projectId, authenticatedUserId)) {
+        if (!projectPermissionService.canRemoveMember(projectMemberEntity.project, authenticatedUserId)) {
             throw AuthorizationDeniedException(
                 "Access denied: You do not have permission to remove members from this project.",
             )
         }
 
-        val memberToRemove =
-            projectEntity.members.find { it.id.userId == userId }
-                ?: throw ProjectMemberNotFoundException(projectId = projectId, userId = userId)
-
 //        if (userId == authenticatedUserId) {
 //            throw CannotSelfManageProjectMembershipException(projectId)
 //        }
 
-        projectEntity.members.remove(memberToRemove)
-        projectMemberRepository.delete(memberToRemove)
-        projectRepository.save(projectEntity)
+        projectMemberRepository.deleteById(memberId)
     }
-
-    @Transactional(readOnly = true)
-    override fun isMember(
-        projectId: Long,
-        userId: Long,
-    ): Boolean = projectMemberRepository.isMember(projectId, userId)
 
     override fun generateInvitationToken(
         projectId: Long,
@@ -262,29 +249,31 @@ class ProjectMemberServiceImpl(
         userId: Long,
         memberRoleId: Int,
     ) {
-        val projectEntity =
-            projectRepository.findByIdOrNull(projectId)
-                ?: throw ProjectNotFoundException(projectId)
-        val userEntity =
-            userRepository.findByIdOrNull(userId)
-                ?: throw UserNotFoundException(userId)
-        val memberRoleEntity =
-            memberRoleRepository.findByIdOrNull(memberRoleId)
-                ?: throw MemberRoleNotFoundException(memberRoleId)
+        if (!projectRepository.existsById(projectId)) {
+            throw ProjectNotFoundException(projectId)
+        }
+        if (!userRepository.existsById(userId)) {
+            throw UserNotFoundException(userId)
+        }
+        if (!memberRoleRepository.existsById(memberRoleId)) {
+            throw MemberRoleNotFoundException(memberRoleId)
+        }
 
         if (projectMemberRepository.isMember(projectId, userId)) {
-            throw ProjectMemberAlreadyExistsException(projectId = projectId, userId = userId)
+            throw ProjectMemberAlreadyExistsException(projectId, userId)
         }
+
+        val projectProxy = projectRepository.getReferenceById(projectId)
+        val userProxy = userRepository.getReferenceById(userId)
+        val memberRoleProxy = memberRoleRepository.getReferenceById(memberRoleId)
 
         val memberEntity =
             projectMemberMapper.toEntity(
-                projectEntity = projectEntity,
-                userEntity = userEntity,
-                memberRoleEntity = memberRoleEntity,
+                projectEntity = projectProxy,
+                userEntity = userProxy,
+                memberRoleEntity = memberRoleProxy,
             )
-        projectEntity.members.add(memberEntity)
-        projectRepository.save(projectEntity)
 
-        // return memberEntity.let(projectMemberMapper::toDto)
+        projectMemberRepository.save(memberEntity)
     }
 }

@@ -34,11 +34,6 @@ interface ProjectMemberService {
         userId: Long,
     )
 
-    fun isMember(
-        projectId: Long,
-        userId: Long,
-    ): Boolean
-
     fun generateInvitationToken(
         projectId: Long,
         userId: Long,
