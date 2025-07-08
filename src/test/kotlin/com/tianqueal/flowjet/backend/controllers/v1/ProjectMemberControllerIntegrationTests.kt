@@ -8,7 +8,6 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberInvitati
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectMemberRequest
 import com.tianqueal.flowjet.backend.domain.entities.keys.ProjectMemberId
-import com.tianqueal.flowjet.backend.exceptions.business.MemberRoleNotFoundException
 import com.tianqueal.flowjet.backend.repositories.ProjectMemberRepository
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
 import com.tianqueal.flowjet.backend.utils.enums.MemberRoleEnum
@@ -621,7 +620,7 @@ class ProjectMemberControllerIntegrationTests
             fun `inviteProjectMember should correctly assign different roles`(roleToSet: MemberRoleEnum) {
                 // Arrange
                 val memberRole = memberRoleRegistry.getRole(roleToSet)
-                val memberRoleId = memberRole.id ?: throw MemberRoleNotFoundException(roleToSet)
+                val memberRoleId = memberRole.safeId
                 val expectedRole = memberRole.code
 
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
@@ -914,7 +913,7 @@ class ProjectMemberControllerIntegrationTests
             fun `updateProjectMemberRole should correctly update to different roles`(roleToSet: MemberRoleEnum) {
                 // Arrange
                 val memberRole = memberRoleRegistry.getRole(roleToSet)
-                val memberRoleId = memberRole.id ?: throw MemberRoleNotFoundException(roleToSet)
+                val memberRoleId = memberRole.safeId
                 val expectedRole = memberRole.code
 
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
