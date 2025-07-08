@@ -1,9 +1,11 @@
 package com.tianqueal.flowjet.backend.mappers.v1
 
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.CreateProjectRequest
+import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectListResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectRequest
 import com.tianqueal.flowjet.backend.domain.entities.ProjectEntity
+import com.tianqueal.flowjet.backend.domain.entities.ProjectMemberEntity
 import com.tianqueal.flowjet.backend.domain.entities.UserEntity
 import com.tianqueal.flowjet.backend.repositories.ProjectStatusRepository
 import org.springframework.stereotype.Component
@@ -15,16 +17,34 @@ class ProjectMapper(
     private val projectMemberMapper: ProjectMemberMapper,
     private val projectStatusRepository: ProjectStatusRepository,
 ) {
-    fun toDto(entity: ProjectEntity): ProjectResponse =
+    fun toListDto(
+        entity: ProjectEntity,
+        memberCount: Int,
+    ): ProjectListResponse =
+        ProjectListResponse(
+            id = entity.safeId,
+            name = entity.name,
+            status = entity.status.let(projectStatusMapper::toDto),
+            owner = entity.owner.let(userProfileMapper::toDto),
+            memberCount = memberCount,
+            createdAt = entity.createdAt,
+        )
+
+    fun toDto(
+        entity: ProjectEntity,
+        members: List<ProjectMemberEntity>,
+    ): ProjectResponse =
         ProjectResponse(
             id = entity.safeId,
             name = entity.name,
             description = entity.description,
-            status = projectStatusMapper.toDto(entity.status),
-            owner = userProfileMapper.toDto(entity.owner),
-            members = entity.members.map { projectMemberMapper.toDto(it) }.toSet(),
+            status = entity.status.let(projectStatusMapper::toDto),
+            owner = entity.owner.let(userProfileMapper::toDto),
+            members = members.map(projectMemberMapper::toDto),
             createdAt = entity.createdAt,
         )
+
+    fun toDto(entity: ProjectEntity): ProjectResponse = toDto(entity, emptyList())
 
     fun toEntity(
         dto: CreateProjectRequest,

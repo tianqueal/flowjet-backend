@@ -1,6 +1,7 @@
 package com.tianqueal.flowjet.backend.services
 
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.CreateProjectRequest
+import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectListResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectRequest
 import com.tianqueal.flowjet.backend.domain.entities.UserEntity
@@ -15,7 +16,7 @@ interface ProjectService {
         description: String?,
         statusId: Int?,
         pageable: Pageable,
-    ): Page<ProjectResponse>
+    ): Page<ProjectListResponse>
 
     fun findById(id: Long): ProjectResponse
 

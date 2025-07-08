@@ -1,6 +1,7 @@
 package com.tianqueal.flowjet.backend.controllers.v1
 
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.CreateProjectRequest
+import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectListResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectRequest
 import com.tianqueal.flowjet.backend.services.ProjectService
@@ -62,7 +63,7 @@ class ProjectController(
             size = PaginationConstants.DEFAULT_PAGE_SIZE,
         )
         pageable: Pageable,
-    ): ResponseEntity<PagedModel<ProjectResponse>> =
+    ): ResponseEntity<PagedModel<ProjectListResponse>> =
         ResponseEntity.ok(
             PagedModel(
                 projectService.findAll(accessType, name, description, projectStatusId, pageable),

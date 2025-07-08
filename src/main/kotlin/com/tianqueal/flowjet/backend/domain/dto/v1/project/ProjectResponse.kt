@@ -20,7 +20,8 @@ data class ProjectResponse(
     val status: ProjectStatusResponse,
     @field:Schema(description = "User who created the project")
     val owner: UserProfileResponse,
-    val members: Set<ProjectMemberResponse>,
+    @field:Schema(description = "List of members in the project")
+    val members: List<ProjectMemberResponse>,
     @field:Schema(description = "Creation timestamp of the project", example = "2020-01-01T00:00:00Z")
     val createdAt: Instant,
 )
