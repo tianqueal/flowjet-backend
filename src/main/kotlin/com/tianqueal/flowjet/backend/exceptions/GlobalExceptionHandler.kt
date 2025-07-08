@@ -9,9 +9,12 @@ import com.tianqueal.flowjet.backend.exceptions.business.MemberRoleNotFoundExcep
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectNotFoundException
+import com.tianqueal.flowjet.backend.exceptions.business.TaskAssigneeAlreadyExistsException
+import com.tianqueal.flowjet.backend.exceptions.business.TaskAssigneeNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.TaskNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyVerifiedException
+import com.tianqueal.flowjet.backend.exceptions.business.UserIsNotProjectMemberException
 import com.tianqueal.flowjet.backend.exceptions.business.UserNotFoundException
 import com.tianqueal.flowjet.backend.utils.constants.MessageKeys
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -369,6 +372,7 @@ class GlobalExceptionHandler(
         MemberRoleNotFoundException::class,
         ProjectMemberNotFoundException::class,
         TaskNotFoundException::class,
+        TaskAssigneeNotFoundException::class,
     )
     fun handleNotFoundExceptions(
         ex: AppException,
@@ -433,12 +437,32 @@ class GlobalExceptionHandler(
         UserAlreadyExistsException::class,
         UserAlreadyVerifiedException::class,
         ProjectMemberAlreadyExistsException::class,
+        TaskAssigneeAlreadyExistsException::class,
     )
     fun handleConflictExceptions(
         ex: AppException,
         request: HttpServletRequest,
     ): ResponseEntity<ErrorResponse> {
         val status: HttpStatus = HttpStatus.CONFLICT
+        val errorResponse = buildErrorResponse(ex, request)
+        logWarning(ex, status, errorResponse)
+        return ResponseEntity(errorResponse, status)
+    }
+
+    /**
+     * Handles unprocessable content exceptions
+     * Returns 422 Unprocessable Entity with a detailed error response.
+     */
+    @ApiResponse(description = "Unprocessable content")
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(
+        UserIsNotProjectMemberException::class,
+    )
+    fun handleUnprocessableContentException(
+        ex: AppException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ErrorResponse> {
+        val status: HttpStatus = HttpStatus.UNPROCESSABLE_ENTITY
         val errorResponse = buildErrorResponse(ex, request)
         logWarning(ex, status, errorResponse)
         return ResponseEntity(errorResponse, status)
