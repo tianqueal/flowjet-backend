@@ -20,7 +20,6 @@ import com.tianqueal.flowjet.backend.utils.constants.DefaultRoles
 import jakarta.annotation.PostConstruct
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -50,7 +49,7 @@ class UserServiceImpl(
     @Transactional(readOnly = true)
     override fun loadUserByUsername(usernameOrEmail: String): UserDetails {
         val userEntity =
-            userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+            userRepository.findWithRolesByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
                 ?: throw UserNotFoundException(usernameOrEmail)
 
         return User
@@ -81,28 +80,28 @@ class UserServiceImpl(
     @Transactional(readOnly = true)
     override fun findById(id: Long): UserResponse =
         userRepository
-            .findByIdOrNull(id)
+            .findWithRolesById(id)
             ?.let(userMapper::toDto)
             ?: throw UserNotFoundException(id)
 
     @Transactional(readOnly = true)
     override fun findByUsername(username: String): UserResponse =
         userRepository
-            .findByUsername(username)
+            .findWithRolesByUsername(username)
             ?.let(userMapper::toDto)
             ?: throw UserNotFoundException(username)
 
     @Transactional(readOnly = true)
     override fun findByEmail(email: String): UserResponse =
         userRepository
-            .findByEmail(email)
+            .findWithRolesByEmail(email)
             ?.let(userMapper::toDto)
             ?: throw UserNotFoundException(email)
 
     @Transactional(readOnly = true)
     override fun findByUsernameOrEmail(usernameOrEmail: String): UserResponse =
         userRepository
-            .findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+            .findWithRolesByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
             ?.let(userMapper::toDto)
             ?: throw UserNotFoundException(usernameOrEmail)
 
@@ -144,14 +143,14 @@ class UserServiceImpl(
         updateUserRequest: UpdateUserRequest,
     ): UserResponse {
         val userEntity =
-            userRepository.findByIdOrNull(id)
+            userRepository.findWithRolesById(id)
                 ?: throw UserNotFoundException(id)
         userMapper.updateEntityFromDto(updateUserRequest, userEntity)
         return userRepository.save(userEntity).let(userMapper::toDto)
     }
 
     override fun updateProfile(updateUserProfileRequest: UpdateUserProfileRequest): UserResponse {
-        val userEntity = authenticatedUserService.getAuthenticatedUserEntity()
+        val userEntity = authenticatedUserService.getAuthenticatedUserEntityWithRoles()
         userMapper.updateEntityFromDto(updateUserProfileRequest, userEntity)
         return userRepository.save(userEntity).let(userMapper::toDto)
     }

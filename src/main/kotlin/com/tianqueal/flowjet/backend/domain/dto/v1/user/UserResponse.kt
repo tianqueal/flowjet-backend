@@ -21,7 +21,7 @@ data class UserResponse(
     )
     val avatarUrl: String? = null,
     @field:Schema(description = "User's roles")
-    val roles: Set<RoleResponse> = emptySet(),
+    val roles: List<RoleResponse> = emptyList(),
     @field:Schema(
         description = "Timestamp when the user account was verified",
         example = "2020-01-01T00:00:00Z",
