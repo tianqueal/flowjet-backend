@@ -39,6 +39,7 @@ object MessageKeys {
     const val ERROR_USER_NOT_FOUND = "error.user.notFound"
     const val ERROR_USER_ALREADY_EXISTS = "error.user.alreadyExists"
     const val ERROR_USER_ALREADY_VERIFIED = "error.user.alreadyVerified"
+    const val ERROR_USER_IS_NOT_PROJECT_MEMBER = "error.user.isNotProjectMember"
 
     // Email
     const val EMAIL_VERIFICATION_SUBJECT = "email.verification.subject"
