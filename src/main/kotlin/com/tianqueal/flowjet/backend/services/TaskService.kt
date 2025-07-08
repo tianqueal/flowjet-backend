@@ -33,12 +33,6 @@ interface TaskService {
         createTaskRequest: CreateTaskRequest,
     ): TaskResponse
 
-    fun create(
-        projectId: Long,
-        userId: Long,
-        createTaskRequest: CreateTaskRequest,
-    ): TaskResponse
-
     fun update(
         projectId: Long,
         id: Long,
