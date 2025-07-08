@@ -12,6 +12,9 @@ databaseChangeLog:
               - column:
                   name: name
                   value: Project Owner
+              - column:
+                  name: display_order
+                  valueNumeric: 10
 
         - insert:
             tableName: member_roles
@@ -22,6 +25,9 @@ databaseChangeLog:
               - column:
                   name: name
                   value: Project Member
+              - column:
+                  name: display_order
+                  valueNumeric: 20
 
         - insert:
             tableName: member_roles
@@ -32,3 +38,6 @@ databaseChangeLog:
               - column:
                   name: name
                   value: Project Viewer
+              - column:
+                  name: display_order
+                  valueNumeric: 30

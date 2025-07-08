@@ -24,3 +24,8 @@ databaseChangeLog:
                   type: varchar(64)
                   constraints:
                     nullable: false
+              - column:
+                  name: display_order
+                  type: int
+                  constraints:
+                    nullable: false
