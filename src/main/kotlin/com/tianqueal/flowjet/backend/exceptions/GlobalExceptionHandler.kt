@@ -5,12 +5,14 @@ import com.tianqueal.flowjet.backend.exceptions.business.AppException
 import com.tianqueal.flowjet.backend.exceptions.business.CannotAddOwnerAsProjectMemberException
 import com.tianqueal.flowjet.backend.exceptions.business.CannotAssignOwnerRoleException
 import com.tianqueal.flowjet.backend.exceptions.business.CannotSelfManageProjectMembershipException
+import com.tianqueal.flowjet.backend.exceptions.business.CommentNestingLimitExceededException
 import com.tianqueal.flowjet.backend.exceptions.business.MemberRoleNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectMemberNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.TaskAssigneeAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.TaskAssigneeNotFoundException
+import com.tianqueal.flowjet.backend.exceptions.business.TaskCommentNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.TaskNotFoundException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyVerifiedException
@@ -373,6 +375,7 @@ class GlobalExceptionHandler(
         ProjectMemberNotFoundException::class,
         TaskNotFoundException::class,
         TaskAssigneeNotFoundException::class,
+        TaskCommentNotFoundException::class,
     )
     fun handleNotFoundExceptions(
         ex: AppException,
@@ -457,6 +460,7 @@ class GlobalExceptionHandler(
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(
         UserIsNotProjectMemberException::class,
+        CommentNestingLimitExceededException::class,
     )
     fun handleUnprocessableContentException(
         ex: AppException,
