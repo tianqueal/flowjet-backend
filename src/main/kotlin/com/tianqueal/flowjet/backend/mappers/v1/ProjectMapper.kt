@@ -6,8 +6,8 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectRequest
 import com.tianqueal.flowjet.backend.domain.entities.ProjectEntity
 import com.tianqueal.flowjet.backend.domain.entities.ProjectMemberEntity
-import com.tianqueal.flowjet.backend.domain.entities.UserEntity
 import com.tianqueal.flowjet.backend.repositories.ProjectStatusRepository
+import com.tianqueal.flowjet.backend.repositories.UserRepository
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,6 +16,7 @@ class ProjectMapper(
     private val userProfileMapper: UserProfileMapper,
     private val projectMemberMapper: ProjectMemberMapper,
     private val projectStatusRepository: ProjectStatusRepository,
+    private val userRepository: UserRepository,
 ) {
     fun toListDto(
         entity: ProjectEntity,
@@ -48,13 +49,13 @@ class ProjectMapper(
 
     fun toEntity(
         dto: CreateProjectRequest,
-        user: UserEntity,
+        userId: Long,
     ): ProjectEntity =
         ProjectEntity(
             name = dto.name,
             description = dto.description,
             status = projectStatusRepository.getReferenceById(dto.statusId),
-            owner = user,
+            owner = userRepository.getReferenceById(userId),
         )
 
     fun updateEntityFromDto(
