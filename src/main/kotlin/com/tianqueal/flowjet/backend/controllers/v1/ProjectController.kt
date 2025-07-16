@@ -15,9 +15,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
-import org.springframework.data.web.PagedModel
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -61,12 +61,8 @@ class ProjectController(
             size = PaginationConstants.DEFAULT_PAGE_SIZE,
         )
         pageable: Pageable,
-    ): ResponseEntity<PagedModel<ProjectListResponse>> =
-        ResponseEntity.ok(
-            PagedModel(
-                projectService.findAll(accessType, name, projectStatusId, pageable),
-            ),
-        )
+    ): ResponseEntity<Page<ProjectListResponse>> =
+        ResponseEntity.ok(projectService.findAll(accessType, name, projectStatusId, pageable))
 
     @Operation(
         summary = "Get project by ID",
