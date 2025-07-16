@@ -38,6 +38,12 @@ spring:
       pageable:
         page-parameter: p
         size-parameter: s
+  cache:
+    type: caffeine
+    caffeine: 
+      spec: maximumSize=1000,expireAfterWrite=10m
+    cache-names:
+      - project-permissions
 
 info:
   app:
@@ -62,3 +68,6 @@ info:
       fromName: ${MAIL_FROM_NAME:Sender Name}
     frontend:
       base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
+    cors:
+      allowed-origins:
+        - ${FRONTEND_BASE_URL:http://localhost:3000}
