@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: task_comments-001-idx-user_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_task_comments_user_id
+            tableName: task_comments
+            columns:
+              - column:
+                  name: user_id
+
+  - changeSet:
+      id: task_comments-002-idx-task_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_task_comments_task_id
+            tableName: task_comments
+            columns:
+              - column:
+                  name: task_id
+
+  - changeSet:
+      id: task_comments-003-idx-task_comment_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_task_comments_task_comment_id
+            tableName: task_comments
+            columns:
+              - column:
+                  name: task_comment_id

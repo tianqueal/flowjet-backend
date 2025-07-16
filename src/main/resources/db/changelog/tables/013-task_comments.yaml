@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: comments-001-create-table
+      id: task_comments-001-create-table
       author: Christian A.
       changes:
         - createTable:
-            tableName: comments
+            tableName: task_comments
             columns:
               - column:
                   name: id
@@ -12,6 +12,11 @@ databaseChangeLog:
                   autoIncrement: true
                   constraints:
                     primaryKey: true
+                    nullable: false
+              - column:
+                  name: task_id
+                  type: bigint
+                  constraints:
                     nullable: false
               - column:
                   name: user_id
@@ -24,7 +29,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: comment_id
+                  name: task_comment_id
                   type: bigint
               - column:
                   name: created_at
@@ -38,16 +43,26 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
-              - column:
-                  name: deleted_at
-                  type: timestamp
 
   - changeSet:
-      id: comments-002-add-fk-user_id
+      id: task_comments-002-add-fk-task_id
       author: Christian A.
       changes:
         - addForeignKeyConstraint:
-            baseTableName: comments
+            baseTableName: task_comments
+            baseColumnNames: task_id
+            constraintName: fk_comments_task_id
+            referencedTableName: tasks
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: task_comments-003-add-fk-user_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: task_comments
             baseColumnNames: user_id
             constraintName: fk_comments_user_id
             referencedTableName: users
@@ -56,14 +71,14 @@ databaseChangeLog:
             onUpdate: RESTRICT
 
   - changeSet:
-      id: comments-003-add-fk-comment_id
+      id: task_comments-004-add-fk-task_comment_id
       author: Christian A.
       changes:
         - addForeignKeyConstraint:
-            baseTableName: comments
-            baseColumnNames: comment_id
-            constraintName: fk_comments_comment_id
-            referencedTableName: comments
+            baseTableName: task_comments
+            baseColumnNames: task_comment_id
+            constraintName: fk_comments_task_comment_id
+            referencedTableName: task_comments
             referencedColumnNames: id
             onDelete: CASCADE # RESTRICT would prevent deletion of parent comments
             onUpdate: RESTRICT
