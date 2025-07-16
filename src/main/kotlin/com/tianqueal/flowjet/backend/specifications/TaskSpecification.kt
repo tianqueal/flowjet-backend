@@ -15,7 +15,6 @@ object TaskSpecification {
 
     fun filterBy(
         name: String?,
-        description: String?,
         statusId: Int?,
     ): Specification<TaskEntity> =
         Specification { root, _, cb ->
@@ -23,10 +22,6 @@ object TaskSpecification {
 
             if (!name.isNullOrBlank()) {
                 predicates += cb.like(cb.lower(root.get(TaskEntity_.name)), "%${name.lowercase()}%")
-            }
-
-            if (!description.isNullOrBlank()) {
-                predicates += cb.like(cb.lower(root.get(TaskEntity_.description)), "%${description.lowercase()}%")
             }
 
             if (statusId != null) {
