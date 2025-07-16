@@ -54,7 +54,7 @@ class UserServiceImpl(
 
         return User
             .builder()
-            .username(userEntity.username)
+            .username(userEntity.safeId.toString())
             .password(userEntity.passwordHash)
             .accountExpired(!userEntity.isAccountNonExpired())
             .accountLocked(!userEntity.isAccountNonLocked())
