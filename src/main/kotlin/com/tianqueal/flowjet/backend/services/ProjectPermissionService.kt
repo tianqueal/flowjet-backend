@@ -11,6 +11,8 @@ import com.tianqueal.flowjet.backend.repositories.ProjectRepository
 import com.tianqueal.flowjet.backend.utils.constants.BeanNames
 import com.tianqueal.flowjet.backend.utils.enums.MemberRoleEnum
 import jakarta.annotation.PostConstruct
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -89,15 +91,16 @@ class ProjectPermissionService(
         userId: Long,
     ): Boolean = isProjectOwner(projectEntity, userId)
 
+    @Cacheable(
+        value = ["project-permissions"],
+        key = "'canRead_' + #projectId + '_' + #userId",
+        condition = "#projectId > 0 && #userId > 0",
+        unless = "#result == false",
+    )
     fun canRead(
-        id: Long,
+        projectId: Long,
         userId: Long,
-    ): Boolean = projectRepository.hasReadAccess(id, userId)
-
-    fun canRead(
-        projectEntity: ProjectEntity,
-        userId: Long,
-    ): Boolean = projectRepository.hasReadAccess(projectEntity.safeId, userId)
+    ): Boolean = projectRepository.hasReadAccess(projectId, userId)
 
     fun canUpdateProject(
         projectEntity: ProjectEntity,
@@ -132,4 +135,38 @@ class ProjectPermissionService(
         taskEntity: TaskEntity,
         userId: Long,
     ): Boolean = isProjectOwner(projectEntity, userId) || isTaskOwner(taskEntity, userId)
+
+    fun canCreateTaskComment(
+        projectEntity: ProjectEntity,
+        userId: Long,
+    ): Boolean {
+        if (isProjectOwner(projectEntity, userId)) {
+            return true
+        }
+
+        val projectMember =
+            projectMemberRepository.findWithMemberRoleById(
+                ProjectMemberId(projectEntity.safeId, userId),
+            ) ?: return false
+
+        return projectMember.memberRole.id != viewerRole.id
+    }
+
+    @Suppress("unused")
+    @CacheEvict(
+        value = ["project-permissions"],
+        key = "'canRead_' + #projectId + '_' + #userId",
+    )
+    fun evictUserPermissionCache(
+        projectId: Long,
+        userId: Long,
+    ) {
+    }
+
+    @CacheEvict(
+        value = ["project-permissions"],
+        allEntries = true,
+    )
+    fun evictAllProjectPermissions() {
+    }
 }
