@@ -1,17 +1,16 @@
 package com.tianqueal.flowjet.backend.controllers.v1
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.icegreen.greenmail.junit5.GreenMailExtension
 import com.icegreen.greenmail.util.ServerSetupTest
-import com.tianqueal.flowjet.backend.domain.dto.v1.task.CreateTaskRequest
-import com.tianqueal.flowjet.backend.domain.dto.v1.task.TaskResponse
+import com.tianqueal.flowjet.backend.domain.dto.v1.common.PageResponse
+import com.tianqueal.flowjet.backend.domain.dto.v1.task.TaskAssigneeResponse
 import com.tianqueal.flowjet.backend.domain.entities.keys.TaskAssigneeId
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
 import com.tianqueal.flowjet.backend.repositories.TaskAssigneeRepository
 import com.tianqueal.flowjet.backend.repositories.TaskRepository
-import com.tianqueal.flowjet.backend.repositories.TaskStatusRepository
-import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
-import com.tianqueal.flowjet.backend.utils.constants.TestUris
 import com.tianqueal.flowjet.backend.utils.enums.MemberRoleEnum
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -34,8 +32,7 @@ class TaskAssigneeControllerIntegrationTests
         private val taskRepository: TaskRepository,
         private val projectRepository: ProjectRepository,
         private val taskAssigneeRepository: TaskAssigneeRepository,
-        private val taskStatusRepository: TaskStatusRepository,
-    ) : AbstractProjectControllerTest() {
+    ) : AbstractTaskControllerTest() {
         @BeforeEach
         fun setUp() {
             taskAssigneeRepository.deleteAll()
@@ -56,7 +53,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (assignee1, _) = createTestUserAndGetToken("assignee.1")
                 val (assignee2, _) = createTestUserAndGetToken("assignee.2")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
 
                 // Invite and accept project members
                 inviteMemberToProject(ownerToken, project.id, assignee1.id, MemberRoleEnum.PROJECT_MEMBER)
@@ -77,10 +74,16 @@ class TaskAssigneeControllerIntegrationTests
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":2"))
-                assertTrue(responseContent.contains(assignee1.username))
-                assertTrue(responseContent.contains(assignee2.username))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<TaskAssigneeResponse>>() {},
+                    )
+                val taskAssigneesUsernames = response.content.map { it.assignee.username }
+
+                assertEquals(2, response.content.size)
+                assertEquals(2L, response.totalElements)
+                assertThat(taskAssigneesUsernames).contains(assignee1.username, assignee2.username)
             }
 
             @Test
@@ -92,7 +95,7 @@ class TaskAssigneeControllerIntegrationTests
                 inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
                 assertEquals(1, greenMail.receivedMessages.size, "Expected one invitation email.")
                 acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
                 assignUserToTask(ownerToken, project.id, task.id, member.id)
 
                 // Act & Assert
@@ -108,7 +111,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
                 val (_, outsiderToken) = createTestUserAndGetToken("outsider")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
 
                 // Act & Assert
                 mockMvc
@@ -162,15 +165,23 @@ class TaskAssigneeControllerIntegrationTests
                     mockMvc
                         .get(buildAssigneesUri(project.id, task.id)) {
                             header(HttpHeaders.AUTHORIZATION, ownerToken)
-                            param("username", "find.this")
+                            queryParam("username", "find.this")
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":1"))
-                assertTrue(responseContent.contains("find.this.user"))
-                assertFalse(responseContent.contains("ignore.this.user"))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<TaskAssigneeResponse>>() {},
+                    )
+                val taskAssigneesUsernames = response.content.map { it.assignee.username }
+
+                assertEquals(1, response.content.size)
+                assertEquals(1L, response.totalElements)
+                assertTrue(taskAssigneesUsernames.contains("find.this.user"))
+                assertFalse(taskAssigneesUsernames.contains("ignore.this.user"))
+                assertThat(taskAssigneesUsernames).doesNotContain(assignee2.username)
             }
         }
 
@@ -186,7 +197,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
                 val (userToAssign, _) = createTestUserAndGetToken("user.to.assign")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
                 inviteMemberToProject(ownerToken, project.id, userToAssign.id, MemberRoleEnum.PROJECT_MEMBER)
                 acceptMemberInvitation(project.id, userToAssign.id, MemberRoleEnum.PROJECT_MEMBER)
 
@@ -228,7 +239,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (member, memberToken) = createTestUserAndGetToken("regular.member")
                 val (userToAssign, _) = createTestUserAndGetToken("user.to.assign")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
                 inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
                 acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
                 inviteMemberToProject(ownerToken, project.id, userToAssign.id, MemberRoleEnum.PROJECT_MEMBER)
@@ -247,7 +258,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
                 val (user, _) = createTestUserAndGetToken("user.to.assign")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
                 inviteMemberToProject(ownerToken, project.id, user.id, MemberRoleEnum.PROJECT_MEMBER)
                 acceptMemberInvitation(project.id, user.id, MemberRoleEnum.PROJECT_MEMBER)
 
@@ -266,7 +277,7 @@ class TaskAssigneeControllerIntegrationTests
                 // Arrange
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
                 val nonExistentUserId = 99999L
 
                 // Act & Assert
@@ -282,7 +293,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
                 val (notAMember, _) = createTestUserAndGetToken("not.a.member")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
 
                 // Act & Assert
                 mockMvc
@@ -304,7 +315,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
                 val (userToRemove, _) = createTestUserAndGetToken("user.to.remove")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
                 inviteMemberToProject(ownerToken, project.id, userToRemove.id, MemberRoleEnum.PROJECT_MEMBER)
                 acceptMemberInvitation(project.id, userToRemove.id, MemberRoleEnum.PROJECT_MEMBER)
                 assignUserToTask(ownerToken, project.id, task.id, userToRemove.id)
@@ -349,7 +360,7 @@ class TaskAssigneeControllerIntegrationTests
                 val (member, memberToken) = createTestUserAndGetToken("regular.member")
                 val (userToRemove, _) = createTestUserAndGetToken("user.to.remove")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
 
                 inviteMemberToProject(ownerToken, project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
                 acceptMemberInvitation(project.id, member.id, MemberRoleEnum.PROJECT_MEMBER)
@@ -370,7 +381,7 @@ class TaskAssigneeControllerIntegrationTests
                 // Arrange
                 val (_, ownerToken) = createTestUserAndGetToken("project.owner")
                 val project = createTestProject(ownerToken)
-                val task = createTestTask(ownerToken, project.id, "Test Task")
+                val task = createTestTask(ownerToken, project.id)
                 val nonExistentUserId = 99999L
 
                 // Act & Assert
@@ -384,33 +395,6 @@ class TaskAssigneeControllerIntegrationTests
         // ================================
         // Helper Methods
         // ================================
-        private fun createTestTask(
-            creatorToken: String,
-            projectId: Long,
-            name: String,
-            description: String? = "Test task description",
-        ): TaskResponse {
-            val createRequest =
-                CreateTaskRequest(
-                    name = name,
-                    description = description,
-                    statusId = getDefaultTaskStatusId(),
-                )
-
-            val response =
-                mockMvc
-                    .post(buildTasksUri(projectId)) {
-                        header(HttpHeaders.AUTHORIZATION, creatorToken)
-                        contentType = MediaType.APPLICATION_JSON
-                        content = objectMapper.writeValueAsBytes(createRequest)
-                    }.andExpect { status { isCreated() } }
-                    .andReturn()
-            return objectMapper.readValue(
-                response.response.contentAsByteArray,
-                TaskResponse::class.java,
-            )
-        }
-
         private fun assignUserToTask(
             assignerToken: String,
             projectId: Long,
@@ -422,10 +406,6 @@ class TaskAssigneeControllerIntegrationTests
                     header(HttpHeaders.AUTHORIZATION, assignerToken)
                 }.andExpect { status { isCreated() } }
         }
-
-        private fun getDefaultTaskStatusId(): Int = taskStatusRepository.findAll().first().safeId
-
-        private fun buildTasksUri(projectId: Long): String = "${TestUris.PROJECTS_URI}/$projectId${ApiPaths.TASKS}"
 
         private fun buildAssigneesUri(
             projectId: Long,
