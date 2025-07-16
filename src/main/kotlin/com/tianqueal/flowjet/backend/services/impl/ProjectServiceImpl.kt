@@ -6,14 +6,11 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectRequest
 import com.tianqueal.flowjet.backend.domain.entities.MemberRoleEntity_
 import com.tianqueal.flowjet.backend.domain.entities.ProjectMemberEntity_
-import com.tianqueal.flowjet.backend.domain.entities.UserEntity
 import com.tianqueal.flowjet.backend.domain.entities.UserEntity_
 import com.tianqueal.flowjet.backend.exceptions.business.ProjectNotFoundException
-import com.tianqueal.flowjet.backend.exceptions.business.UserNotFoundException
 import com.tianqueal.flowjet.backend.mappers.v1.ProjectMapper
 import com.tianqueal.flowjet.backend.repositories.ProjectMemberRepository
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
-import com.tianqueal.flowjet.backend.repositories.UserRepository
 import com.tianqueal.flowjet.backend.services.AuthenticatedUserService
 import com.tianqueal.flowjet.backend.services.ProjectPermissionService
 import com.tianqueal.flowjet.backend.services.ProjectService
@@ -22,7 +19,6 @@ import com.tianqueal.flowjet.backend.utils.enums.ProjectAccessType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class ProjectServiceImpl(
     private val projectRepository: ProjectRepository,
-    private val userRepository: UserRepository,
     private val projectMemberRepository: ProjectMemberRepository,
     private val projectMapper: ProjectMapper,
     private val authenticatedUserService: AuthenticatedUserService,
@@ -41,7 +36,6 @@ class ProjectServiceImpl(
     override fun findAll(
         accessType: ProjectAccessType,
         name: String?,
-        description: String?,
         statusId: Int?,
         pageable: Pageable,
     ): Page<ProjectListResponse> {
@@ -52,7 +46,7 @@ class ProjectServiceImpl(
                 ProjectAccessType.MEMBER_OF -> ProjectSpecification.isMember(userId)
                 ProjectAccessType.ALL_ACCESSIBLE -> ProjectSpecification.isOwnerOrMember(userId)
             }
-        val filterSpec = ProjectSpecification.filterBy(name, description, statusId)
+        val filterSpec = ProjectSpecification.filterBy(name, statusId)
 
         val projectsPage =
             projectRepository.findAll(
@@ -80,7 +74,7 @@ class ProjectServiceImpl(
             projectRepository.findWithStatusAndOwnerById(id)
                 ?: throw ProjectNotFoundException(id)
         val userId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canRead(projectEntity, userId)) {
+        if (!projectPermissionService.canRead(projectEntity.safeId, userId)) {
             throw AuthorizationDeniedException("Access Denied: You do not have permission to view this project.")
         }
 
@@ -95,25 +89,16 @@ class ProjectServiceImpl(
     }
 
     override fun create(createProjectRequest: CreateProjectRequest): ProjectResponse =
-        create(authenticatedUserService.getAuthenticatedUserEntity(), createProjectRequest)
-
-    override fun create(
-        userEntity: UserEntity,
-        createProjectRequest: CreateProjectRequest,
-    ): ProjectResponse =
-        projectRepository
-            .save(
-                projectMapper.toEntity(dto = createProjectRequest, user = userEntity),
-            ).let(projectMapper::toDto)
+        create(authenticatedUserService.getAuthenticatedUserId(), createProjectRequest)
 
     override fun create(
         userId: Long,
         createProjectRequest: CreateProjectRequest,
     ): ProjectResponse =
-        userRepository
-            .findByIdOrNull(userId)
-            ?.let { create(it, createProjectRequest) }
-            ?: throw UserNotFoundException(userId)
+        projectRepository
+            .save(
+                projectMapper.toEntity(dto = createProjectRequest, userId = userId),
+            ).let(projectMapper::toDto)
 
     override fun update(
         id: Long,

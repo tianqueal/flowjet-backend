@@ -12,7 +12,6 @@ interface TaskService {
     fun findAll(
         projectId: Long,
         name: String?,
-        description: String?,
         statusId: Int?,
         pageable: Pageable,
     ): Page<TaskResponse>

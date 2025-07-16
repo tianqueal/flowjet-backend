@@ -10,6 +10,7 @@ import com.tianqueal.flowjet.backend.exceptions.business.TaskNotFoundException
 import com.tianqueal.flowjet.backend.mappers.v1.TaskMapper
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
 import com.tianqueal.flowjet.backend.repositories.TaskRepository
+import com.tianqueal.flowjet.backend.repositories.UserRepository
 import com.tianqueal.flowjet.backend.services.AuthenticatedUserService
 import com.tianqueal.flowjet.backend.services.ProjectPermissionService
 import com.tianqueal.flowjet.backend.services.TaskService
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class TaskServiceImpl(
     private val taskRepository: TaskRepository,
+    private val userRepository: UserRepository,
     private val taskMapper: TaskMapper,
     private val authenticatedUserService: AuthenticatedUserService,
     private val projectPermissionService: ProjectPermissionService,
@@ -33,17 +35,16 @@ class TaskServiceImpl(
     override fun findAll(
         projectId: Long,
         name: String?,
-        description: String?,
         statusId: Int?,
         pageable: Pageable,
     ): Page<TaskResponse> {
         val projectEntity = projectRepository.findWithOwnerById(projectId) ?: throw ProjectNotFoundException(projectId)
         val userId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canRead(projectEntity, userId)) {
+        if (!projectPermissionService.canRead(projectEntity.safeId, userId)) {
             throw AuthorizationDeniedException("You do not have permission to access tasks in this project.")
         }
         val projectSpec = TaskSpecification.belongsToProject(projectId)
-        val filterSpec = TaskSpecification.filterBy(name, description, statusId)
+        val filterSpec = TaskSpecification.filterBy(name, statusId)
         return taskRepository.findAll(projectSpec.and(filterSpec), pageable).map(taskMapper::toDto)
     }
 
@@ -56,7 +57,7 @@ class TaskServiceImpl(
             taskRepository.findWithStatusProjectAndOwnerByIdAndProjectId(id, projectId)
                 ?: throw TaskNotFoundException(id)
         val userId = authenticatedUserService.getAuthenticatedUserId()
-        if (!projectPermissionService.canRead(taskEntity.project, userId)) {
+        if (!projectPermissionService.canRead(taskEntity.project.safeId, userId)) {
             throw AuthorizationDeniedException("You do not have permission to access this task.")
         }
         return taskEntity.let(taskMapper::toDto)
@@ -69,9 +70,10 @@ class TaskServiceImpl(
         val projectEntity =
             projectRepository.findWithOwnerById(projectId)
                 ?: throw ProjectNotFoundException(projectId)
+        val userId = authenticatedUserService.getAuthenticatedUserId()
         return create(
             projectEntity = projectEntity,
-            userEntity = authenticatedUserService.getAuthenticatedUserEntity(),
+            userEntity = userRepository.getReferenceById(userId),
             createTaskRequest = createTaskRequest,
         )
     }

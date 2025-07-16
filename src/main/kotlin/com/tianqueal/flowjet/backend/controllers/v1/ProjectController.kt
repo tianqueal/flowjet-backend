@@ -53,8 +53,6 @@ class ProjectController(
         @RequestParam(required = false) accessType: ProjectAccessType = ProjectAccessType.ALL_ACCESSIBLE,
         @Parameter(description = "Filter by project name (case-insensitive, partial match)")
         @RequestParam(required = false) name: String?,
-        @Parameter(description = "Filter by project description (case-insensitive, partial match)")
-        @RequestParam(required = false) description: String?,
         @Parameter(description = "Filter by project status ID")
         @RequestParam(required = false) projectStatusId: Int?,
         @ParameterObject
@@ -66,7 +64,7 @@ class ProjectController(
     ): ResponseEntity<PagedModel<ProjectListResponse>> =
         ResponseEntity.ok(
             PagedModel(
-                projectService.findAll(accessType, name, description, projectStatusId, pageable),
+                projectService.findAll(accessType, name, projectStatusId, pageable),
             ),
         )
 

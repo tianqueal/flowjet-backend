@@ -31,7 +31,6 @@ object ProjectSpecification {
 
     fun filterBy(
         name: String?,
-        description: String?,
         projectStatusId: Int?,
     ): Specification<ProjectEntity> =
         Specification { root, _, cb ->
@@ -39,10 +38,6 @@ object ProjectSpecification {
 
             if (!name.isNullOrBlank()) {
                 predicates += cb.like(cb.lower(root.get(ProjectEntity_.name)), "%${name.lowercase()}%")
-            }
-
-            if (!description.isNullOrBlank()) {
-                predicates += cb.like(cb.lower(root.get(ProjectEntity_.description)), "%${description.lowercase()}%")
             }
 
             if (projectStatusId != null) {

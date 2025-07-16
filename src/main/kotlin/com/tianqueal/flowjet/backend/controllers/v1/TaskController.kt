@@ -48,8 +48,6 @@ class TaskController(
         @PathVariable projectId: Long,
         @Parameter(description = "Filter by task name (case-insensitive, partial match)")
         @RequestParam(required = false) name: String? = null,
-        @Parameter(description = "Filter by task description (case-insensitive, partial match)")
-        @RequestParam(required = false) description: String? = null,
         @Parameter(description = "Filter by task status ID")
         @RequestParam(required = false) statusId: Int? = null,
         @ParameterObject
@@ -58,7 +56,7 @@ class TaskController(
             size = PaginationConstants.DEFAULT_PAGE_SIZE,
         )
         pageable: Pageable,
-    ): ResponseEntity<Page<TaskResponse>> = ResponseEntity.ok(taskService.findAll(projectId, name, description, statusId, pageable))
+    ): ResponseEntity<Page<TaskResponse>> = ResponseEntity.ok(taskService.findAll(projectId, name, statusId, pageable))
 
     @Operation(summary = "Get a specific task by ID")
     @GetMapping("/{id}")
