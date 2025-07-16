@@ -161,6 +161,7 @@ class ProjectPermissionService(
         projectId: Long,
         userId: Long,
     ) {
+        // Spring AOP will handle the eviction
     }
 
     @CacheEvict(
@@ -168,5 +169,6 @@ class ProjectPermissionService(
         allEntries = true,
     )
     fun evictAllProjectPermissions() {
+        // Spring AOP will handle the eviction
     }
 }
