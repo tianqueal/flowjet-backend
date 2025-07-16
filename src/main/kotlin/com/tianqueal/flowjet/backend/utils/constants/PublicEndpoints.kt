@@ -4,7 +4,7 @@ object PublicEndpoints {
     val SWAGGER = setOf("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 
     private val AUTH_PATHS =
-        listOf(
+        setOf(
             ApiPaths.LOGIN,
             ApiPaths.REGISTER,
             ApiPaths.VERIFY_EMAIL,
@@ -13,13 +13,13 @@ object PublicEndpoints {
         )
 
     private val NON_AUTH_PATHS =
-        listOf(
+        setOf(
             "${ApiPaths.PROJECTS}/*${ApiPaths.MEMBERS}/accept-invitation",
         )
 
-    fun auth(version: String) = AUTH_PATHS.map { "$version${ApiPaths.AUTH}$it" }.toSet()
+    fun auth(version: String) = AUTH_PATHS.map { "$version${ApiPaths.AUTH}$it" }
 
-    fun nonAuthPaths(version: String) = NON_AUTH_PATHS.map { "$version$it" }.toSet()
+    fun nonAuthPaths(version: String) = NON_AUTH_PATHS.map { "$version$it" }
 
     fun forVersion(version: String): Set<String> = SWAGGER + auth(version) + nonAuthPaths(version)
 }
