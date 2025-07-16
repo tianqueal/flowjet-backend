@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.core.io.Resource
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
@@ -43,6 +44,28 @@ class SecurityConfig(
     private val privateKeyResource: Resource,
 ) {
     /**
+     * Configures a security filter chain for WebSocket endpoints.
+     *
+     * - Disables CSRF protection for WebSocket connections.
+     * - Permits all requests to the WebSocket endpoint.
+     */
+    @Bean
+    @Order(1)
+    fun webSocketSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .csrf { it.disable() }
+            .securityMatcher("${ApiPaths.WS_ENDPOINT}/**")
+            .authorizeHttpRequests { authz ->
+                authz
+                    .anyRequest()
+                    .permitAll()
+            }.sessionManagement { sess ->
+                sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }
+        return http.build()
+    }
+
+    /**
      * Configures the main security filter chain.
      *
      * - Disables CSRF protection.
@@ -53,6 +76,7 @@ class SecurityConfig(
      * - Applies a custom JwtAuthenticationConverter for authority mapping.
      */
     @Bean
+    @Order(2)
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         val publicV1 = PublicEndpoints.forVersion(ApiPaths.V1)
         http
