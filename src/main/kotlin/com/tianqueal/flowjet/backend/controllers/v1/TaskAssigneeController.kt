@@ -4,14 +4,18 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.task.TaskAssigneeResponse
 import com.tianqueal.flowjet.backend.services.TaskAssigneeService
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.PaginationConstants
+import com.tianqueal.flowjet.backend.utils.constants.SecurityConstants
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,6 +26,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("${ApiPaths.V1}${ApiPaths.PROJECTS}/{projectId}${ApiPaths.TASKS}/{taskId}/assignees")
+@PreAuthorize("isAuthenticated()")
+@SecurityRequirement(name = SecurityConstants.SECURITY_SCHEME_BEARER)
+@Tag(name = "Task Assignee Management", description = "Endpoints for managing users assigned to tasks within a project")
 class TaskAssigneeController(
     private val taskAssigneeService: TaskAssigneeService,
 ) {
