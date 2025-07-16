@@ -7,6 +7,7 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.auth.LoginRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.auth.LoginResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.auth.PasswordResetConfirmRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.auth.PasswordResetRequest
+import com.tianqueal.flowjet.backend.domain.dto.v1.auth.VerifyEmailResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.CreateAdminUserRequest
 import com.tianqueal.flowjet.backend.services.EmailVerificationService
 import com.tianqueal.flowjet.backend.services.PasswordResetService
@@ -190,7 +191,13 @@ class AuthControllerIntegrationTests
                     .andReturn()
 
             // Assert
-            assertTrue(result.response.contentAsString.contains("success"))
+            val response =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    VerifyEmailResponse::class.java,
+                )
+
+            assertTrue(response.success)
         }
 
         @Test
