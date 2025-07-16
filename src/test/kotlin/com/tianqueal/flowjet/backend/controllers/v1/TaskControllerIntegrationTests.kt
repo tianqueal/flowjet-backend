@@ -1,15 +1,14 @@
 package com.tianqueal.flowjet.backend.controllers.v1
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.icegreen.greenmail.junit5.GreenMailExtension
 import com.icegreen.greenmail.util.ServerSetupTest
+import com.tianqueal.flowjet.backend.domain.dto.v1.common.PageResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.task.CreateTaskRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.task.TaskResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.task.UpdateTaskRequest
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
 import com.tianqueal.flowjet.backend.repositories.TaskRepository
-import com.tianqueal.flowjet.backend.repositories.TaskStatusRepository
-import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
-import com.tianqueal.flowjet.backend.utils.constants.TestUris
 import com.tianqueal.flowjet.backend.utils.enums.MemberRoleEnum
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -37,8 +36,7 @@ class TaskControllerIntegrationTests
     constructor(
         private val taskRepository: TaskRepository,
         private val projectRepository: ProjectRepository,
-        private val taskStatusRepository: TaskStatusRepository,
-    ) : AbstractProjectControllerTest() {
+    ) : AbstractTaskControllerTest() {
         @BeforeEach
         fun setUp() {
             taskRepository.deleteAll()
@@ -70,9 +68,14 @@ class TaskControllerIntegrationTests
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":3"))
-                assertTrue(responseContent.contains("\"content\""))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<TaskResponse>>() {},
+                    )
+
+                assertEquals(3, response.content.size)
+                assertEquals(3L, response.totalElements)
             }
 
             @Test
@@ -138,14 +141,20 @@ class TaskControllerIntegrationTests
                     mockMvc
                         .get(buildTasksUri(project.id)) {
                             header(HttpHeaders.AUTHORIZATION, ownerToken)
-                            param("name", taskName)
+                            queryParam("name", taskName)
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains(taskName))
-                assertTrue(responseContent.contains("\"totalElements\":1"))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<TaskResponse>>() {},
+                    )
+
+                assertEquals(1, response.content.size)
+                assertEquals(1L, response.totalElements)
+                assertTrue(response.content.any { it.name == taskName })
             }
 
             @Test
@@ -162,15 +171,20 @@ class TaskControllerIntegrationTests
                     mockMvc
                         .get(buildTasksUri(project.id)) {
                             header(HttpHeaders.AUTHORIZATION, ownerToken)
-                            param("p", "0")
-                            param("s", "5")
+                            queryParam("p", "0")
+                            queryParam("s", "5")
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"size\":5"))
-                assertTrue(responseContent.contains("\"totalElements\":10"))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<TaskResponse>>() {},
+                    )
+
+                assertEquals(5, response.content.size)
+                assertEquals(10L, response.totalElements)
             }
         }
 
@@ -674,47 +688,6 @@ class TaskControllerIntegrationTests
                     }.andExpect { status { isOk() } }
             }
         }
-
-        // ================================
-        // Helper Methods
-        // ================================
-
-        fun createTestTask(
-            creatorToken: String,
-            projectId: Long,
-            name: String,
-            description: String,
-        ): TaskResponse {
-            val createRequest =
-                CreateTaskRequest(
-                    name = name,
-                    description = description,
-                    statusId = getDefaultTaskStatusId(),
-                )
-
-            val response =
-                mockMvc
-                    .post(buildTasksUri(projectId)) {
-                        header(HttpHeaders.AUTHORIZATION, creatorToken)
-                        contentType = MediaType.APPLICATION_JSON
-                        content = objectMapper.writeValueAsBytes(createRequest)
-                    }.andExpect { status { isCreated() } }
-                    .andReturn()
-
-            return objectMapper.readValue(
-                response.response.contentAsByteArray,
-                TaskResponse::class.java,
-            )
-        }
-
-        private fun getDefaultTaskStatusId(): Int = taskStatusRepository.findAll().first().safeId
-
-        private fun buildTasksUri(projectId: Long): String = "${TestUris.PROJECTS_URI}/$projectId${ApiPaths.TASKS}"
-
-        private fun buildTaskUri(
-            projectId: Long,
-            taskId: Long,
-        ): String = "${TestUris.PROJECTS_URI}/$projectId${ApiPaths.TASKS}/$taskId"
 
         companion object {
             @JvmField
