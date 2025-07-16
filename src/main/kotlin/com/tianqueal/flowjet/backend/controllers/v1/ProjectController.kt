@@ -61,8 +61,7 @@ class ProjectController(
             size = PaginationConstants.DEFAULT_PAGE_SIZE,
         )
         pageable: Pageable,
-    ): ResponseEntity<Page<ProjectListResponse>> =
-        ResponseEntity.ok(projectService.findAll(accessType, name, projectStatusId, pageable))
+    ): ResponseEntity<Page<ProjectListResponse>> = ResponseEntity.ok(projectService.findAll(accessType, name, projectStatusId, pageable))
 
     @Operation(
         summary = "Get project by ID",
