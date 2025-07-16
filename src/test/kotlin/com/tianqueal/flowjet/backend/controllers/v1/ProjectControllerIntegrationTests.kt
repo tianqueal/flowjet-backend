@@ -1,6 +1,9 @@
 package com.tianqueal.flowjet.backend.controllers.v1
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.tianqueal.flowjet.backend.domain.dto.v1.common.PageResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.CreateProjectRequest
+import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectListResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.UpdateProjectRequest
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
@@ -19,7 +22,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 @DisplayName("Project Controller Integration Tests")
 class ProjectControllerIntegrationTests
@@ -54,11 +57,16 @@ class ProjectControllerIntegrationTests
                     .andReturn()
 
             // Assert
-            val responseContent = result.response.contentAsString
-            assertTrue(responseContent.contains("Project Alpha"), "Response should contain 'Project Alpha'")
-            assertTrue(responseContent.contains("Project Beta"), "Response should contain 'Project Beta'")
-            assertTrue(responseContent.contains("\"totalElements\""), "Response should contain total elements")
-            assertTrue(responseContent.contains("\"content\""), "Response should contain project content")
+            val response =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    object : TypeReference<PageResponse<ProjectListResponse>>() {},
+                )
+            val projectNames = response.content.map { it.name }
+
+            assertEquals(2, response.content.size)
+            assertEquals(2L, response.totalElements)
+            assertThat(projectNames).contains("Project Alpha", "Project Beta")
         }
 
         @Test
@@ -93,8 +101,12 @@ class ProjectControllerIntegrationTests
                     .andReturn()
 
             // Assert - member should not see the owned project
-            val responseContent = result.response.contentAsString
-            assertTrue(responseContent.contains("\"totalElements\":0"))
+            val response =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    object : TypeReference<PageResponse<ProjectResponse>>() {},
+                )
+            assertEquals(0L, response.totalElements)
         }
 
         @Test
@@ -102,7 +114,7 @@ class ProjectControllerIntegrationTests
             // Arrange
             val (user, token) = createTestUserAndGetToken()
 
-            listOf("Alpha Project", "Beta Project", "Gamma Task").forEach {
+            listOf("Alpha Project", "Beta Project", "Gamma Plan").forEach {
                 projectService.create(
                     userId = user.id,
                     createProjectRequest = TestDataUtils.createTestProjectRequest(it),
@@ -114,15 +126,22 @@ class ProjectControllerIntegrationTests
                 mockMvc
                     .get(TestUris.PROJECTS_URI) {
                         header(HttpHeaders.AUTHORIZATION, token)
-                        param("name", "Project")
+                        queryParam("name", "Project")
                     }.andExpect { status { isOk() } }
                     .andReturn()
 
             // Assert
-            val responseContent = result.response.contentAsString
-            assertTrue(responseContent.contains("Alpha Project"))
-            assertTrue(responseContent.contains("Beta Project"))
-            assertThat(responseContent).doesNotContain("Gamma Task")
+            val response =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    object : TypeReference<PageResponse<ProjectListResponse>>() {},
+                )
+            val projectNames = response.content.map { it.name }
+
+            assertEquals(2, response.content.size)
+            assertEquals(2L, response.totalElements)
+            assertThat(projectNames).contains("Alpha Project", "Beta Project")
+            assertFalse(projectNames.contains("Gamma Plan"))
         }
 
         @Test
@@ -143,15 +162,19 @@ class ProjectControllerIntegrationTests
                 mockMvc
                     .get(TestUris.PROJECTS_URI) {
                         header(HttpHeaders.AUTHORIZATION, token)
-                        param("p", "0")
-                        param("s", "2")
+                        queryParam("p", "0")
+                        queryParam("s", "2")
                     }.andExpect { status { isOk() } }
                     .andReturn()
 
             // Assert
-            val responseContent = result.response.contentAsString
-            assertTrue(responseContent.contains("\"size\":2"), "Response should contain page size 2")
-            assertTrue(responseContent.contains("\"totalElements\":5"), "Response should contain total elements 5")
+            val response =
+                objectMapper.readValue(
+                    result.response.contentAsByteArray,
+                    object : TypeReference<PageResponse<ProjectListResponse>>() {},
+                )
+            assertEquals(2, response.content.size)
+            assertEquals(5L, response.totalElements)
         }
 
         @Test
