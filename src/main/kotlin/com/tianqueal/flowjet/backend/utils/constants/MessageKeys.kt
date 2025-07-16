@@ -30,6 +30,8 @@ object MessageKeys {
     const val ERROR_TASK_NOT_FOUND = "error.task.notFound"
     const val ERROR_TASK_ASSIGNEE_NOT_FOUND = "error.task.assignee.notFound"
     const val ERROR_TASK_ASSIGNEE_ALREADY_EXISTS = "error.task.assignee.alreadyExists"
+    const val ERROR_TASK_COMMENT_NOT_FOUND = "error.task.comment.notFound"
+    const val ERROR_COMMENT_NESTING_LIMIT_EXCEEDED = "error.comment.nestingLimitExceeded"
 
     // Authentication success messages
     const val AUTH_LOGIN_SUCCESS = "auth.login.success"
