@@ -16,6 +16,7 @@ data class CreateTaskRequest(
     val name: String,
     @field:TaskDescriptionConstraint
     val description: String? = null,
+    @field:Schema(description = "Status ID of the task")
     @field:NotNull(message = ValidationMessageKeys.VALIDATION_IDENTIFIER_NUMBER_NOT_NULL)
     @field:Positive(message = ValidationMessageKeys.VALIDATION_IDENTIFIER_NUMBER_POSITIVE)
     val statusId: Int,
