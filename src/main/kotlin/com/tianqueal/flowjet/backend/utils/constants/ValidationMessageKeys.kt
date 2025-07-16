@@ -32,4 +32,6 @@ object ValidationMessageKeys {
     const val VALIDATION_TASK_NAME_NOT_BLANK = "{validation.task.name.notBlank}"
     const val VALIDATION_TASK_NAME_SIZE = "{validation.task.name.size}"
     const val VALIDATION_TASK_DESCRIPTION_SIZE = "{validation.task.description.size}"
+    const val VALIDATION_TASK_COMMENT_NOT_BLANK = "{validation.task.comment.notBlank}"
+    const val VALIDATION_TASK_COMMENT_CONTENT_SIZE = "{validation.task.comment.content.size}"
 }
