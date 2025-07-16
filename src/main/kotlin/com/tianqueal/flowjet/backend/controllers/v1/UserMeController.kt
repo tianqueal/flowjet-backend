@@ -2,10 +2,10 @@ package com.tianqueal.flowjet.backend.controllers.v1
 
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UpdateUserProfileRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UserResponse
+import com.tianqueal.flowjet.backend.services.AuthenticatedUserService
 import com.tianqueal.flowjet.backend.services.UserService
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.SecurityConstants
-import com.tianqueal.flowjet.backend.utils.functions.AuthFunctions
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBod
 )
 class UserMeController(
     private val userService: UserService,
+    private val authenticatedUserService: AuthenticatedUserService,
 ) {
     @Operation(
         summary = "Get current authenticated user's details",
@@ -36,8 +37,7 @@ class UserMeController(
     )
     @GetMapping
     fun getCurrentUser(): ResponseEntity<UserResponse> {
-        val username = AuthFunctions.getAuthenticatedUsername()
-        val currentUser = userService.findByUsername(username)
+        val currentUser = userService.findById(authenticatedUserService.getAuthenticatedUserId())
         return ResponseEntity.ok(currentUser)
     }
 
