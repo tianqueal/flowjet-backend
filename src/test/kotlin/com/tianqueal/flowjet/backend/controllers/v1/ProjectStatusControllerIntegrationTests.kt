@@ -85,7 +85,7 @@ class ProjectStatusControllerIntegrationTests
                 // Assert
                 val projectStatuses: List<ProjectStatusResponse> =
                     objectMapper.readValue(
-                        result.response.contentAsString,
+                        result.response.contentAsByteArray,
                         objectMapper.typeFactory.constructCollectionType(
                             List::class.java,
                             ProjectStatusResponse::class.java,
@@ -119,7 +119,7 @@ class ProjectStatusControllerIntegrationTests
                 // Assert
                 val projectStatuses: List<ProjectStatusResponse> =
                     objectMapper.readValue(
-                        result.response.contentAsString,
+                        result.response.contentAsByteArray,
                         objectMapper.typeFactory.constructCollectionType(
                             List::class.java,
                             ProjectStatusResponse::class.java,
@@ -150,7 +150,7 @@ class ProjectStatusControllerIntegrationTests
                 // Assert
                 val projectStatuses: List<ProjectStatusResponse> =
                     objectMapper.readValue(
-                        result.response.contentAsString,
+                        result.response.contentAsByteArray,
                         objectMapper.typeFactory.constructCollectionType(
                             List::class.java,
                             ProjectStatusResponse::class.java,
