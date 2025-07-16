@@ -35,7 +35,7 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
-    implementation("org.springframework.boot:spring-boot-configuration-processor:3.5.3")
+    implementation("org.springframework.boot:spring-boot-configuration-processor")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     runtimeOnly("com.h2database:h2")
