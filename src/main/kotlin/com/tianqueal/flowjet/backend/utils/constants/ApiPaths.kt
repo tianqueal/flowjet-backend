@@ -5,6 +5,9 @@ object ApiPaths {
     const val BASE = "/api"
     const val V1 = "$BASE/v1"
     const val ADMIN = "/admin"
+    const val WS_TOPIC_PREFIX = "/topic"
+    const val WS_APP_PREFIX = "/app"
+    const val WS_ENDPOINT = "/ws"
 
     // Resources
     const val USERS = "/users"
