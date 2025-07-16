@@ -1,8 +1,10 @@
 package com.tianqueal.flowjet.backend.controllers.v1
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.icegreen.greenmail.junit5.GreenMailExtension
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
+import com.tianqueal.flowjet.backend.domain.dto.v1.common.PageResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberInvitationRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberInvitationResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.project.ProjectMemberResponse
@@ -11,6 +13,7 @@ import com.tianqueal.flowjet.backend.domain.entities.keys.ProjectMemberId
 import com.tianqueal.flowjet.backend.repositories.ProjectMemberRepository
 import com.tianqueal.flowjet.backend.repositories.ProjectRepository
 import com.tianqueal.flowjet.backend.utils.enums.MemberRoleEnum
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -73,11 +76,16 @@ class ProjectMemberControllerIntegrationTests
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":2"))
-                assertTrue(responseContent.contains(member1.username))
-                assertTrue(responseContent.contains(member2.username))
-                assertTrue(responseContent.contains("\"content\""))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+                val projectMemberNames = response.content.map { it.member.username }
+
+                assertEquals(2, response.content.size)
+                assertEquals(2L, response.totalElements)
+                assertThat(projectMemberNames).contains(member1.username, member2.username)
             }
 
             @Test
@@ -99,9 +107,15 @@ class ProjectMemberControllerIntegrationTests
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":1"))
-                assertTrue(responseContent.contains(member.username))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+
+                assertEquals(1, response.content.size)
+                assertEquals(1L, response.totalElements)
+                assertTrue(response.content.any { it.member.username == member.username })
             }
 
             @Test
@@ -176,9 +190,14 @@ class ProjectMemberControllerIntegrationTests
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":0"))
-                assertTrue(responseContent.contains("\"content\":[]"))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+
+                assertEquals(0, response.content.size)
+                assertEquals(0L, response.totalElements)
             }
 
             @ParameterizedTest
@@ -197,13 +216,18 @@ class ProjectMemberControllerIntegrationTests
                     mockMvc
                         .get(buildMembersUri(project.id)) {
                             header(HttpHeaders.AUTHORIZATION, ownerToken)
-                            param("username", memberUsername)
+                            queryParam("username", memberUsername)
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains(memberUsername))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+
+                assertTrue(response.content.any { it.member.username == memberUsername })
             }
 
             @Test
@@ -224,15 +248,20 @@ class ProjectMemberControllerIntegrationTests
                     mockMvc
                         .get(buildMembersUri(project.id)) {
                             header(HttpHeaders.AUTHORIZATION, ownerToken)
-                            param("p", "0")
-                            param("s", "2")
+                            queryParam("p", "0")
+                            queryParam("s", "2")
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"size\":2"))
-                assertTrue(responseContent.contains("\"totalElements\":5"))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+
+                assertEquals(2, response.content.size)
+                assertEquals(5L, response.totalElements)
             }
 
             @ParameterizedTest
@@ -262,21 +291,24 @@ class ProjectMemberControllerIntegrationTests
                     mockMvc
                         .get(buildMembersUri(project.id)) {
                             header(HttpHeaders.AUTHORIZATION, ownerToken)
-                            param("memberRoleId", memberRoleId.toString())
+                            queryParam("memberRoleId", memberRoleId.toString())
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":1"), "Expected 1 member, got: $responseContent")
-                assertTrue(
-                    responseContent.contains(expectedRole.name),
-                    "Expected role $expectedRole not found in response, got: $responseContent",
-                )
-                assertFalse(
-                    responseContent.contains(anotherMember.username),
-                    "The member with the wrong role should not be in the response",
-                )
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+                val members = response.content
+                val memberRoleNames = members.map { it.memberRole.code.name }
+                val memberUsernames = members.map { it.member.username }
+
+                assertEquals(1, response.content.size)
+                assertEquals(1L, response.totalElements)
+                assertTrue(memberRoleNames.contains(expectedRole.name))
+                assertFalse(memberUsernames.contains(anotherMember.username))
             }
         }
 
@@ -1059,9 +1091,15 @@ class ProjectMemberControllerIntegrationTests
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":1"))
-                assertTrue(responseContent.contains(member.username))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+
+                assertEquals(1, response.content.size)
+                assertEquals(1L, response.totalElements)
+                assertTrue(response.content.any { it.member.username == member.username })
             }
 
             @Test
@@ -1137,11 +1175,14 @@ class ProjectMemberControllerIntegrationTests
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
-                val responseContent = result.response.contentAsString
-                assertTrue(
-                    responseContent.contains("\"totalElements\":0"),
-                    "Expected no members in response, but found: $responseContent",
-                )
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+
+                assertEquals(0, response.content.size)
+                assertEquals(0L, response.totalElements)
 
                 // Verify the user still exists (not cascaded)
                 assertTrue(userRepository.existsById(member.id))
@@ -1196,8 +1237,13 @@ class ProjectMemberControllerIntegrationTests
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"totalElements\":0"))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+                assertEquals(0, response.content.size)
+                assertEquals(0L, response.totalElements)
 
                 // Verify the user still exists (not cascaded)
                 assertTrue(userRepository.existsById(member.id))
@@ -1304,16 +1350,21 @@ class ProjectMemberControllerIntegrationTests
                     mockMvc
                         .get(buildMembersUri(project.id)) {
                             header(HttpHeaders.AUTHORIZATION, ownerToken)
-                            param("p", "1")
-                            param("s", "10")
+                            queryParam("p", "1")
+                            queryParam("s", "10")
                         }.andExpect { status { isOk() } }
                         .andReturn()
 
                 // Assert
-                val responseContent = result.response.contentAsString
-                assertTrue(responseContent.contains("\"size\":10"))
-                assertTrue(responseContent.contains("\"number\":1"))
-                assertTrue(responseContent.contains("\"totalElements\":25"))
+                val response =
+                    objectMapper.readValue(
+                        result.response.contentAsByteArray,
+                        object : TypeReference<PageResponse<ProjectMemberResponse>>() {},
+                    )
+
+                assertEquals(10, response.content.size)
+                assertEquals(1, response.number)
+                assertEquals(25L, response.totalElements)
             }
 
             @Test
