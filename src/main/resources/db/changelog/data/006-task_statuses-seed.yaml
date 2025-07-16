@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: task_statuses-001-seed
+      author: Christian A.
+      changes:
+        - insert:
+            tableName: task_statuses
+            columns:
+              - column:
+                  name: code
+                  value: NOT_STARTED
+              - column:
+                  name: name
+                  value: Not Started
+
+        - insert:
+            tableName: task_statuses
+            columns:
+              - column:
+                  name: code
+                  value: IN_PROGRESS
+              - column:
+                  name: name
+                  value: In Progress
+
+        - insert:
+            tableName: task_statuses
+            columns:
+              - column:
+                  name: code
+                  value: COMPLETED
+              - column:
+                  name: name
+                  value: Completed
+
+        - insert:
+            tableName: task_statuses
+            columns:
+              - column:
+                  name: code
+                  value: CANCELLED
+              - column:
+                  name: name
+                  value: Cancelled

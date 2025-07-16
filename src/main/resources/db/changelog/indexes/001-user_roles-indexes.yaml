@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: user_roles-001-idx-role_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_user_roles_role_id
+            tableName: user_roles
+            columns:
+              - column:
+                  name: role_id

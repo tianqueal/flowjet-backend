@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: task_assignees-001-create-table
+      author: Christian A.
+      changes:
+        - createTable:
+            tableName: task_assignees
+            columns:
+              - column:
+                  name: task_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: task_assignees-002-add-pk
+      author: Christian A.
+      changes:
+        - addPrimaryKey:
+            tableName: task_assignees
+            columnNames: task_id, user_id
+
+  - changeSet:
+      id: task_assignees-003-add-fk-task_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: task_assignees
+            baseColumnNames: task_id
+            constraintName: fk_task_assignees_task_id
+            referencedTableName: tasks
+            referencedColumnNames: id
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+
+  - changeSet:
+      id: task_assignees-004-add-fk-user_id
+      author: Christian A.
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: task_assignees
+            baseColumnNames: user_id
+            constraintName: fk_task_assignees_user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            onDelete: RESTRICT
+            onUpdate: RESTRICT

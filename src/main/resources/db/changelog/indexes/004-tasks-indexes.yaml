@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: tasks-001-idx-task_status_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_tasks_task_status_id
+            tableName: tasks
+            columns:
+              - column:
+                  name: task_status_id
+
+  - changeSet:
+      id: tasks-002-idx-project_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_tasks_project_id
+            tableName: tasks
+            columns:
+              - column:
+                  name: project_id
+
+  - changeSet:
+      id: tasks-002-idx-user_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_tasks_user_id
+            tableName: tasks
+            columns:
+              - column:
+                  name: user_id

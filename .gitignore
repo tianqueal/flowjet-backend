@@ -45,3 +45,6 @@ out/
 ### Public and Private Keys ###
 public-key.pem
 private-key.pem
+
+### macOS ###
+.DS_Store

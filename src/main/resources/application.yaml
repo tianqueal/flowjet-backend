@@ -21,6 +21,7 @@ spring:
           public-key-location: classpath:certs/public-key.pem
   messages:
     basename: i18n/messages
+    encoding: UTF-8
   mail:
     host: ${MAIL_HOST:smtp.example.com}
     port: ${MAIL_PORT:587}
@@ -31,6 +32,18 @@ spring:
       "[mail.smtp.auth]": true
       "[mail.smtp.starttls.enable]": true
       "[mail.smtp.starttls.required]": true
+    default-encoding: UTF-8
+  data:
+    web:
+      pageable:
+        page-parameter: p
+        size-parameter: s
+  cache:
+    type: caffeine
+    caffeine: 
+      spec: maximumSize=1000,expireAfterWrite=10m
+    cache-names:
+      - project-permissions
 
 info:
   app:
@@ -55,3 +68,6 @@ info:
       fromName: ${MAIL_FROM_NAME:Sender Name}
     frontend:
       base-url: ${FRONTEND_BASE_URL:http://localhost:3000}
+    cors:
+      allowed-origins:
+        - ${FRONTEND_BASE_URL:http://localhost:3000}

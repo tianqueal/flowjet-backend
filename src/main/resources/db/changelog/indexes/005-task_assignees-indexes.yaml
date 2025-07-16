@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: task_assignees-001-idx-user_id
+      author: Christian A.
+      changes:
+        - createIndex:
+            indexName: idx_task_assignees_user_id
+            tableName: task_assignees
+            columns:
+              - column:
+                  name: user_id
