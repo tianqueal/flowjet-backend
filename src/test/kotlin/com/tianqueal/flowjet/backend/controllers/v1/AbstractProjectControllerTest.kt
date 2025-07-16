@@ -91,6 +91,23 @@ abstract class AbstractProjectControllerTest : AbstractAuthenticatableController
     }
 
     /**
+     * Invites a member to a project and accepts the invitation in one step.
+     * @param ownerToken The authentication token of the project owner
+     * @param projectId The ID of the project to which the member is being invited
+     * @param userId The ID of the user being invited
+     * @param memberRole The role to assign to the invited member
+     */
+    protected fun inviteAndAcceptMember(
+        ownerToken: String,
+        projectId: Long,
+        userId: Long,
+        memberRole: MemberRoleEnum = MemberRoleEnum.PROJECT_MEMBER,
+    ) {
+        inviteMemberToProject(ownerToken, projectId, userId, memberRole)
+        acceptMemberInvitation(projectId, userId, memberRole)
+    }
+
+    /**
      * Builds the URI for project members collection.
      * @param projectId The ID of the project for which to build the members URI
      * @return The URI for the project members collection
