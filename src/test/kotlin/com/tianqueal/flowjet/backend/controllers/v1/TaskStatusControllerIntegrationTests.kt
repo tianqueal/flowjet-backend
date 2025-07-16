@@ -85,7 +85,7 @@ class TaskStatusControllerIntegrationTests
                 // Assert
                 val taskStatuses: List<TaskStatusResponse> =
                     objectMapper.readValue(
-                        result.response.contentAsString,
+                        result.response.contentAsByteArray,
                         objectMapper.typeFactory.constructCollectionType(
                             List::class.java,
                             TaskStatusResponse::class.java,
@@ -119,7 +119,7 @@ class TaskStatusControllerIntegrationTests
                 // Assert
                 val taskStatuses: List<TaskStatusResponse> =
                     objectMapper.readValue(
-                        result.response.contentAsString,
+                        result.response.contentAsByteArray,
                         objectMapper.typeFactory.constructCollectionType(
                             List::class.java,
                             TaskStatusResponse::class.java,
@@ -150,7 +150,7 @@ class TaskStatusControllerIntegrationTests
                 // Assert
                 val taskStatuses: List<TaskStatusResponse> =
                     objectMapper.readValue(
-                        result.response.contentAsString,
+                        result.response.contentAsByteArray,
                         objectMapper.typeFactory.constructCollectionType(
                             List::class.java,
                             TaskStatusResponse::class.java,
