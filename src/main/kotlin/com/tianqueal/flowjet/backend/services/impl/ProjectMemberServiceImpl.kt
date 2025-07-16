@@ -186,6 +186,7 @@ class ProjectMemberServiceImpl(
 //        }
 
         projectMemberRepository.deleteById(memberId)
+        projectPermissionService.evictUserPermissionCache(projectId, userId)
     }
 
     override fun generateInvitationToken(
@@ -242,6 +243,7 @@ class ProjectMemberServiceImpl(
         }
 
         acceptInvitation(projectId, userId, memberRoleId)
+        projectPermissionService.evictUserPermissionCache(projectId, userId)
     }
 
     override fun acceptInvitation(
