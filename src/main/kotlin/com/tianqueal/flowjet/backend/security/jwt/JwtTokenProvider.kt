@@ -5,7 +5,9 @@ import com.tianqueal.flowjet.backend.utils.constants.BeanNames
 import com.tianqueal.flowjet.backend.utils.constants.SecurityConstants
 import io.jsonwebtoken.Jwts
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtException
@@ -145,5 +147,38 @@ class JwtTokenProvider(
             expiresInSeconds = expiresInSeconds,
             expiresAt = expirationDate,
         )
+    }
+
+    /**
+     * Validates a JWT token.
+     * It relies on the configured `JwtDecoder` which checks the signature, expiration, and format.
+     * @param token The JWT token string.
+     * @return `true` if the token is valid, `false` otherwise.
+     */
+    fun validateToken(token: String): Boolean =
+        try {
+            jwtDecoder.decode(token)
+            true
+        } catch (_: JwtException) {
+            false
+        }
+
+    /**
+     * Creates a Spring Security `Authentication` object from a valid JWT token.
+     * @param token The JWT token string.
+     * @return An `Authentication` object populated with user details from the token.
+     * @throws JwtException if the token is invalid or claims are missing.
+     */
+    fun getAuthentication(token: String): Authentication {
+        val jwt: Jwt = jwtDecoder.decode(token)
+        val subject = jwt.subject
+
+        val authoritiesClaim =
+            jwt.getClaimAsStringList(SecurityConstants.AUTHORITIES_CLAIM_NAME)
+                ?: emptyList()
+
+        val authorities = authoritiesClaim.map { SimpleGrantedAuthority(it) }.toList()
+
+        return UsernamePasswordAuthenticationToken(subject, null, authorities)
     }
 }
