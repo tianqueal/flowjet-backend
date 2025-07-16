@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.Lob
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
@@ -27,8 +26,7 @@ class TaskEntity(
     @Column(name = "name", nullable = false, length = 100)
     var name: String,
     @field:Schema(description = "Description of the task")
-    @Column(name = "description")
-    @Lob
+    @Column(name = "description", columnDefinition = "TEXT")
     var description: String? = null,
     @field:Schema(description = "Status of the task")
     @ManyToOne(fetch = FetchType.LAZY)
