@@ -1,5 +1,7 @@
 package com.tianqueal.flowjet.backend.controllers.v1
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.tianqueal.flowjet.backend.domain.dto.v1.common.PageResponse
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.CreateUserRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UpdateUserRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UserResponse
@@ -92,9 +94,13 @@ class AdminUserControllerIntegrationTests : AbstractAuthenticatableControllerTes
                 .andReturn()
 
         // Assert
-        val page = objectMapper.readTree(result.response.contentAsByteArray)
-        assertTrue(page["content"].size() == 2)
-        assertTrue(page["content"].any { it["username"].asText().contains("user") })
+        val response =
+            objectMapper.readValue(
+                result.response.contentAsByteArray,
+                object : TypeReference<PageResponse<UserResponse>>() {},
+            )
+        assertTrue(response.content.size == 2)
+        assertTrue(response.content.any { it.username.contains("user") })
     }
 
     @Test
