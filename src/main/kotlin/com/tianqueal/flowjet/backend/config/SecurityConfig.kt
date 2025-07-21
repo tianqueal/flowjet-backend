@@ -1,5 +1,6 @@
 package com.tianqueal.flowjet.backend.config
 
+import com.tianqueal.flowjet.backend.config.properties.CorsProperties
 import com.tianqueal.flowjet.backend.utils.constants.ApiPaths
 import com.tianqueal.flowjet.backend.utils.constants.BeanNames
 import com.tianqueal.flowjet.backend.utils.constants.PublicEndpoints
@@ -10,6 +11,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -22,6 +25,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.util.FileCopyUtils
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import java.nio.charset.StandardCharsets
 import java.security.KeyFactory
 import java.security.PrivateKey
@@ -42,6 +48,7 @@ import java.util.Base64
 class SecurityConfig(
     @param:Value("classpath:certs/private-key.pem")
     private val privateKeyResource: Resource,
+    private val corsProperties: CorsProperties,
 ) {
     /**
      * Configures a security filter chain for WebSocket endpoints.
@@ -80,6 +87,7 @@ class SecurityConfig(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         val publicV1 = PublicEndpoints.forVersion(ApiPaths.V1)
         http
+            .cors { it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
             .authorizeHttpRequests { authz ->
                 authz
@@ -154,5 +162,36 @@ class SecurityConfig(
         val jwtAuthenticationConverter = JwtAuthenticationConverter()
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter)
         return jwtAuthenticationConverter
+    }
+
+    /**
+     * Configures Cross-Origin Resource Sharing (CORS) for the application.
+     */
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = listOf(*corsProperties.allowedOrigins.toTypedArray())
+
+        configuration.allowedMethods = listOf(
+            HttpMethod.GET.name(),
+            HttpMethod.POST.name(),
+            HttpMethod.PUT.name(),
+            HttpMethod.DELETE.name(),
+            HttpMethod.OPTIONS.name()
+        )
+
+        configuration.allowedHeaders = listOf(
+            HttpHeaders.ACCEPT,
+            HttpHeaders.ACCEPT_LANGUAGE,
+            HttpHeaders.AUTHORIZATION,
+            HttpHeaders.CACHE_CONTROL,
+            HttpHeaders.CONTENT_TYPE,
+        )
+
+        configuration.allowCredentials = true
+
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
     }
 }
