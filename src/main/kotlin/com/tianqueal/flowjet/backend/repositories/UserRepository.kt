@@ -46,9 +46,17 @@ interface UserRepository :
         email: String,
     ): UserEntity?
 
-    fun existsByUsername(username: String): Boolean
-
-    fun existsByEmail(email: String): Boolean
+    @Query(
+        """
+        SELECT 'username' FROM UserEntity u WHERE u.username = :username
+        UNION
+        SELECT 'email' FROM UserEntity u WHERE u.email = :email
+    """,
+    )
+    fun findExistingFields(
+        username: String,
+        email: String,
+    ): List<String>
 
     // @Modifying
     // @Transactional
