@@ -16,12 +16,15 @@ object ApiPaths {
     const val AUTH = "/auth"
     const val PROJECTS = "/projects"
     const val TASKS = "/tasks"
+
     // const val NOTIFICATIONS = "/notifications"
     // const val TAGS = "/tags"
     const val COMMENTS = "/comments"
+
     // const val ROLES = "/roles"
     // const val MEMBER_ROLES = "/member-roles"
     const val MEMBERS = "/members"
+
     // const val TASK_ASSIGNEES = "/task-assignees"
     // const val TASK_TAGS = "/task-tags"
     // const val TASK_COMMENTS = "/task-comments"

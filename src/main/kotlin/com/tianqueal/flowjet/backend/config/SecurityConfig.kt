@@ -172,21 +172,23 @@ class SecurityConfig(
         val configuration = CorsConfiguration()
         configuration.allowedOrigins = listOf(*corsProperties.allowedOrigins.toTypedArray())
 
-        configuration.allowedMethods = listOf(
-            HttpMethod.GET.name(),
-            HttpMethod.POST.name(),
-            HttpMethod.PUT.name(),
-            HttpMethod.DELETE.name(),
-            HttpMethod.OPTIONS.name()
-        )
+        configuration.allowedMethods =
+            listOf(
+                HttpMethod.GET.name(),
+                HttpMethod.POST.name(),
+                HttpMethod.PUT.name(),
+                HttpMethod.DELETE.name(),
+                HttpMethod.OPTIONS.name(),
+            )
 
-        configuration.allowedHeaders = listOf(
-            HttpHeaders.ACCEPT,
-            HttpHeaders.ACCEPT_LANGUAGE,
-            HttpHeaders.AUTHORIZATION,
-            HttpHeaders.CACHE_CONTROL,
-            HttpHeaders.CONTENT_TYPE,
-        )
+        configuration.allowedHeaders =
+            listOf(
+                HttpHeaders.ACCEPT,
+                HttpHeaders.ACCEPT_LANGUAGE,
+                HttpHeaders.AUTHORIZATION,
+                HttpHeaders.CACHE_CONTROL,
+                HttpHeaders.CONTENT_TYPE,
+            )
 
         configuration.allowCredentials = true
 
