@@ -75,7 +75,6 @@ class ProjectMemberServiceImpl(
     override fun inviteProjectMember(
         projectId: Long,
         projectMemberInvitationRequest: ProjectMemberInvitationRequest,
-        apiVersionPath: String,
     ) {
         // Phase 1: Check principal resource
         val projectEntity =
@@ -121,7 +120,6 @@ class ProjectMemberServiceImpl(
             projectEntity = projectEntity,
             user = userEntity,
             memberRoleEntity = memberRoleEntity,
-            apiVersionPath = apiVersionPath,
         )
 //        val memberEntity = projectMemberMapper.toEntity(
 //            dto = addProjectMemberRequest,
@@ -205,7 +203,6 @@ class ProjectMemberServiceImpl(
         projectEntity: ProjectEntity,
         user: UserEntity,
         memberRoleEntity: MemberRoleEntity,
-        apiVersionPath: String,
     ) = emailService.sendProjectMemberInvitation(
         to = user.email,
         name = user.name,
@@ -216,7 +213,6 @@ class ProjectMemberServiceImpl(
                 memberRoleId = memberRoleEntity.safeId,
             ),
         projectEntity = projectEntity,
-        apiVersionPath = apiVersionPath,
     )
 
     override fun verifyTokenAndAcceptInvitation(

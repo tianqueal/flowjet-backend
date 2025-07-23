@@ -10,7 +10,6 @@ interface EmailService {
         name: String,
         token: String,
         locale: Locale = LocaleContextHolder.getLocale(),
-        apiVersionPath: String,
     )
 
     fun sendPasswordResetEmail(
@@ -18,7 +17,6 @@ interface EmailService {
         name: String,
         token: String,
         locale: Locale = LocaleContextHolder.getLocale(),
-        apiVersionPath: String,
     )
 
     fun sendProjectMemberInvitation(
@@ -27,6 +25,5 @@ interface EmailService {
         projectEntity: ProjectEntity,
         token: String,
         locale: Locale = LocaleContextHolder.getLocale(),
-        apiVersionPath: String,
     )
 }

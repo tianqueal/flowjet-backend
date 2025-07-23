@@ -78,7 +78,6 @@ class ProjectMemberController(
         projectMemberService.inviteProjectMember(
             projectId = projectId,
             projectMemberInvitationRequest = projectMemberInvitationRequest,
-            apiVersionPath = ApiPaths.V1,
         )
         val locale = LocaleContextHolder.getLocale()
         val message =

@@ -25,12 +25,8 @@ class PasswordResetServiceImpl(
      * Sends a password reset email to the user with the provided email address.
      * If the user is not found, it silently returns without throwing an error.
      * @param email The email address of the user requesting a password reset.
-     * @param apiVersionPath The API version path to include in the email.
      */
-    override fun sendPasswordResetEmail(
-        email: String,
-        apiVersionPath: String,
-    ) {
+    override fun sendPasswordResetEmail(email: String) {
         try {
             val user = userService.findByEmail(email)
             val token = generatePasswordResetToken(email)
@@ -38,7 +34,6 @@ class PasswordResetServiceImpl(
                 to = user.email,
                 name = user.username,
                 token = token,
-                apiVersionPath = apiVersionPath,
             )
         } catch (ex: UserNotFoundException) {
             log.warn(

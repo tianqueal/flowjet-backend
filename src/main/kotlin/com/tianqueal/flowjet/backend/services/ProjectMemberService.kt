@@ -20,7 +20,6 @@ interface ProjectMemberService {
     fun inviteProjectMember(
         projectId: Long,
         projectMemberInvitationRequest: ProjectMemberInvitationRequest,
-        apiVersionPath: String,
     )
 
     fun updateMemberRole(
@@ -44,7 +43,6 @@ interface ProjectMemberService {
         projectEntity: ProjectEntity,
         user: UserEntity,
         memberRoleEntity: MemberRoleEntity,
-        apiVersionPath: String,
     )
 
     fun verifyTokenAndAcceptInvitation(

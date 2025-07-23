@@ -36,19 +36,17 @@ class EmailServiceImpl(
      * @param name The name of the user.
      * @param token The verification token.
      * @param locale The locale for the email content.
-     * @param apiVersionPath The API version path to use in the verification URL.
      */
     override fun sendEmailVerification(
         to: String,
         name: String,
         token: String,
         locale: Locale,
-        apiVersionPath: String,
     ) {
         val verificationUrl =
             UriComponentsBuilder
                 .fromUriString(frontendBaseUrl)
-                .path("${apiVersionPath}${ApiPaths.AUTH}${ApiPaths.VERIFY_EMAIL}")
+                .path("${ApiPaths.AUTH}${ApiPaths.VERIFY_EMAIL}")
                 .queryParam("token", token)
                 .toUriString()
 
@@ -69,19 +67,17 @@ class EmailServiceImpl(
      * @param name The name of the user.
      * @param token The password reset token.
      * @param locale The locale for the email content.
-     * @param apiVersionPath The API version path to use in the password reset URL.
      */
     override fun sendPasswordResetEmail(
         to: String,
         name: String,
         token: String,
         locale: Locale,
-        apiVersionPath: String,
     ) {
         val passwordResetUrl =
             UriComponentsBuilder
                 .fromUriString(frontendBaseUrl)
-                .path("${apiVersionPath}${ApiPaths.AUTH}${ApiPaths.PASSWORD_RESET}")
+                .path("${ApiPaths.AUTH}${ApiPaths.PASSWORD_RESET}")
                 .pathSegment("confirm")
                 .queryParam("token", token)
                 .toUriString()
@@ -104,7 +100,6 @@ class EmailServiceImpl(
      * @param projectEntity The project entity to which the user is being invited.
      * @param token The invitation token.
      * @param locale The locale for the email content.
-     * @param apiVersionPath The API version path to use in the invitation URL.
      */
     override fun sendProjectMemberInvitation(
         to: String,
@@ -112,12 +107,11 @@ class EmailServiceImpl(
         projectEntity: ProjectEntity,
         token: String,
         locale: Locale,
-        apiVersionPath: String,
     ) {
         val projectMemberInvitationUrl =
             UriComponentsBuilder
                 .fromUriString(frontendBaseUrl)
-                .path("${apiVersionPath}${ApiPaths.PROJECTS}/${projectEntity.safeId}${ApiPaths.MEMBERS}")
+                .path("${ApiPaths.PROJECTS}/${projectEntity.safeId}${ApiPaths.MEMBERS}")
                 .pathSegment("/accept-invitation")
                 .queryParam("token", token)
                 .toUriString()

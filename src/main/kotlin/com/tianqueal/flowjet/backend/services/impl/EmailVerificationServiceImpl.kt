@@ -23,17 +23,13 @@ class EmailVerificationServiceImpl(
     /**
      * Sends an email verification to the user.
      * @param user The user to whom the verification email is sent.
-     * @param apiVersionPath The API version path to include in the email.
      */
-    override fun sendEmail(
-        user: UserResponse,
-        apiVersionPath: String,
-    ) = emailService.sendEmailVerification(
-        to = user.email,
-        name = user.username,
-        token = generateToken(user),
-        apiVersionPath = apiVersionPath,
-    )
+    override fun sendEmail(user: UserResponse) =
+        emailService.sendEmailVerification(
+            to = user.email,
+            name = user.username,
+            token = generateToken(user),
+        )
 
     /**
      * Verifies the provided token and marks the user as verified.

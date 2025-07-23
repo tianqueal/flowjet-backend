@@ -90,7 +90,6 @@ class AuthController(
         val createdUser = userService.registerUser(userRegisterRequest)
         emailVerificationService.sendEmail(
             user = createdUser,
-            apiVersionPath = ApiPaths.V1,
         )
         val location =
             ServletUriComponentsBuilder
@@ -132,7 +131,6 @@ class AuthController(
     ): ResponseEntity<PasswordResetResponse> {
         passwordResetService.sendPasswordResetEmail(
             email = passwordResetRequest.email,
-            apiVersionPath = ApiPaths.V1,
         )
         val locale = LocaleContextHolder.getLocale()
         val message = messageSource.getMessage(MessageKeys.PASSWORD_RESET_REQUEST_SUCCESS, null, locale)
