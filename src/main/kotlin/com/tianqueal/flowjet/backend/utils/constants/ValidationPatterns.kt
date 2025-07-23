@@ -2,7 +2,7 @@ package com.tianqueal.flowjet.backend.utils.constants
 
 object ValidationPatterns {
     const val USERNAME = "^[a-zA-Z][a-zA-Z0-9._]{2,49}$"
-    const val NAME = "^[A-Za-zÀ-ÿ' -]{2,100}$"
+    const val NAME = "^[A-Za-zÀ-ÿ' -]{3,100}$"
 
     // - At least one digit.
     // - At least one lower case letter.
