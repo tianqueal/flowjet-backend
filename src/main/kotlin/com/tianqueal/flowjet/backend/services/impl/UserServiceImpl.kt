@@ -7,6 +7,7 @@ import com.tianqueal.flowjet.backend.domain.dto.v1.user.UpdateUserProfileRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UpdateUserRequest
 import com.tianqueal.flowjet.backend.domain.dto.v1.user.UserResponse
 import com.tianqueal.flowjet.backend.domain.entities.RoleEntity
+import com.tianqueal.flowjet.backend.domain.entities.UserEntity_
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyExistsException
 import com.tianqueal.flowjet.backend.exceptions.business.UserAlreadyVerifiedException
 import com.tianqueal.flowjet.backend.exceptions.business.UserNotFoundException
@@ -160,7 +161,7 @@ class UserServiceImpl(
             userRepository.findByUsername(username)
                 ?: throw UserNotFoundException(username)
         if (userEntity.verifiedAt != null) {
-            throw UserAlreadyVerifiedException("username", username)
+            throw UserAlreadyVerifiedException(UserEntity_.USERNAME, username)
         }
         userEntity.verifiedAt = Instant.now()
         userRepository.save(userEntity)
@@ -171,7 +172,7 @@ class UserServiceImpl(
             userRepository.findByUsername(username)
                 ?: throw UserNotFoundException(username)
         if (userEntity.verifiedAt == null) {
-            throw UserAlreadyVerifiedException("username", username)
+            throw UserAlreadyVerifiedException(UserEntity_.USERNAME, username)
         }
         userEntity.verifiedAt = null
         userRepository.save(userEntity)
@@ -193,12 +194,18 @@ class UserServiceImpl(
         username: String,
         email: String,
     ) {
-        if (userRepository.existsByUsername(username)) {
-            throw UserAlreadyExistsException("username", username)
-        }
+        val conflictingFields = userRepository.findExistingFields(username, email)
 
-        if (userRepository.existsByEmail(email)) {
-            throw UserAlreadyExistsException("email", email)
+        if (conflictingFields.isNotEmpty()) {
+            val errorDetails =
+                conflictingFields.associateWith { field ->
+                    when (field) {
+                        UserEntity_.USERNAME -> username
+                        UserEntity_.EMAIL -> email
+                        else -> ""
+                    }
+                }
+            throw UserAlreadyExistsException.of(errorDetails)
         }
     }
 }

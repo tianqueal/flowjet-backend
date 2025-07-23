@@ -1,6 +1,7 @@
 package com.tianqueal.flowjet.backend.exceptions
 
 import com.tianqueal.flowjet.backend.domain.dto.v1.error.ErrorResponse
+import com.tianqueal.flowjet.backend.domain.dto.v1.error.FieldErrorsResponse
 import com.tianqueal.flowjet.backend.exceptions.business.AppException
 import com.tianqueal.flowjet.backend.exceptions.business.CannotAddOwnerAsProjectMemberException
 import com.tianqueal.flowjet.backend.exceptions.business.CannotAssignOwnerRoleException
@@ -83,7 +84,7 @@ class GlobalExceptionHandler(
                 error = ex::class.simpleName,
                 message = message,
                 path = request.requestURI,
-                details = fieldErrors,
+                details = FieldErrorsResponse(fieldErrors = fieldErrors),
             )
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
