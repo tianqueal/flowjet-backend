@@ -7,6 +7,16 @@ spring:
         '[use_sql_comments]': true
   liquibase:
     contexts: dev
+  mail:
+    host: localhost
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      "[mail.smtp.auth]": false
+      "[mail.smtp.starttls.enable]": false
+      "[mail.smtp.starttls.required]": false
+    default-encoding: UTF-8
   freemarker:
     cache: false
 debug: true

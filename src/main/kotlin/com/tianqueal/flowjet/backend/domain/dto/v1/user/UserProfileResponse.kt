@@ -15,4 +15,6 @@ data class UserProfileResponse(
         example = "https://example.com/avatar.jpg",
     )
     val avatarUrl: String,
+    @field:Schema(description = "Indicates if the user's email is verified")
+    val isVerified: Boolean,
 )

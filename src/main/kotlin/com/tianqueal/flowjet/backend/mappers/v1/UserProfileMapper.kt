@@ -18,5 +18,6 @@ class UserProfileMapper(
             avatarUrl =
                 entity.avatarUrl?.takeIf { it.isNotBlank() }
                     ?: avatarService.getAvatarUrl(entity.email, AvatarConstants.DEFAULT_SIZE),
+            isVerified = entity.isVerified()
         )
 }
